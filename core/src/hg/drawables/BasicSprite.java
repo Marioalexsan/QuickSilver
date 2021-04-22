@@ -1,0 +1,59 @@
+package hg.drawables;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Affine2;
+import com.badlogic.gdx.math.Rectangle;
+import hg.engine.GraphicsEngine;
+import hg.utils.Angle;
+import hg.utils.HgEngineUtils;
+
+public class BasicSprite extends Drawable {
+    protected TextureRegion frame = new TextureRegion();
+
+    protected boolean mirrored = false;
+    protected boolean flipped = false;
+
+    public void setFlipped(boolean flipped) {
+        this.flipped = flipped;
+    }
+
+    public void setMirrored(boolean mirrored) {
+        this.mirrored = mirrored;
+    }
+
+    public BasicSprite() {}
+
+    public BasicSprite(Texture texture) {
+        setTexture(texture);
+    }
+
+    public BasicSprite(Texture texture, int x, int y, int width, int height) {
+        setTexture(texture, x, y, width, height);
+    }
+
+    public void setTexture(Texture texture) {
+        frame.setTexture(texture);
+        frame.setRegion(texture);
+    }
+
+    public void setTexture(Texture texture, int x, int y, int width, int height) {
+        frame.setTexture(texture);
+        frame.setRegion(x, y, width, height);
+    }
+
+    public void centerToRegion() {
+        if (frame.getTexture() != null) center.set(frame.getRegionWidth() / 2f, frame.getRegionHeight() / 2f);
+    }
+
+    @Override
+    public void draw(SpriteBatch batch) {
+        if (frame.getTexture() == null) return;
+
+        Affine2 transform = HgEngineUtils.GetAffineForPCAO(position, center, angle, posOffset,
+                cenOffset, new Angle(angOffset).add(textureAngle));
+
+        GraphicsEngine.RenderTextureRegion(batch, transform, color, relativeToCamera, frame, mirrored, flipped);
+    }
+}
