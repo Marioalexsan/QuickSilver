@@ -17,6 +17,11 @@ import hg.playerlogic.LocalPlayerLogic;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+
+/** For TUIASI:
+ * Project made by Miron Alexandru, 1208B
+ */
+
 public class HgGame extends ApplicationAdapter {
 
 	private static HgGame _instance;

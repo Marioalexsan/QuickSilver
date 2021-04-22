@@ -16,6 +16,7 @@ import java.util.ArrayList;
 /**
  * This drawable is intended for debug purposes only.
  * It can draw ISATPolygons and SphereColliders
+ * It can also store a list of lines (raycasts) to draw on next draw() call
  */
 public class ColliderDrawable extends Drawable {
     public static class VectorLine {
@@ -37,7 +38,7 @@ public class ColliderDrawable extends Drawable {
     private int phase = 0;
     private final Color color = new Color(0f, 0f, 0f, 1f);
 
-    ShapeRenderer renderer;
+    private ShapeRenderer renderer;
 
     public ColliderDrawable() {
         renderer = new ShapeRenderer();
