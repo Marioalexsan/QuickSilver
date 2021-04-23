@@ -2,7 +2,6 @@ package hg.drawables;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import hg.engine.GraphicsEngine;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import hg.game.HgGame;
 import hg.utils.Angle;
@@ -11,10 +10,6 @@ import hg.utils.Angle;
  * Abstract class that can draw to the screen.
  */
 public abstract class Drawable {
-    // In the same layer, higher objects are drawn over lower objects
-
-    // Fields
-
     protected Vector2 position = new Vector2();
     protected Vector2 center = new Vector2();
     protected Angle angle = new Angle();
@@ -23,11 +18,23 @@ public abstract class Drawable {
     protected Vector2 cenOffset = new Vector2();
     protected Angle angOffset = new Angle();
 
-    protected Angle textureAngle = new Angle(); // Texture's default orientation
+    protected Angle textureAngle = new Angle(); // Texture orientation offset (yes, this is the third one)
 
     protected boolean relativeToCamera = true;
     protected int layer = DrawLayer.Default;
     protected final Color color = new Color(1, 1, 1, 1);
+
+    public Drawable() {}
+
+    public abstract void draw(SpriteBatch batch);
+
+    public void registerToEngine() {
+        HgGame.Graphics().registerDrawable(this);
+    }
+
+    public void unregisterFromEngine() {
+        HgGame.Graphics().unregisterDrawable(this);
+    }
 
     // Getters and setters
 
@@ -56,12 +63,4 @@ public abstract class Drawable {
     public void setColor(Color color) { this.color.set(color); }
     public Color getColor() { return this.color; }
 
-    // Methods
-
-    public Drawable() {}
-
-    public abstract void draw(SpriteBatch batch);
-
-    public void registerToEngine() { HgGame.Graphics().registerDrawable(this); }
-    public void unregisterFromEngine() { HgGame.Graphics().unregisterDrawable(this); }
 }

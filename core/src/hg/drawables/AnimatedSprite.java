@@ -45,9 +45,7 @@ public class AnimatedSprite extends BasicSprite {
         this.playMode = mode;
     }
 
-    public void update() {
-        update(1);
-    }
+    public void update() { update(1); }
 
     public void update(int frames) {
         if (playMode == PlayMode.Static || finished) return;
@@ -84,6 +82,4 @@ public class AnimatedSprite extends BasicSprite {
         finished = false;
         started = false;
     }
-
-    // Draw is the same as BasicSprite
 }

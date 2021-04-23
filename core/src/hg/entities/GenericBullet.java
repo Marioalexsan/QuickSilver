@@ -2,26 +2,23 @@ package hg.entities;
 
 import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
-import hg.engine.AssetLoader;
+import hg.engine.AssetEngine;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
-import hg.physics.Collider;
-import hg.physics.ColliderGroup;
-import hg.physics.ColliderProperty;
-import hg.physics.SphereCollider;
+import hg.physics.*;
 import hg.utils.Angle;
 
 public class GenericBullet extends Entity {
-    public float speed = 30.0f;
+    public float speed = 38f;
     public float maxDistance = 1800f;
     public float currentDistance = 0.0f;
 
     private final BasicSprite drawable = new BasicSprite();
-    private final SphereCollider collider = new SphereCollider(14f);
+    private final BoxCollider collider = new BoxCollider(32f, 12f);
 
     public GenericBullet() {
-        AssetLoader assets = HgGame.Assets(); // Extra dependency
+        AssetEngine assets = HgGame.Assets(); // Extra dependency
 
         collider.owner = this;
         collider.group = ColliderGroup.Player_Projectile;
@@ -31,7 +28,7 @@ public class GenericBullet extends Entity {
         collider.groupProperties.put(ColliderGroup.Environment_ShootThrough, ColliderProperty.DoNothing);
         collider.groupProperties.put(ColliderGroup.Player, ColliderProperty.DoNothing);
 
-        drawable.setTexture(assets.loadTexture("Assets/Bullet.png"));
+        drawable.setTexture(assets.loadTexture("Assets/Sprites/Projectiles/Bullet.png"));
         drawable.setTextureAngle(new Angle(-90f));
         drawable.setLayer(DrawLayer.CeilingAir);
 

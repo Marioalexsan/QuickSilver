@@ -15,14 +15,6 @@ public class BasicSprite extends Drawable {
     protected boolean mirrored = false;
     protected boolean flipped = false;
 
-    public void setFlipped(boolean flipped) {
-        this.flipped = flipped;
-    }
-
-    public void setMirrored(boolean mirrored) {
-        this.mirrored = mirrored;
-    }
-
     public BasicSprite() {}
 
     public BasicSprite(Texture texture) {
@@ -51,9 +43,12 @@ public class BasicSprite extends Drawable {
     public void draw(SpriteBatch batch) {
         if (frame.getTexture() == null) return;
 
-        Affine2 transform = HgEngineUtils.GetAffineForPCAO(position, center, angle, posOffset,
-                cenOffset, new Angle(angOffset).add(textureAngle));
-
+        Affine2 transform = HgEngineUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, new Angle(angOffset).add(textureAngle));
         GraphicsEngine.RenderTextureRegion(batch, transform, color, relativeToCamera, frame, mirrored, flipped);
     }
+
+    // Getters and Setters
+
+    public void setFlipped(boolean flipped) { this.flipped = flipped; }
+    public void setMirrored(boolean mirrored) { this.mirrored = mirrored; }
 }

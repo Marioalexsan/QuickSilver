@@ -144,14 +144,15 @@ public class Animation extends AnimatedSprite {
         }
     }
 
-    public void resetActions(boolean includingUpdates, boolean includingStart, boolean includingEnd) {
+    public void resetActions(boolean updates, boolean start, boolean end) {
         AnimationInfo info = knownAnimations.get(currentAnimation);
         if (info == null) return;
 
         for (var action : info.actions) {
-            if (includingUpdates && action.criteria.type != ActCriteria.Type.TriggerAtStart && action.criteria.type != ActCriteria.Type.TriggerAtEnd) action.triggered = false;
-            if (includingStart && action.criteria.type == ActCriteria.Type.TriggerAtStart) action.triggered = false;
-            if (includingEnd && action.criteria.type == ActCriteria.Type.TriggerAtEnd) action.triggered = false;
+            boolean doReset = updates && action.criteria.type != ActCriteria.Type.TriggerAtStart && action.criteria.type != ActCriteria.Type.TriggerAtEnd ||
+                            start && action.criteria.type == ActCriteria.Type.TriggerAtStart ||
+                            end && action.criteria.type == ActCriteria.Type.TriggerAtEnd;
+            if (doReset) action.triggered = false;
         }
     }
 }

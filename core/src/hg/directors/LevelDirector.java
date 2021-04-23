@@ -14,7 +14,7 @@ public class LevelDirector extends Director {
         UnloadMap();
 
         for (var envProto : prototype.environments) {
-            environments.add(HgGame.Entities().addEnvironment(envProto.type, envProto.position, envProto.angle));
+            environments.add(HgGame.Entities().addEnvironment(envProto.ID, envProto.position, envProto.angle));
         }
     }
 

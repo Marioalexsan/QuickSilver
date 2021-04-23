@@ -36,17 +36,16 @@ public class EntityManager {
         return newEntity;
     }
 
-    public Entity addEnvironment(EnvironmentLibrary.Types entity, Vector2 position, float direction) {
-        Entity newEntity = EnvironmentLibrary.CreateEnvironment(entity);
-        if (newEntity != null) {
-            newEntity.setPosition(position);
-            newEntity.setAngle(direction);
+    public Entity addEnvironment(int ID, Vector2 position, float direction) {
+        Entity newEntity = EnvironmentLibrary.CreateEnvironment(ID);
 
-            int nextID = nextEntityID++;
+        newEntity.setPosition(position);
+        newEntity.setAngle(direction);
 
-            environments.put(nextID, newEntity);
-            newEntity.setID(nextID);
-        }
+        int nextID = nextEntityID++;
+        environments.put(nextID, newEntity);
+        newEntity.setID(nextID);
+
         return newEntity;
     }
 

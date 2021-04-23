@@ -3,7 +3,7 @@ package hg.entities;
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
 import hg.drawables.AnimatedSprite;
-import hg.engine.AssetLoader;
+import hg.engine.AssetEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
@@ -27,7 +27,7 @@ public class Player extends Entity {
     protected SphereCollider collider = new SphereCollider(50);
 
     public Player(IPlayerLogic playerLogic) {
-        AssetLoader assets = HgGame.Assets(); // Extra dependency
+        AssetEngine assets = HgGame.Assets(); // Extra dependency
 
         setLogic(playerLogic);
 
@@ -36,16 +36,16 @@ public class Player extends Entity {
         collider.baseStats = baseStats;
         collider.owner = this;
 
-        AnimationInfo anim1 = new AnimationInfo("Assets/Textures/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        AnimationInfo anim1 = new AnimationInfo("Assets/Sprites/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
         anim1.cenOffset.set(new Vector2(48, 31));
         anim1.textureAngle.set(-90f);
         drawable.addKnownAnimation("Player_Idle", anim1);
         drawable.setDefaultAnimation("Player_Idle");
 
-        AnimationInfo anim2 = new AnimationInfo("Assets/Textures/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtEnd), new ActEffect(ActEffect.Type.PlaySound, "Assets/shotMono.ogg")),
+        AnimationInfo anim2 = new AnimationInfo("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtEnd), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
         });
         anim2.cenOffset.set(new Vector2(48, 31));
         anim2.textureAngle.set(-90f);

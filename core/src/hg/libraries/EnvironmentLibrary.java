@@ -4,10 +4,11 @@ import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
-import hg.engine.AssetLoader;
+import hg.engine.AssetEngine;
 import hg.entities.Entity;
 import hg.entities.Environment;
 import hg.game.HgGame;
+import hg.id.EnvID;
 import hg.physics.*;
 import hg.utils.Angle;
 
@@ -17,32 +18,15 @@ import java.util.LinkedList;
  * Holds descriptions of entities that are related to the world / map.
  */
 public class EnvironmentLibrary {
-    public enum Types {
-        BrickDefault,
-        BrickLShape,
-        BrickHalf,
-        BrickTriangle,
-        BrickSlashedLeft,
-        BrickSlashedRight,
-        BrickPillarSmall,
-        BrickPillarMedium,
-        BrickPillarBig,
+    public static final String envPath = "Assets/Sprites/Environment/";
 
-        ConcreteFloor,
-
-        BoxMedium,
-        BoxSmall
-    }
-
-    public static final String envPath = "Assets/Textures/Environment/";
-
-    public static Entity CreateEnvironment(Types type) {
-        AssetLoader assets = HgGame.Assets(); // Extra dependency
+    public static Entity CreateEnvironment(int ID) {
+        AssetEngine assets = HgGame.Assets(); // Extra dependency
 
         LinkedList<Drawable> drawableList = new LinkedList<>();
         LinkedList<Collider> colliderList = new LinkedList<>();
-        switch(type) {
-            case BrickDefault -> {
+        switch(ID) {
+            case EnvID.BrickDefault -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickDefault.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -55,7 +39,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickHalf -> {
+            case EnvID.BrickHalf -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickHalf.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -68,7 +52,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickSlashedLeft -> {
+            case EnvID.BrickSlashedLeft -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickSlashed.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -81,7 +65,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickSlashedRight -> {
+            case EnvID.BrickSlashedRight -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickSlashed.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -96,7 +80,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickLShape -> {
+            case EnvID.BrickLShape -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickLShape.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -120,7 +104,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickTriangle -> {
+            case EnvID.BrickTriangle -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickTriangle.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -133,7 +117,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickPillarSmall -> {
+            case EnvID.BrickPillarSmall -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickPillarSmall.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -146,7 +130,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickPillarMedium -> {
+            case EnvID.BrickPillarMedium -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickPillarMedium.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -159,7 +143,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BrickPillarBig -> {
+            case EnvID.BrickPillarBig -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickPillarBig.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
@@ -172,7 +156,7 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case ConcreteFloor -> {
+            case EnvID.ConcreteFloor -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "ConcreteFloor.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Floor);
@@ -180,33 +164,46 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
-            case BoxMedium -> {
+            case EnvID.BoxMedium -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BoxMedium.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
                 drawableList.add(draw1);
 
                 BoxCollider col1 = new BoxCollider(80, 80);
+                col1.group = ColliderGroup.Environment;
                 col1.makeHeavy();
-                col1.group = ColliderGroup.Environment_ShootThrough;
                 colliderList.add(col1);
 
                 return new Environment(drawableList, colliderList);
             }
-            case BoxSmall -> {
+            case EnvID.BoxSmall -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BoxSmall.png"));
                 draw1.centerToRegion();
                 draw1.setLayer(DrawLayer.Default);
                 drawableList.add(draw1);
 
                 BoxCollider col1 = new BoxCollider(60, 60);
+                col1.group = ColliderGroup.Environment;
+                col1.makeHeavy();
+                colliderList.add(col1);
+
+                return new Environment(drawableList, colliderList);
+            }
+            case EnvID.BrickMetalBars -> {
+                BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "MetalBars.png"));
+                draw1.centerToRegion();
+                draw1.setLayer(DrawLayer.Default);
+                drawableList.add(draw1);
+
+                BoxCollider col1 = new BoxCollider(100, 20);
                 col1.makeHeavy();
                 col1.group = ColliderGroup.Environment_ShootThrough;
                 colliderList.add(col1);
 
                 return new Environment(drawableList, colliderList);
             }
-            default -> throw new RuntimeException("Tried to create unknown Environment of type " + type.toString());
+            default -> throw new RuntimeException("Tried to create unknown Environment of type " + ID);
         }
     }
 }

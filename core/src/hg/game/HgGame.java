@@ -9,7 +9,7 @@ import hg.drawables.*;
 import hg.engine.*;
 import hg.libraries.ActorLibrary;
 import hg.entities.Player;
-import hg.libraries.MapLibrary;
+import hg.maps.MapRWMethods;
 import hg.physics.CollisionEngine;
 import hg.playerlogic.LuigiAI;
 import hg.playerlogic.LocalPlayerLogic;
@@ -28,7 +28,7 @@ public class HgGame extends ApplicationAdapter {
 	public static HgGame Game() { return _instance; }
 
 	public static AudioEngine Audio() { return _instance.audioEngine; }
-	public static AssetLoader Assets() { return _instance.assetLoader; }
+	public static AssetEngine Assets() { return _instance.assetEngine; }
 	public static CollisionEngine Physics() { return _instance.collisionEngine; }
 	public static GraphicsEngine Graphics() { return _instance.graphicsEngine; }
 	public static InputEngine Input() { return _instance.inputEngine; }
@@ -36,7 +36,7 @@ public class HgGame extends ApplicationAdapter {
 	public static EntityManager Entities() { return _instance.entityManager; }
 
 	private AudioEngine audioEngine;
-	private AssetLoader assetLoader;
+	private AssetEngine assetEngine;
 	private CollisionEngine collisionEngine;
 	private GraphicsEngine graphicsEngine;
 	private InputEngine inputEngine;
@@ -81,7 +81,7 @@ public class HgGame extends ApplicationAdapter {
 		_instance = this;
 
 		graphicsEngine = new GraphicsEngine();
-		assetLoader = new AssetLoader();
+		assetEngine = new AssetEngine();
 		audioEngine = new AudioEngine();
 		inputEngine = new InputEngine();
 		collisionEngine = new CollisionEngine();
@@ -89,34 +89,34 @@ public class HgGame extends ApplicationAdapter {
 
 		collisionEngine.setDebugDraw(true); // This will make colliders visible!
 
-		lowhpvignette.setTexture(assetLoader.loadTexture("Assets/LowHP.png"));
+		lowhpvignette.setTexture(assetEngine.loadTexture("Assets/GUI/LowHP.png"));
 		lowhpvignette.registerToEngine();
 		lowhpvignette.centerToRegion();
 		lowhpvignette.setLayer(DrawLayer.GUIDefault);
 		lowhpvignette.setCameraUse(false);
-		targetGUI.setTexture(assetLoader.loadTexture("Assets/Target.png"));
+		targetGUI.setTexture(assetEngine.loadTexture("Assets/GUI/Target.png"));
 		targetGUI.setCameraUse(false);
 		targetGUI.setLayer(DrawLayer.GUIDefault);
 		targetGUI.centerToRegion();
 		targetGUI.registerToEngine();
 
-		targetWorld.setTexture(assetLoader.loadTexture("Assets/Target.png"));
+		targetWorld.setTexture(assetEngine.loadTexture("Assets/GUI/Target.png"));
 		targetWorld.setLayer(DrawLayer.Overlay);
 		targetWorld.centerToRegion();
 		targetWorld.registerToEngine();
 
-		debugText0.setFont(assetLoader.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText0.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
 		debugText0.registerToEngine();
 		debugText0.setCameraUse(false);
 		debugText0.setLayer(DrawLayer.GUIDefault);
 		debugText0.setPosition(new Vector2(-800, -100));
 
-		debugText1.setFont(assetLoader.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText1.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
 		debugText1.registerToEngine();
 		debugText1.setCameraUse(false);
 		debugText1.setLayer(DrawLayer.GUIDefault);
 
-		debugText2.setFont(assetLoader.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText2.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
 		debugText2.setCameraUse(false);
 		debugText2.registerToEngine();
 		debugText2.setLayer(DrawLayer.GUIDefault);
@@ -133,7 +133,9 @@ public class HgGame extends ApplicationAdapter {
 
 		LevelDirector level = (LevelDirector) entityManager.getDirector(DirectorTypes.LEVEL_DIRECTOR);
 
-		level.LoadMap(MapLibrary.CreatePrototype(MapLibrary.StaticMaps.TestArea01));
+		//var proto = MapLibrary.CreatePrototype(MapLibrary.StaticMaps.TestArea01);
+		level.LoadMap(MapRWMethods.LoadMapFromFile("Assets/Maps/grinder.hgm"));
+		//MapReaderWriter.WriteMapToFile(proto, "Assets/Maps/grinder.hgm");
 
 		player = (Player) entityManager.addActor(ActorLibrary.Types.Player, new Vector2(3450, 1500), 0f);
 		player.setLogic(new LocalPlayerLogic());
@@ -148,13 +150,13 @@ public class HgGame extends ApplicationAdapter {
 
 		enemy2.setLogic(new LuigiAI());
 
-		debugText3.setFont(assetLoader.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText3.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
 		debugText3.registerToEngine();
 		debugText3.setLayer(DrawLayer.GUIDefault);
 		debugText3.setPosition(player.getPosition());
 		debugText3.setPositionOffset(new Vector2(100, 0));
 
-		debugText4.setFont(assetLoader.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText4.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
 		debugText4.registerToEngine();
 		debugText4.setLayer(DrawLayer.GUIDefault);
 		debugText4.setPosition(enemy.getPosition());
@@ -235,7 +237,7 @@ public class HgGame extends ApplicationAdapter {
 		graphicsEngine.cleanup();
 		audioEngine.cleanup();
 
-		assetLoader.unloadAll();
+		assetEngine.unloadAll();
 	}
 
 	/**
