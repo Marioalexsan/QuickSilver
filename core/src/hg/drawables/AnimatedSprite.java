@@ -7,7 +7,8 @@ public class AnimatedSprite extends BasicSprite {
     public enum PlayMode {
         PlayOnce,
         Loop,
-        Static
+        Static,
+        PlayAndFreeze,
     }
 
     protected int updatesPerFrame;

@@ -97,10 +97,12 @@ public class CollisionEngine {
         HashSet<ColliderPair> checkedPairs = new HashSet<>();
 
         for (Collider A : colliderLibrary) {
+            if (!A.isActive()) continue;
             if (A.isHeavy() && A.attackStats == null && A.baseStats == null) continue;
 
             ArrayList<Collider> sortedCandidates = getCollisionCandidates(A);
             for (Collider B : sortedCandidates) {
+                if (!B.isActive()) continue;
                 if (A == B) continue;
 
                 ColliderPair thisPair = new ColliderPair(A, B);
@@ -252,6 +254,8 @@ public class CollisionEngine {
 
         spatialHashMap.clear();
         for (var collider: colliderLibrary) {
+            if (!collider.isActive()) continue;
+
             float[] boundingBox;
             if (collider instanceof IPolygon)
                 boundingBox = CollisionAlgorithms.PolyAABB(((IPolygon) collider).trueVertices());
@@ -282,6 +286,7 @@ public class CollisionEngine {
 
         // I should add hashmap candidates instead of searching through whole collider Library
         for (Collider A : colliderLibrary) {
+            if (!A.isActive()) continue;
             if (!hitThese.contains(A.group)) continue;
 
             RaycastResults results = CollisionAlgorithms.Raycast(start, end, A);

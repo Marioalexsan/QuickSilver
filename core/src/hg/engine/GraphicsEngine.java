@@ -169,7 +169,7 @@ public class GraphicsEngine {
     // Functionality resembles RenderCopyEx from SDL
     // Transforms the output if the drawable doesn't use the camera
     public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text) {
-        //font.setColor(color);
+        font.setColor(color);
         Affine2 targetTransform = new Affine2(transform);
         if (!useCamera) {
             // Move the texture into camera's view so that it's invariant to its positioning

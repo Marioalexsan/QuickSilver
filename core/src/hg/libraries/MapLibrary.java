@@ -5,10 +5,6 @@ import hg.id.EnvID;
 import hg.maps.EnvironmentDescription;
 import hg.maps.MapPrototype;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 public class MapLibrary {
     public enum StaticMaps {
         TestArea01

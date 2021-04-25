@@ -5,11 +5,12 @@ import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
 import hg.gamelogic.BaseStats;
 import hg.interfaces.ICollisionObserver;
+import hg.interfaces.IEnable;
 import hg.utils.Angle;
 
 import java.util.HashMap;
 
-public abstract class Collider {
+public abstract class Collider implements IEnable {
 
     public static final float StaticMassThreshold = 1000000f; // Colliders which have equal or higher mass than this are Static
     public static final float DefaultMass = 1000f; // Default value for collider mass
@@ -29,6 +30,8 @@ public abstract class Collider {
     public BaseStats baseStats;
     public ColliderGroup group;
     public String specialCategory = "";
+
+    public boolean enabled = true;
 
     public HashMap<ColliderGroup, ColliderProperty> groupProperties = new HashMap<>();
 
@@ -64,4 +67,9 @@ public abstract class Collider {
     public void registerToEngine() { HgGame.Physics().registerCollider(this); }
     public void unregisterFromEngine() { HgGame.Physics().unregisterCollider(this); }
 
+    @Override
+    public void setEnabled(boolean enable) { this.enabled = enable; }
+
+    @Override
+    public boolean isActive() { return this.enabled; }
 }

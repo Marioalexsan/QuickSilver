@@ -1,0 +1,45 @@
+package hg.libraries;
+
+import com.badlogic.gdx.math.Vector2;
+import hg.animation.ActCriteria;
+import hg.animation.ActEffect;
+import hg.animation.ActInstruction;
+import hg.animation.AnimationInfo;
+import hg.drawables.AnimatedSprite;
+
+import java.util.HashMap;
+
+public class AnimationLibrary {
+    private static final HashMap<String, AnimationInfo> prototypes = new HashMap<>();
+
+    public static AnimationInfo GetAnimationInfo(String info) {
+        AnimationInfo obj = prototypes.get(info);
+        return obj != null ? new AnimationInfo(obj) : null;
+    }
+
+    static {
+        AnimationInfo anim1 = new AnimationInfo("Assets/Sprites/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        anim1.cenOffset.set(new Vector2(48, 31));
+        anim1.textureAngle.set(-90f);
+        prototypes.put("Player_Rifle_Idle", anim1);
+
+        AnimationInfo anim2 = new AnimationInfo("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtEnd), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+        });
+        anim2.cenOffset.set(new Vector2(48, 31));
+        anim2.textureAngle.set(-90f);
+        prototypes.put("Player_Rifle_Reload", anim2);
+
+        AnimationInfo anim3 = new AnimationInfo("Assets/Sprites/Player/Dead.png", 150, 250, 8, 8, 3, AnimatedSprite.PlayMode.PlayAndFreeze, null);
+        anim3.cenOffset.set(new Vector2(75, 119));
+        anim3.textureAngle.set(-90f);
+        prototypes.put("Player_Death", anim3);
+
+        AnimationInfo anim4 = new AnimationInfo("Assets/Sprites/Player/Rifle_Shoot.png", 96, 106, 4, 4, 2, AnimatedSprite.PlayMode.PlayOnce, null);
+        anim4.cenOffset.set(new Vector2(48, 31));
+        anim4.textureAngle.set(-90f);
+        prototypes.put("Player_Rifle_Shoot", anim4);
+    }
+}

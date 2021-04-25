@@ -59,6 +59,8 @@ public class ColliderDrawable extends Drawable {
         // Draw colliders using black lines
         renderer.begin(ShapeRenderer.ShapeType.Line);
         for (var collider : collidersToDraw) {
+            if (!collider.isActive()) continue;
+
             if (collider instanceof IPolygon) {
                 Vector2[] vertices = ((IPolygon) collider).trueVertices();
                 for (var vertex : vertices) vertex.add(cameraOffset);

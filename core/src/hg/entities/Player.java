@@ -3,28 +3,37 @@ package hg.entities;
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
 import hg.drawables.AnimatedSprite;
+import hg.drawables.DrawLayer;
+import hg.drawables.Drawable;
 import hg.engine.AssetEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
+import hg.interfaces.IWeapon;
 import hg.libraries.ActorLibrary;
+import hg.libraries.AnimationLibrary;
 import hg.physics.Collider;
 import hg.physics.ColliderGroup;
 import hg.physics.SphereCollider;
 import hg.playerlogic.EmptyAI;
 import hg.interfaces.IPlayerLogic;
+import hg.utils.HgMath;
+import hg.weapons.AssaultRifle;
 
 public class Player extends Entity {
 
     private IPlayerLogic playerLogic;
     private final Vector2 smoothSpeed = new Vector2();
 
-    private int DEBUG_shootCooldown = 10;
     public int DEBUG_killCount = 0;
 
     protected Animation drawable = new Animation();
     protected SphereCollider collider = new SphereCollider(50);
+
+    protected int deathCounter = 0;
+
+    protected IWeapon currentWeapon = new AssaultRifle(this);
 
     public Player(IPlayerLogic playerLogic) {
         AssetEngine assets = HgGame.Assets(); // Extra dependency
@@ -36,20 +45,11 @@ public class Player extends Entity {
         collider.baseStats = baseStats;
         collider.owner = this;
 
-        AnimationInfo anim1 = new AnimationInfo("Assets/Sprites/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
-        anim1.cenOffset.set(new Vector2(48, 31));
-        anim1.textureAngle.set(-90f);
-        drawable.addKnownAnimation("Player_Idle", anim1);
-        drawable.setDefaultAnimation("Player_Idle");
-
-        AnimationInfo anim2 = new AnimationInfo("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtEnd), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
-        });
-        anim2.cenOffset.set(new Vector2(48, 31));
-        anim2.textureAngle.set(-90f);
-        drawable.addKnownAnimation("Player_Rifle_Reload", anim2);
+        drawable.addKnownAnimation("Rifle_Idle", AnimationLibrary.GetAnimationInfo("Player_Rifle_Idle"));
+        drawable.addKnownAnimation("Rifle_Reload", AnimationLibrary.GetAnimationInfo("Player_Rifle_Reload"));
+        drawable.addKnownAnimation("Death", AnimationLibrary.GetAnimationInfo("Player_Death"));
+        drawable.addKnownAnimation("Rifle_Shoot", AnimationLibrary.GetAnimationInfo("Player_Rifle_Shoot"));
+        drawable.setDefaultAnimation("Rifle_Idle");
 
         collider.setPosition(position);
         collider.setAngle(angle);
@@ -79,6 +79,14 @@ public class Player extends Entity {
             playerLogic = new EmptyAI();
         }
 
+        if (baseStats.isDead) {
+            deathCounter++;
+            if (deathCounter >= 180) {
+                revive();
+                deathCounter = 0;
+            }
+        }
+
         drawable.update();
 
         playerLogic.localUpdate();
@@ -87,40 +95,44 @@ public class Player extends Entity {
 
         // Resolve movement
 
-        Vector2 moveDirection;
+        Vector2 moveDirection = new Vector2(0, 0);
         Vector2 advancedMove = playerLogic.obtainAdvancedMove();
 
-        if (advancedMove == null) {
-            moveDirection = new Vector2(0, 0);
-            if (actions != null) {
+        if (!baseStats.isDead) {
+            if (advancedMove != null) {
+                moveDirection = advancedMove;
+            }
+            else if (actions != null) {
                 if (actions.contains(MappedAction.MoveUp)) moveDirection.y += 1f;
                 if (actions.contains(MappedAction.MoveDown)) moveDirection.y -= 1f;
                 if (actions.contains(MappedAction.MoveLeft)) moveDirection.x -= 1f;
                 if (actions.contains(MappedAction.MoveRight)) moveDirection.x += 1f;
             }
         }
-        else {
-            moveDirection = advancedMove;
-        }
 
-        Vector2 targetSpeed = new Vector2(moveDirection).nor().scl(baseStats.baseMoveSpeed);
-        smoothSpeed.add(targetSpeed.sub(smoothSpeed).scl(0.22f));
+        float decayFactor = baseStats.isDead ? 0.07f : 0.22f;
+        float totalMoveSpeed = baseStats.baseMoveSpeed * (baseStats.heavyArmor > 0 ? 0.83f : 1f);
 
+        Vector2 targetSpeed = new Vector2(moveDirection).nor().scl(totalMoveSpeed);
+        smoothSpeed.add(targetSpeed.sub(smoothSpeed).scl(decayFactor));
         move(smoothSpeed);
 
         // Resolve aim direction
 
-        if (aim != null) angle.set(new Vector2(aim).angleDeg());
+        if (!baseStats.isDead) {
+            if (aim != null)
+                angle.set(new Vector2(aim).angleDeg());
 
-        if (actions != null && actions.contains(MappedAction.Reload) && !drawable.getCurrentAnimation().equals("Player_Rifle_Reload")) {
-            drawable.switchAnimation("Player_Rifle_Reload");
-        }
-        if (DEBUG_shootCooldown > 0) DEBUG_shootCooldown--;
-        if (actions!= null && DEBUG_shootCooldown == 0 && actions.contains(MappedAction.SecondaryFire)) {
-            var boolet = HgGame.Entities().addActor(ActorLibrary.Types.GenericBullet, position, angle.getDeg());
-            boolet.getPosition().add(angle.normalVector().scl(75).add(angle.normalVector().rotate90(-1).scl(25)));
-            boolet.getColliderIfAny().attackStats = new AttackStats(this, 20f, ColliderGroup.Player);
-            DEBUG_shootCooldown = 10;
+            if (actions != null) {
+                if (actions.contains(MappedAction.Reload)) {
+                    currentWeapon.onReload();
+                }
+                if (actions.contains(MappedAction.PrimaryFire)) {
+                    currentWeapon.onPrimaryFire();
+                }
+            }
+
+            currentWeapon.onUpdate();
         }
     }
 
@@ -143,7 +155,25 @@ public class Player extends Entity {
     public void onHitByAttack(AttackStats attacker) {
         if (baseStats.invulnerabilityFrames > 0 || attacker.baseDamage <= 0.0) return;
 
-        baseStats.health -= attacker.baseDamage;
+        float damage = attacker.baseDamage;
+
+        // Apply armor plates
+        if (baseStats.armorPlates > 0) {
+            baseStats.armorPlates--;
+            damage = Math.max(0f, damage - 5f);
+        }
+
+        // Apply kevlar vest and heavy armor
+        float reduction = 0f;
+
+        if (baseStats.hasKevlarVest) reduction += 0.2f;
+        if (baseStats.heavyArmor > 0) {
+            reduction += 0.5f;
+            baseStats.heavyArmor = HgMath.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
+        }
+        damage *= HgMath.ClampValue(1f - reduction, 0f, 1f);
+
+        baseStats.health = HgMath.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
 
         if (baseStats.health <= 0.0) onDeath(attacker.owner);
         else HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);
@@ -156,12 +186,33 @@ public class Player extends Entity {
         if (baseStats != null && !baseStats.isDead) {
             baseStats.isDead = true;
             killer.onKill(this);
+            drawable.setLayer(DrawLayer.FloorAir);
+            drawable.switchAnimation("Death");
+            collider.setEnabled(false);
         }
+    }
+
+    public void revive() {
+        baseStats.health = baseStats.maxHealth;
+        baseStats.armorPlates = 0;
+        baseStats.heavyArmor = 0;
+        baseStats.hasKevlarVest = false;
+        baseStats.isDead = false;
+
+        drawable.switchAnimation("Rifle_Idle");
+        drawable.setLayer(DrawLayer.Default);
+
+        collider.setEnabled(true);
     }
 
     @Override
     public void destroy() {
         collider.unregisterFromEngine(); // Deallocation!
         drawable.unregisterFromEngine(); // Deallocation!
+    }
+
+    @Override
+    public Drawable getDrawableIfAny() {
+        return drawable;
     }
 }

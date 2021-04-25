@@ -2,6 +2,7 @@ package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.DirectorTypes;
 import hg.directors.LevelDirector;
@@ -71,6 +72,7 @@ public class HgGame extends ApplicationAdapter {
 	BasicText debugText2 = new BasicText();
 	BasicText debugText3 = new BasicText();
 	BasicText debugText4 = new BasicText();
+	BasicText debugText5 = new BasicText();
 
 	public Player player;
 	public Player enemy;
@@ -105,30 +107,28 @@ public class HgGame extends ApplicationAdapter {
 		targetWorld.centerToRegion();
 		targetWorld.registerToEngine();
 
-		debugText0.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText0.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
 		debugText0.registerToEngine();
 		debugText0.setCameraUse(false);
 		debugText0.setLayer(DrawLayer.GUIDefault);
-		debugText0.setPosition(new Vector2(-800, -100));
+		debugText0.setPosition(new Vector2(-940, -300));
 
-		debugText1.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText1.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
 		debugText1.registerToEngine();
 		debugText1.setCameraUse(false);
 		debugText1.setLayer(DrawLayer.GUIDefault);
 
-		debugText2.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText2.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
 		debugText2.setCameraUse(false);
 		debugText2.registerToEngine();
 		debugText2.setLayer(DrawLayer.GUIDefault);
-		debugText2.setPosition(new Vector2(-800, -400));
-
-
+		debugText2.setPosition(new Vector2(-940, -160));
 
 		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
 		audioEngine.setGlobalSoundVolume(0.0f);
 		audioEngine.setGlobalMusicVolume(0.0f);
 
-		graphicsEngine.setVideoMode(1600, 900, false);
+		graphicsEngine.setVideoMode(1920, 1080, false);
 		graphicsEngine.setCameraZoom(1.2);
 
 		LevelDirector level = (LevelDirector) entityManager.getDirector(DirectorTypes.LEVEL_DIRECTOR);
@@ -150,17 +150,23 @@ public class HgGame extends ApplicationAdapter {
 
 		enemy2.setLogic(new LuigiAI());
 
-		debugText3.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText3.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
 		debugText3.registerToEngine();
 		debugText3.setLayer(DrawLayer.GUIDefault);
 		debugText3.setPosition(player.getPosition());
 		debugText3.setPositionOffset(new Vector2(100, 0));
 
-		debugText4.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew48.fnt"));
+		debugText4.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
 		debugText4.registerToEngine();
 		debugText4.setLayer(DrawLayer.GUIDefault);
 		debugText4.setPosition(enemy.getPosition());
 		debugText4.setPositionOffset(new Vector2(100, 0));
+
+		debugText5.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
+		debugText5.registerToEngine();
+		debugText5.setLayer(DrawLayer.GUIDefault);
+		debugText5.setPosition(enemy2.getPosition());
+		debugText5.setPositionOffset(new Vector2(100, 0));
 	}
 
 	@Override
@@ -221,8 +227,9 @@ public class HgGame extends ApplicationAdapter {
 
 		debugText3.setText(format.format(player.getStats().health) + ", Kills: " + player.DEBUG_killCount);
 		debugText4.setText(format.format(enemy.getStats().health) + ", Kills: " + enemy.DEBUG_killCount);
+		debugText5.setText(format.format(enemy2.getStats().health) + ", Kills: " + enemy2.DEBUG_killCount);
 
-		if (inputEngine.isButtonTapped(Input.Buttons.LEFT)) {
+		if (inputEngine.isActionTapped(MappedAction.SecondaryFire)) {
 			player.setPosition(targetWorld.getPosition());
 		}
 

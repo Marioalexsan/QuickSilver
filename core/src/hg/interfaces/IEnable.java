@@ -1,8 +1,6 @@
 package hg.interfaces;
 
 public interface IEnable {
-    void enable();
-    void disable();
-    boolean isEnabled();
-    boolean isDisabled();
+    void setEnabled(boolean enable);
+    boolean isActive();
 }

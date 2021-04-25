@@ -134,7 +134,7 @@ public class Animation extends AnimatedSprite {
         if (currentFrame > lastFrame) {
             parseUpdateActions(lastFrame + 1, currentFrame);
         }
-        else if (finished) {
+        else if (finished && playMode != PlayMode.PlayAndFreeze) {
             String lastAnimation = currentAnimation;
             parseEndActions();
             if (lastAnimation.equals(currentAnimation)) {

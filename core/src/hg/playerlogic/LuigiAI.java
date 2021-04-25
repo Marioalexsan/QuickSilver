@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class LuigiAI implements IPlayerLogic {
     private Player controlledPlayer;
+    private int keksimus = 0;
 
     private final float rotationSpeed;
 
@@ -32,7 +33,11 @@ public class LuigiAI implements IPlayerLogic {
     @Override
     public List<MappedAction> obtainActions() {
         ArrayList<MappedAction> actionsThisFrame = new ArrayList<>();
-        actionsThisFrame.add(MappedAction.Reload);
+
+        if (keksimus <= 3)
+            actionsThisFrame.add(MappedAction.Reload);
+        else
+            actionsThisFrame.add(MappedAction.PrimaryFire);
 
         return actionsThisFrame;
     }
@@ -45,5 +50,10 @@ public class LuigiAI implements IPlayerLogic {
     @Override
     public Vector2 obtainAimPosition() {
         return controlledPlayer != null ? Angle.NormalVector(controlledPlayer.getAngle().getDeg() - rotationSpeed) : null;
+    }
+
+    @Override
+    public void localUpdate() {
+        keksimus = (keksimus + 1) % 120;
     }
 }

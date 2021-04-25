@@ -16,7 +16,7 @@ public class BaseStats {
     public float maxHeavyArmor = 100f;
     public float heavyArmor = 0f;
     public int maxArmorPlates = 10;
-    public int armorPlates = 0;
+    public int armorPlates = 3;
     public boolean hasKevlarVest = false;
     public int invulnerabilityFrames = 0;
 
