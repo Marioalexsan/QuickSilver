@@ -33,6 +33,8 @@ public class InputEngine {
         keyActionMap.put(MappedAction.Reload, Input.Keys.R);
         keyActionMap.put(MappedAction.Escape, Input.Keys.ESCAPE);
 
+        keyActionMap.put(MappedAction.QuickSwitchWeapon, Input.Keys.Q);
+
         keyActionMap.put(MappedAction.PrimaryFire, Input.Buttons.LEFT + ButtonMappingOffset);
         keyActionMap.put(MappedAction.SecondaryFire, Input.Buttons.RIGHT + ButtonMappingOffset);
     }
@@ -123,8 +125,8 @@ public class InputEngine {
     public Vector2 getMouse() {
         Vector2 resolution = HgGame.Graphics().getCurrentResolution();
         return new Vector2(
-                keyMouseState.virtualMouseX - HgGame.worldWidth / 2f,
-                1080 - keyMouseState.virtualMouseY - HgGame.worldHeight / 2f
+                keyMouseState.virtualMouseX - HgGame.WorldWidth / 2f,
+                1080 - keyMouseState.virtualMouseY - HgGame.WorldHeight / 2f
         );
     }
 

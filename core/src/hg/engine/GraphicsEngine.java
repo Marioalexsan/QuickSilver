@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
 import hg.utils.HgMath;
@@ -29,7 +28,7 @@ public class GraphicsEngine {
     private SpriteBatch batch;
 
     private Vector2 currentResolution = new Vector2(0, 0);
-    private static final OrthographicCamera camera = new OrthographicCamera(HgGame.worldWidth, HgGame.worldHeight);
+    private static final OrthographicCamera camera = new OrthographicCamera(HgGame.WorldWidth, HgGame.WorldHeight);
     private static final Vector2 cameraOffset = new Vector2();
 
     private final HashSet<Drawable> drawableLibrary = new HashSet<>();

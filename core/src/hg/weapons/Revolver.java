@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import hg.animation.Animation;
 import hg.drawables.Drawable;
 import hg.entities.Entity;
+import hg.entities.GenericBullet;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
@@ -11,7 +12,7 @@ import hg.libraries.ActorLibrary;
 import hg.physics.ColliderGroup;
 import hg.utils.Angle;
 
-public class AssaultRifle implements IWeapon {
+public class Revolver implements IWeapon {
 
     // Owner related stuff
 
@@ -20,26 +21,22 @@ public class AssaultRifle implements IWeapon {
 
     // Weapon stats
 
-    private final int magazineSize = 30;
-    private final int maxTotalAmmo = 120;
-    private final int burstCooldown = 35;
-    private final int burstShotInterval = 7;
-    private final int burstCount = 3;
+    private final int magazineSize = 6;
+    private final int maxTotalAmmo = 30;
+    private final int shotCooldown = 42;
     private final int timeToReload = 120;
-    private final int weaponPickupAmmo = 30;
+    private final int weaponPickupAmmo = 12;
     private final int ammoPackAmmo = 6;
 
     // Weapon state
 
     private int currentAmmo = 0;
-    private int reserveAmmo = 90;
-    private int bulletsToFire = 0;
-    private int burstShotCooldown = 0;
+    private int reserveAmmo = 30;
     private int weaponCooldown = 0;
 
     private int reloadCounter = 0;
 
-    public AssaultRifle(Entity owner) {
+    public Revolver(Entity owner) {
         setOwner(owner);
     }
 
@@ -54,17 +51,17 @@ public class AssaultRifle implements IWeapon {
         Vector2 ownerPosition = owner.getPosition();
 
         var boolet = HgGame.Entities().addActor(ActorLibrary.Types.GenericBullet, ownerPosition, ownerAngle.getDeg());
-        boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
-        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
+        boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
+        ((GenericBullet) boolet).setSpeed(38);
+        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 20f, ColliderGroup.Player);
     }
 
-    private void tryBurstShot() {
-        if (burstShotCooldown > 0 || currentAmmo <= 0 || bulletsToFire <= 0 || reloadCounter > 0) return;
+    private void tryShot() {
+        if (weaponCooldown > 0 || currentAmmo <= 0 || reloadCounter > 0) return;
         currentAmmo--;
-        bulletsToFire--;
-        burstShotCooldown = burstShotInterval;
+        weaponCooldown = shotCooldown;
         createBullet();
-        if (ownerAnimation != null) ownerAnimation.switchAnimation("Rifle_Shoot");
+        if (ownerAnimation != null) ownerAnimation.switchAnimation("Revolver_Shoot");
     }
 
     private void doReload() {
@@ -76,14 +73,13 @@ public class AssaultRifle implements IWeapon {
     private void reset() {
         reloadCounter = 0;
         weaponCooldown = 0;
-        bulletsToFire = 0;
     }
 
     @Override
     public boolean onPrimaryFire() {
         if (owner == null || weaponCooldown > 0 || currentAmmo <= 0) return false;
-        weaponCooldown = burstCooldown;
-        bulletsToFire = burstCount;
+        tryShot();
+        weaponCooldown = shotCooldown;
         return true;
     }
 
@@ -96,15 +92,15 @@ public class AssaultRifle implements IWeapon {
     public boolean onReload() {
         if (weaponCooldown > 0 || reloadCounter > 0 || currentAmmo >= magazineSize || reserveAmmo <= 0) return false;
         reloadCounter = timeToReload;
-        if (ownerAnimation != null) ownerAnimation.switchAnimation("Rifle_Reload");
+        if (ownerAnimation != null) ownerAnimation.switchAnimation("Revolver_Reload");
         return true;
     }
 
     @Override
     public void onEquip() {
-        weaponCooldown = 30;
-        ownerAnimation.setDefaultAnimation("Rifle_Idle");
+        ownerAnimation.setDefaultAnimation("Revolver_Idle");
         ownerAnimation.switchToDefault();
+        weaponCooldown = 30;
     }
 
     @Override
@@ -114,9 +110,6 @@ public class AssaultRifle implements IWeapon {
 
     @Override
     public void onUpdate() {
-        tryBurstShot();
-
-        if (burstShotCooldown > 0) burstShotCooldown--;
         if (weaponCooldown > 0) weaponCooldown--;
         if (reloadCounter > 0) {
             reloadCounter--;

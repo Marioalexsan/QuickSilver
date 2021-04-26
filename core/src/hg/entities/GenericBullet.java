@@ -43,6 +43,14 @@ public class GenericBullet extends Entity {
         drawable.registerToEngine(); // Allocation!
     }
 
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
     @Override
     public void onCombatCollision(Collider other) {
         toBeDestroyed = true;

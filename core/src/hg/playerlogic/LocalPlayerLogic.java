@@ -35,6 +35,8 @@ public class LocalPlayerLogic implements IPlayerLogic {
         if (input.isButtonHeld(Input.Buttons.LEFT)) actionsThisFrame.add(MappedAction.PrimaryFire);
         if (input.isButtonHeld(Input.Buttons.RIGHT)) actionsThisFrame.add(MappedAction.SecondaryFire);
 
+        if (input.isActionTapped(MappedAction.QuickSwitchWeapon)) actionsThisFrame.add(MappedAction.QuickSwitchWeapon);
+
         return actionsThisFrame;
     }
 

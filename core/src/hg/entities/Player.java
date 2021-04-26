@@ -20,6 +20,7 @@ import hg.playerlogic.EmptyAI;
 import hg.interfaces.IPlayerLogic;
 import hg.utils.HgMath;
 import hg.weapons.AssaultRifle;
+import hg.weapons.Revolver;
 
 public class Player extends Entity {
 
@@ -33,7 +34,10 @@ public class Player extends Entity {
 
     protected int deathCounter = 0;
 
-    protected IWeapon currentWeapon = new AssaultRifle(this);
+    protected AssaultRifle rifle = new AssaultRifle(this);
+    protected Revolver revolver = new Revolver(this);
+
+    protected IWeapon currentWeapon = revolver;
 
     public Player(IPlayerLogic playerLogic) {
         AssetEngine assets = HgGame.Assets(); // Extra dependency
@@ -45,11 +49,17 @@ public class Player extends Entity {
         collider.baseStats = baseStats;
         collider.owner = this;
 
+
+        drawable.addKnownAnimation("Death", AnimationLibrary.GetAnimationInfo("Player_Death"));
+
         drawable.addKnownAnimation("Rifle_Idle", AnimationLibrary.GetAnimationInfo("Player_Rifle_Idle"));
         drawable.addKnownAnimation("Rifle_Reload", AnimationLibrary.GetAnimationInfo("Player_Rifle_Reload"));
-        drawable.addKnownAnimation("Death", AnimationLibrary.GetAnimationInfo("Player_Death"));
         drawable.addKnownAnimation("Rifle_Shoot", AnimationLibrary.GetAnimationInfo("Player_Rifle_Shoot"));
-        drawable.setDefaultAnimation("Rifle_Idle");
+        drawable.setDefaultAnimation("Revolver_Idle");
+
+        drawable.addKnownAnimation("Revolver_Idle", AnimationLibrary.GetAnimationInfo("Player_Revolver_Idle"));
+        drawable.addKnownAnimation("Revolver_Reload", AnimationLibrary.GetAnimationInfo("Player_Revolver_Reload"));
+        drawable.addKnownAnimation("Revolver_Shoot", AnimationLibrary.GetAnimationInfo("Player_Revolver_Shoot"));
 
         collider.setPosition(position);
         collider.setAngle(angle);
@@ -123,16 +133,20 @@ public class Player extends Entity {
             if (aim != null)
                 angle.set(new Vector2(aim).angleDeg());
 
-            if (actions != null) {
-                if (actions.contains(MappedAction.Reload)) {
-                    currentWeapon.onReload();
+            if (currentWeapon != null) {
+                if (actions != null) {
+                    if (actions.contains(MappedAction.QuickSwitchWeapon)) {
+                        currentWeapon.onUnequip();
+                        if (currentWeapon == revolver) currentWeapon = rifle;
+                        else currentWeapon = revolver;
+                        currentWeapon.onEquip();
+                    }
+                    if (actions.contains(MappedAction.Reload)) currentWeapon.onReload();
+                    if (actions.contains(MappedAction.PrimaryFire)) currentWeapon.onPrimaryFire();
                 }
-                if (actions.contains(MappedAction.PrimaryFire)) {
-                    currentWeapon.onPrimaryFire();
-                }
-            }
 
-            currentWeapon.onUpdate();
+                currentWeapon.onUpdate();
+            }
         }
     }
 
@@ -199,7 +213,7 @@ public class Player extends Entity {
         baseStats.hasKevlarVest = false;
         baseStats.isDead = false;
 
-        drawable.switchAnimation("Rifle_Idle");
+        drawable.switchToDefault();
         drawable.setLayer(DrawLayer.Default);
 
         collider.setEnabled(true);

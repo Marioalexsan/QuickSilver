@@ -9,6 +9,7 @@ public enum MappedAction {
     MoveLeft,
     MoveRight,
     Escape,
+    QuickSwitchWeapon,
     WeaponOne,
     WeaponTwo,
     WeaponThree,

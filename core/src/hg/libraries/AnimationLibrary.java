@@ -41,5 +41,20 @@ public class AnimationLibrary {
         anim4.cenOffset.set(new Vector2(48, 31));
         anim4.textureAngle.set(-90f);
         prototypes.put("Player_Rifle_Shoot", anim4);
+
+        AnimationInfo anim5 = new AnimationInfo("Assets/Sprites/Player/Revolver_Idle.png", 95, 100, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        anim5.cenOffset.set(new Vector2(48, 31));
+        anim5.textureAngle.set(-90f);
+        prototypes.put("Player_Revolver_Idle", anim5);
+
+        AnimationInfo anim6 = new AnimationInfo("Assets/Sprites/Player/Revolver_Shoot.png", 95, 100, 7, 7, 4, AnimatedSprite.PlayMode.PlayOnce, null);
+        anim6.cenOffset.set(new Vector2(48, 31));
+        anim6.textureAngle.set(-90f);
+        prototypes.put("Player_Revolver_Shoot", anim6);
+
+        AnimationInfo anim7 = new AnimationInfo("Assets/Sprites/Player/Revolver_Reload.png", 95, 100, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, null);
+        anim7.cenOffset.set(new Vector2(48, 31));
+        anim7.textureAngle.set(-90f);
+        prototypes.put("Player_Revolver_Reload", anim7);
     }
 }

@@ -1,8 +1,6 @@
 package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.DirectorTypes;
 import hg.directors.LevelDirector;
@@ -44,8 +42,8 @@ public class HgGame extends ApplicationAdapter {
 
 	private EntityManager entityManager;
 
-	public static final int worldWidth = 1920;
-	public static final int worldHeight = 1080;
+	public static final int WorldWidth = 1920;
+	public static final int WorldHeight = 1080;
 
 	// TO DO: rewrite / encapsulate random sources
 
@@ -55,7 +53,7 @@ public class HgGame extends ApplicationAdapter {
 	public static double getVisualRandom() { return randomVisual.nextDouble(); }
 	public static double getLogicRandom() { return randomLogic.nextDouble(); }
 
-	int iProgress = 0;
+	private int frameCounter = 0;
 	private boolean applicationHasFocus = true;
 	private float factorFOV = 0.75f;
 
@@ -169,27 +167,13 @@ public class HgGame extends ApplicationAdapter {
 		debugText5.setPositionOffset(new Vector2(100, 0));
 	}
 
+	// Certain things (such as dragging the window) will cause the game to stop updating
+	// This means that the game loop is inherently unreliable! Keep this in mind when designing game logic for network play.
 	@Override
 	public void render () {
 		inputEngine.update();
 
-		iProgress++;
-
-		if (iProgress <= 300) {
-			//((LevelDirector)EntityManager.instance().getDirector(DirectorTypes.LevelDirector)).UnloadMap();
-		}
-
-		if (iProgress == 600) {
-			//((LevelDirector)EntityManager.instance().getDirector(DirectorTypes.LevelDirector)).LoadMap(MapLibrary.CreatePrototype(MapLibrary.StaticMaps.TestArea01));
-		}
-
-		//debugText1.setText(player.getPosition().toString());
 		targetGUI.getAngle().add(1.5f);
-
-		switch(iProgress) {
-			//case 100: audioEngine.playMusic("Assets/digi.ogg", 1f); break;
-			//case 40000: Gdx.app.exit(); break;
-		}
 
 		entityManager.update();
 		collisionEngine.update();
@@ -206,8 +190,8 @@ public class HgGame extends ApplicationAdapter {
 		format.setGroupingUsed(false);
 
 		DecimalFormat format2 = new DecimalFormat();
-		format.setMaximumFractionDigits(2);
-		format.setGroupingUsed(false);
+		format2.setMaximumFractionDigits(2);
+		format2.setGroupingUsed(false);
 
 		var list = collisionEngine.doRaycast(player.getPosition(), player.getAngle(), 500);
 
@@ -223,18 +207,20 @@ public class HgGame extends ApplicationAdapter {
 		debugText1.setText("(" + format.format(targetWorld.getPosition().x) + ", " + format.format(targetWorld.getPosition().y) + ")");
 		debugText1.setPosition(new Vector2(targetGUI.getPosition()).add(100, 20));
 
-		debugText2.setText(Integer.toString(iProgress));
+		debugText2.setText(Integer.toString(frameCounter));
 
 		debugText3.setText(format.format(player.getStats().health) + ", Kills: " + player.DEBUG_killCount);
 		debugText4.setText(format.format(enemy.getStats().health) + ", Kills: " + enemy.DEBUG_killCount);
 		debugText5.setText(format.format(enemy2.getStats().health) + ", Kills: " + enemy2.DEBUG_killCount);
 
 		if (inputEngine.isActionTapped(MappedAction.SecondaryFire)) {
-			player.setPosition(targetWorld.getPosition());
+			player.setPosition(targetWorld.getPosition()); // Debug teleport
 		}
 
 		graphicsEngine.render();
 		audioEngine.update();
+
+		frameCounter++;
 	}
 
 	@Override

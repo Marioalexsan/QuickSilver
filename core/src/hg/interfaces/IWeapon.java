@@ -5,16 +5,13 @@ public interface IWeapon {
     // "Callbacks"
     // PF, SF, Reload, Equip, Unequip, Update, BackpackUpdate
 
-    /** Called when weapon should be fired via Primary Fire
-     * @return True if the action was successful (i.e. the weapon fired) */
+    /** Called when weapon should be fired via Primary Fire. Returns true if action succeeded */
     boolean onPrimaryFire();
 
-    /** Called when weapon should be fired via Secondary Fire
-     * @return True if the action was successful (i.e. the weapon fired) */
+    /** Called when weapon should be fired via Secondary Fire. Returns true if action succeeded */
     boolean onSecondaryFire();
 
-    /** Called when Reload is active
-     * @return True if the action was successful (i.e. the weapon is now reloading) */
+    /** Called when Reload is active. Returns true if action succeeded */
     boolean onReload();
 
     /** Called when the weapon is equipped */
@@ -23,13 +20,18 @@ public interface IWeapon {
     /** Called when weapon is unequipped */
     void onUnequip();
 
-    /** Called when the owner's update method is called */
+    /** Called with owner's update() if active weapon */
     void onUpdate();
 
-    /** Called when the owner's update method is called, and the weapon is in the player's inventory,
-     * but not the currently equipped weapon */
+    /** Called with owner's update() if not active weapon */
     void onBackpackUpdate();
 
     /** Called if the owner dies */
     void onOwnerDeath();
+
+    /** Called if owner picks up a generic ammo pack */
+    void onAmmoPackPickup();
+
+    /** Called if owner picks up another weapon of the same type */
+    void onWeaponPickup();
 }
