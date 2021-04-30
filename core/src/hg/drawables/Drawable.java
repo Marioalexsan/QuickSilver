@@ -24,6 +24,8 @@ public abstract class Drawable {
     protected int layer = DrawLayer.Default;
     protected final Color color = new Color(1, 1, 1, 1);
 
+    protected boolean enabled = true;
+
     public Drawable() {}
 
     public abstract void draw(SpriteBatch batch);
@@ -63,4 +65,7 @@ public abstract class Drawable {
     public void setColor(Color color) { this.color.set(color); }
     public Color getColor() { return this.color; }
 
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public boolean isActive() { return enabled; }
 }

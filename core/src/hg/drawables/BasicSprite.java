@@ -36,7 +36,7 @@ public class BasicSprite extends Drawable {
     }
 
     public void centerToRegion() {
-        if (frame.getTexture() != null) center.set(frame.getRegionWidth() / 2f, frame.getRegionHeight() / 2f);
+        if (frame.getTexture() != null) cenOffset.set(frame.getRegionWidth() / 2f, frame.getRegionHeight() / 2f);
     }
 
     @Override

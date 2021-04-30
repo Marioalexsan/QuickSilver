@@ -6,6 +6,7 @@ import hg.physics.Collider;
 
 /**
  * A collision observer can be motified by a Collider of collisions that happen.
+ * Generally the oberver would be the entity that owns the collider, or something like that
  */
 public interface ICollisionObserver {
     /**

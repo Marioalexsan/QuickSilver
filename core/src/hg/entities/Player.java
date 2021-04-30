@@ -203,6 +203,7 @@ public class Player extends Entity {
             drawable.setLayer(DrawLayer.FloorAir);
             drawable.switchAnimation("Death");
             collider.setEnabled(false);
+            if (currentWeapon != null) currentWeapon.onOwnerDeath();
         }
     }
 

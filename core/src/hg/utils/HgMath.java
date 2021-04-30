@@ -68,6 +68,14 @@ public class HgMath {
         return min - eps <= value && value <= max + eps;
     }
 
+    public static boolean EqualEPS(double a, double b, double eps) {
+        return b - eps <= a && a <= b + eps;
+    }
+
+    public static boolean EqualEPS(float a, float b, float eps) {
+        return b - eps <= a && a <= b + eps;
+    }
+
     /** Solves for X in AX = B, where A = [params] as Mat2x2, X = Mat2x1, B = [-1, -1] */
     public static double[] SolveRaycastLinearSystem(double A, double B, double C, double D) {
         // Lines as ax + by + 1 = 0

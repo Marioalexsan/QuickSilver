@@ -6,12 +6,18 @@ import hg.directors.DirectorTypes;
 import hg.directors.LevelDirector;
 import hg.drawables.*;
 import hg.engine.*;
+import hg.interfaces.callbacks.IButtonCallback;
 import hg.libraries.ActorLibrary;
 import hg.entities.Player;
 import hg.maps.MapRWMethods;
+import hg.physics.BoxCollider;
+import hg.physics.CollisionAlgorithms;
 import hg.physics.CollisionEngine;
+import hg.physics.RTriangleCollider;
 import hg.playerlogic.LuigiAI;
 import hg.playerlogic.LocalPlayerLogic;
+import hg.ui.ClickButton;
+import hg.ui.UIElement;
 
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -75,7 +81,13 @@ public class HgGame extends ApplicationAdapter {
 	public Player player;
 	public Player enemy;
 	public Player enemy2;
-	
+
+
+	RTriangleCollider pointColliderTest = new RTriangleCollider(1000, 350);
+
+	UIElement button;
+
+
 	@Override
 	public void create () {
 		_instance = this;
@@ -96,7 +108,7 @@ public class HgGame extends ApplicationAdapter {
 		lowhpvignette.setCameraUse(false);
 		targetGUI.setTexture(assetEngine.loadTexture("Assets/GUI/Target.png"));
 		targetGUI.setCameraUse(false);
-		targetGUI.setLayer(DrawLayer.GUIDefault);
+		targetGUI.setLayer(DrawLayer.GUICursor);
 		targetGUI.centerToRegion();
 		targetGUI.registerToEngine();
 
@@ -123,10 +135,10 @@ public class HgGame extends ApplicationAdapter {
 		debugText2.setPosition(new Vector2(-940, -160));
 
 		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
-		audioEngine.setGlobalSoundVolume(0.0f);
-		audioEngine.setGlobalMusicVolume(0.0f);
+		audioEngine.setGlobalSoundVolume(0.5f);
+		audioEngine.setGlobalMusicVolume(0.5f);
 
-		graphicsEngine.setVideoMode(1920, 1080, false);
+		graphicsEngine.setVideoMode(1600, 900, false);
 		graphicsEngine.setCameraZoom(1.2);
 
 		LevelDirector level = (LevelDirector) entityManager.getDirector(DirectorTypes.LEVEL_DIRECTOR);
@@ -165,6 +177,15 @@ public class HgGame extends ApplicationAdapter {
 		debugText5.setLayer(DrawLayer.GUIDefault);
 		debugText5.setPosition(enemy2.getPosition());
 		debugText5.setPositionOffset(new Vector2(100, 0));
+
+
+		pointColliderTest.getAngle().add(30);
+		pointColliderTest.getPosition().add(1000, 1000);
+		pointColliderTest.registerToEngine();
+
+		button = new ClickButton(assetEngine.loadTexture("Assets/GUI/Button.png"), 460, 150);
+		button.setPosition(-0, -0);
+		((ClickButton) button).setCallback(() -> audioEngine.playSound(assetEngine.loadSound("Assets/Audio/gunclick.ogg"), 1f));
 	}
 
 	// Certain things (such as dragging the window) will cause the game to stop updating
@@ -195,11 +216,11 @@ public class HgGame extends ApplicationAdapter {
 
 		var list = collisionEngine.doRaycast(player.getPosition(), player.getAngle(), 500);
 
-		String str = "Raycast Hits: " + list.size() + " - \n";
+		String str = "Raycast Hits: " + list.size() + " - " + "Point hit: " + CollisionAlgorithms.PointHit(targetWorld.getPosition(), pointColliderTest) + "\n";
 		str += "Pos: " + format.format(player.getPosition().x) + " " + format.format(player.getPosition().y) + "\n";
 		str += list.size() > 0 ? list.get(0).target.toString() + " " + format2.format(list.get(0).distance) : "";
 		str += "\n";
-		str += list.size() > 1 ? list.get(1).target.toString() + " " + format2.format(list.get(1).distance) : "";
+		str += list.size() > 1 ? list.get(1).target.toString() + " " + format2.format(list.get(1).distance) : "\n";
 
 
 		debugText0.setText(str);
@@ -214,7 +235,8 @@ public class HgGame extends ApplicationAdapter {
 		debugText5.setText(format.format(enemy2.getStats().health) + ", Kills: " + enemy2.DEBUG_killCount);
 
 		if (inputEngine.isActionTapped(MappedAction.SecondaryFire)) {
-			player.setPosition(targetWorld.getPosition()); // Debug teleport
+			//player.setPosition(targetWorld.getPosition()); // Debug teleport
+			button.onLMBDown(targetGUI.getPosition().x, targetGUI.getPosition().y);
 		}
 
 		graphicsEngine.render();

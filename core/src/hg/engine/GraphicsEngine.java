@@ -124,10 +124,10 @@ public class GraphicsEngine {
         ArrayList<Drawable> heightSortedDrawables = new ArrayList<>(drawableLibrary);
         heightSortedDrawables.sort(DrawableLayerComparator);
 
-        // World elements
+        // Draw everything that is enabled
         batch.begin();
         for (var drawable : heightSortedDrawables) {
-            drawable.draw(batch);
+            if (drawable.isActive()) drawable.draw(batch);
         }
         batch.end();
     }

@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import hg.interfaces.IPolygon;
 import hg.utils.HgMath;
 
+import java.util.ArrayList;
+
 // SAT Documentation:
 // http://www.dyn4j.org/2010/01/sat/#sat-mtv
 // https://www.sevenson.com.au/programming/sat/#download
@@ -14,6 +16,8 @@ public class CollisionAlgorithms {
     // ---
     // Generic Stuff
     // ---
+
+    private static final double RaycastEPS = 0.016;
 
     public static float[] PolyAABB(Vector2[] vertices) {
         float XMin = vertices[0].x, YMin = vertices[0].y, XMax = XMin, YMax = YMin;
@@ -227,8 +231,8 @@ public class CollisionAlgorithms {
 
             // Impact is valid if inside a valid AABB intersection of both ray and edge's AABBs
             boolean valid = boxLeft <= boxRight && boxBottom <= boxTop &&
-                    HgMath.InRangeEPS(impact[0], boxLeft, boxRight, 0.016) &&
-                    HgMath.InRangeEPS(impact[1], boxBottom, boxTop, 0.016);
+                    HgMath.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
+                    HgMath.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
 
             if (valid) {
                 // Good hit! Calculate and save relative distance
@@ -270,5 +274,83 @@ public class CollisionAlgorithms {
         if (t1 >= 0 && t1 <= 1) return new RaycastResults(t1);
         if (t2 >= 0 && t2 <= 1) return new RaycastResults(t2);
         return new RaycastResults();
+    }
+
+    // ---
+    // Point vs Collider checks
+    // ---
+
+    public static boolean PointHit(Vector2 point, Collider A) {
+        if (A instanceof IPolygon) return PointVsPoly(point, ((IPolygon) A).trueVertices());
+        if (A instanceof SphereCollider) return PointVsSphere(point, A.trueCenter(), ((SphereCollider) A).getRadius());
+        throw new RuntimeException("Provided collider is not supported! Collider given: " + A.toString());
+    }
+
+    /** Returns true if the point is inside the shape, false otherwise.
+     * This check may fail for stupidly large shapes */
+    public static boolean PointVsPoly(Vector2 point, Vector2[] vertices) {
+        Vector2 rayStart = new Vector2(point).add(-99999999f, 0f);
+        Vector2 rayEnd = new Vector2(point).add(99999999f, 0f);
+
+        ArrayList<Vector2> hits = new ArrayList<>();
+
+        double[] ray = HgMath.SolveRaycastLinearSystem(rayStart.x, rayStart.y, rayEnd.x, rayEnd.y);
+        if (ray.length == 0) return false;
+
+        for (int i = 0; i < vertices.length; i++) {
+            Vector2 first = vertices[i];
+            Vector2 second = vertices[(i + 1) % vertices.length];
+
+            double[] edge = HgMath.SolveRaycastLinearSystem(first.x, first.y, second.x, second.y);
+            if (edge.length == 0) continue; // Bad sign, collider may be crappy
+
+            double[] impact = HgMath.SolveRaycastLinearSystem(ray[0], ray[1], edge[0], edge[1]);
+            if (impact.length == 0) continue; // No impact
+
+            float boxLeft = Math.max(Math.min(rayStart.x, rayEnd.x), Math.min(first.x, second.x));
+            float boxRight = Math.min(Math.max(rayStart.x, rayEnd.x), Math.max(first.x, second.x));
+            float boxBottom = Math.max(Math.min(rayStart.y, rayEnd.y), Math.min(first.y, second.y));
+            float boxTop = Math.min(Math.max(rayStart.y, rayEnd.y), Math.max(first.y, second.y));
+
+            // Impact is valid if inside a valid AABB intersection of both ray and edge's AABBs
+            boolean valid = boxLeft <= boxRight && boxBottom <= boxTop &&
+                    HgMath.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
+                    HgMath.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
+
+            if (valid) {
+                // Good hit! Save it
+                hits.add(new Vector2((float)impact[0], (float)impact[1]));
+            }
+        }
+
+        // Remove EqualEPS duplicates
+        ArrayList<Vector2> uniqueHits = new ArrayList<>();
+        for (var hit : hits) {
+            boolean isUnique = true;
+            for (var unique: uniqueHits) {
+                if (HgMath.EqualEPS(unique.x, hit.x, RaycastEPS) && HgMath.EqualEPS(unique.y, hit.y, RaycastEPS)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+            if (isUnique) {
+                uniqueHits.add(hit);
+            }
+        }
+
+        int leftHits = 0, rightHits = 0;
+
+        for (var hit: uniqueHits) {
+            if (hit.x < point.x) leftHits++;
+            else rightHits++;
+        }
+
+        return leftHits != 0 && rightHits != 0 &&
+                (leftHits % 2 == 1 || rightHits % 2 == 1);
+    }
+
+    /** Returns true if the point is inside the sphere, false otherwise */
+    public static boolean PointVsSphere(Vector2 point, Vector2 center, float radius) {
+        return new Vector2(point).sub(center).len() <= radius;
     }
 }
