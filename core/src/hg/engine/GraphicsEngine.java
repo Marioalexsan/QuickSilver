@@ -6,11 +6,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
+import hg.drawables.BasicText;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
 import hg.utils.HgMath;
@@ -167,9 +171,25 @@ public class GraphicsEngine {
 
     // Functionality resembles RenderCopyEx from SDL
     // Transforms the output if the drawable doesn't use the camera
-    public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text) {
-        font.setColor(color);
+    public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text, BasicText.HPos hpos, BasicText.VPos vpos, float wrap) {
+        //font.setColor(color);
         Affine2 targetTransform = new Affine2(transform);
+
+        float halign = 0f;
+        switch (hpos) {
+            case Center -> halign = -0.5f;
+            case Right -> halign = -1f;
+        }
+
+        float valign = 0f;
+        switch (vpos) {
+            case Center -> valign = 0.5f;
+            case Bottom -> valign = 1f;
+        }
+
+        GlyphLayout layout = new GlyphLayout(font, text, color, wrap, Align.left, wrap > 0f);
+        targetTransform.translate(new Vector2(layout.width * halign, layout.height * valign));
+
         if (!useCamera) {
             // Move the texture into camera's view so that it's invariant to its positioning
             targetTransform.preScale(camera.zoom, camera.zoom).preTranslate(
@@ -185,7 +205,9 @@ public class GraphicsEngine {
         Matrix4 old = new Matrix4(batch.getTransformMatrix());
         batch.setTransformMatrix(new Matrix4().set(targetTransform));
 
-        font.draw(batch, text, 0, 0);
+        //font.draw(batch, text, 0, 0);
+        //font.draw(batch, text, 0, 0, width, halign, false);
+        font.draw(batch, layout, 0, 0);
 
         batch.setTransformMatrix(old);
     }

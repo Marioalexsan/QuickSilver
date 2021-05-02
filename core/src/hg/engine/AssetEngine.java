@@ -20,17 +20,16 @@ public class AssetEngine {
     private final HashMap<String, BitmapFont> fontLibrary = new HashMap<>();
 
     /** Loads a texture from disk. Repeated calls for the same path will return the same object. */
-    public Texture loadTexture(String sPath) {
-        if (textureLibrary.containsKey(sPath))
-            return textureLibrary.get(sPath);
+    public Texture loadTexture(String path) {
+        if (textureLibrary.containsKey(path)) return textureLibrary.get(path);
 
         try {
-            Texture xTex = new Texture(new FileHandle(sPath));
-            xTex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            textureLibrary.put(sPath, xTex);
-            return xTex;
+            Texture tex = new Texture(new FileHandle(path));
+            tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            textureLibrary.put(path, tex);
+            return tex;
         } catch (Exception e) {
-            System.out.println("Couldn't load image at " + sPath);
+            System.out.println("Couldn't load image at " + path);
             return null;
         }
     }
@@ -42,16 +41,15 @@ public class AssetEngine {
     }
 
     /** Loads a sound from disk. Repeated calls for the same path will return the same object. */
-    public Sound loadSound(String sPath) {
-        if (soundLibrary.containsKey(sPath))
-            return soundLibrary.get(sPath);
+    public Sound loadSound(String path) {
+        if (soundLibrary.containsKey(path)) return soundLibrary.get(path);
 
         try {
-            Sound xSound = Gdx.audio.newSound(new FileHandle(sPath));
-            soundLibrary.put(sPath, xSound);
-            return xSound;
+            Sound audio = Gdx.audio.newSound(new FileHandle(path));
+            soundLibrary.put(path, audio);
+            return audio;
         } catch (Exception e) {
-            System.out.println("Couldn't load sound at " + sPath);
+            System.out.println("Couldn't load sound at " + path);
             return null;
         }
     }
@@ -64,15 +62,16 @@ public class AssetEngine {
 
     /** Loads a font based on the data file provided. Repeated calls for the same path will return the same object.
      * Use https://www.angelcode.com/products/bmfont/ for generating fonts. */
-    public BitmapFont loadFont(String sPath) {
-        if (fontLibrary.containsKey(sPath)) return fontLibrary.get(sPath);
+    public BitmapFont loadFont(String path) {
+        if (fontLibrary.containsKey(path)) return fontLibrary.get(path);
 
         try {
-            BitmapFont xSound = new BitmapFont(new FileHandle(sPath));
-            fontLibrary.put(sPath, xSound);
-            return xSound;
+            BitmapFont font = new BitmapFont(new FileHandle(path));
+            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            fontLibrary.put(path, font);
+            return font;
         } catch (Exception e) {
-            System.out.println("Couldn't load font at " + sPath);
+            System.out.println("Couldn't load font at " + path);
             return null;
         }
     }
@@ -86,21 +85,15 @@ public class AssetEngine {
     /** Unloads everything previously loaded. */
     public void unloadAll() {
         // Textures
-        for (var texture : textureLibrary.entrySet()) {
-            texture.getValue().dispose();
-        }
+        for (var texture : textureLibrary.entrySet()) texture.getValue().dispose();
         textureLibrary.clear();
 
         // Sounds
-        for (var sound : soundLibrary.entrySet()) {
-            sound.getValue().dispose();
-        }
+        for (var sound : soundLibrary.entrySet()) sound.getValue().dispose();
         soundLibrary.clear();
 
         // Fonts
-        for (var font : fontLibrary.entrySet()) {
-            font.getValue().dispose();
-        }
+        for (var font : fontLibrary.entrySet()) font.getValue().dispose();
         fontLibrary.clear();
     }
 }

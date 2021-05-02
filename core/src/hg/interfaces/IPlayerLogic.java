@@ -18,7 +18,7 @@ public interface IPlayerLogic {
 
     default Vector2 obtainAimPosition() { return null; }
 
-    default List<MappedAction> obtainActions() { return null; }
+    default List<Integer> obtainActions() { return null; }
 
     default Vector2 obtainAdvancedMove() { return null; }
 

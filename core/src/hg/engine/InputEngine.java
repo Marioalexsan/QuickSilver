@@ -18,7 +18,7 @@ public class InputEngine {
     public static final int ButtonMappingOffset = 1024;
 
     private final KeyMouseState keyMouseState = new KeyMouseState();
-    private final HashMap<MappedAction, Integer> keyActionMap = new HashMap<>();
+    private final HashMap<Integer, Integer> keyActionMap = new HashMap<>();
 
     public InputEngine() {
         Gdx.input.setCursorCatched(true);
@@ -93,19 +93,19 @@ public class InputEngine {
 
 
 
-    public boolean isActionTapped(MappedAction action) {
+    public boolean isActionTapped(int action) {
         return getActionFrames(action) == 1;
     }
 
-    public boolean isActionHeldForX(MappedAction action, int frames) {
+    public boolean isActionHeldForX(int action, int frames) {
         return getActionFrames(action) > frames;
     }
 
-    public boolean isActionHeld(MappedAction action) {
+    public boolean isActionHeld(int action) {
         return isActionHeldForX(action, 1);
     }
 
-    public int getActionFrames(MappedAction action) {
+    public int getActionFrames(int action) {
         Integer mappedKey = keyActionMap.get(action);
         Integer value;
         if (mappedKey >= ButtonMappingOffset) {

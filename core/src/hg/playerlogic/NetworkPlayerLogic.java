@@ -14,7 +14,7 @@ public class NetworkPlayerLogic implements IPlayerLogic {
     public void localUpdate() {}
 
     @Override
-    public List<MappedAction> obtainActions() {
+    public List<Integer> obtainActions() {
         // TO DO
         return null;
     }

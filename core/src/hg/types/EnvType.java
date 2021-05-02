@@ -1,6 +1,6 @@
-package hg.id;
+package hg.types;
 
-public class EnvID {
+public class EnvType {
     public static final int FIRST_VALUE = 0;
 
     public static final int BrickDefault = 0;

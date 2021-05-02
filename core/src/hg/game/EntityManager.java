@@ -2,10 +2,9 @@ package hg.game;
 
 
 import com.badlogic.gdx.math.Vector2;
-import hg.directors.Director;
-import hg.directors.DirectorTypes;
-import hg.directors.LevelDirector;
+import hg.directors.*;
 import hg.entities.Entity;
+import hg.entities.Player;
 import hg.libraries.ActorLibrary;
 import hg.libraries.EnvironmentLibrary;
 
@@ -20,10 +19,20 @@ public class EntityManager {
     private final HashMap<Integer, Entity> environments = new HashMap<>();
     private final HashMap<DirectorTypes, Director> directors = new HashMap<>();
 
+    private Player localPlayer = null;
+
     public EntityManager() {}
 
-    public Entity addActor(ActorLibrary.Types entity, Vector2 position, float direction) {
-        Entity newEntity = ActorLibrary.CreateActor(entity);
+    public void setLocalPlayer(Player player) {
+        localPlayer = player;
+    }
+
+    public Player getLocalPlayer() {
+        return localPlayer;
+    }
+
+    public Entity addActor(int entityType, Vector2 position, float direction) {
+        Entity newEntity = ActorLibrary.CreateActor(entityType);
         if (newEntity != null) {
             newEntity.setPosition(position);
             newEntity.setAngle(direction);
@@ -49,30 +58,41 @@ public class EntityManager {
         return newEntity;
     }
 
-    public Director getDirector(DirectorTypes type) {
-        Director existing = directors.get(type);
+    /** Starts a director if it doesn't exist yet
+     * Returns true if a director was created, false otherwise
+     */
+    public boolean addDirector(DirectorTypes type) {
+        if (directors.get(type) != null) return false;
 
-        if (existing != null) return existing;
-
+        Director which = null;
         switch (type) {
-            case LEVEL_DIRECTOR -> {
-                LevelDirector director = new LevelDirector();
-                directors.put(type, director);
-                return director;
-            }
+            case InitDirector -> which = new InitDirector();
+            case MainMenuDirector -> which = new MainMenuDirector();
+            case MatchDirector -> which = new MatchDirector();
+            case LevelDirector -> which = new LevelDirector();
             default -> throw new RuntimeException("Coudln't retrieve director of type " + type.toString());
         }
+        directors.put(type, which);
+        return true;
+    }
+
+    public Director getDirector(DirectorTypes type) {
+        return directors.get(type);
+    }
+
+    public Director addAndGetDirector(DirectorTypes type) {
+        addDirector(type);
+        return directors.get(type);
     }
 
     public void clearDirectorIfAny(DirectorTypes type) {
         Director existing = directors.remove(type);
-        if (existing != null) {
-            existing.destroy();
-        }
+        if (existing != null) existing.destroy();
     }
 
     public void clearActors() {
         for (var actor: actors.entrySet()) {
+            actor.getValue().signalDestruction();
             actor.getValue().destroy();
         }
         actors.clear();
@@ -80,6 +100,7 @@ public class EntityManager {
 
     public void clearEnvironment() {
         for (var environment: environments.entrySet()) {
+            environment.getValue().signalDestruction();
             environment.getValue().destroy();
         }
         environments.clear();
@@ -87,23 +108,31 @@ public class EntityManager {
 
     public void clearDirectors() {
         for (var director: directors.entrySet()) {
+            director.getValue().signalDestruction();
             director.getValue().destroy();
         }
         directors.clear();
     }
 
     public void update() {
+        boolean isServerOrLocal = true; // TODO implement network roles
 
         // Update all current entities based on network status
 
-        for (var director : new ArrayList<>(directors.values()))
-            director.serverUpdate(); // Directors are priority
+        for (var director : new ArrayList<>(directors.values())) {
+            if (isServerOrLocal) director.serverUpdate();
+            else director.clientUpdate();
+        }
 
-        for (var actor : new ArrayList<>(actors.values()))
-            actor.serverUpdate();
+        for (var actor : new ArrayList<>(actors.values())) {
+            if (isServerOrLocal) actor.serverUpdate();
+            else actor.clientUpdate();
+        }
 
-        for (var env : new ArrayList<>(environments.values()))
-            env.serverUpdate();
+        for (var env : new ArrayList<>(environments.values())) {
+            if (isServerOrLocal) env.serverUpdate();
+            else env.clientUpdate();
+        }
 
         // Check for stuff to dispose of
 

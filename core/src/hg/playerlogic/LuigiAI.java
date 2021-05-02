@@ -31,8 +31,8 @@ public class LuigiAI implements IPlayerLogic {
     }
 
     @Override
-    public List<MappedAction> obtainActions() {
-        ArrayList<MappedAction> actionsThisFrame = new ArrayList<>();
+    public List<Integer> obtainActions() {
+        ArrayList<Integer> actionsThisFrame = new ArrayList<>();
 
         if (keksimus <= 3)
             actionsThisFrame.add(MappedAction.Reload);

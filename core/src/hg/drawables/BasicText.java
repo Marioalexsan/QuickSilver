@@ -3,7 +3,6 @@ package hg.drawables;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.Rectangle;
 import hg.engine.GraphicsEngine;
 import hg.utils.HgEngineUtils;
 
@@ -12,37 +11,40 @@ import hg.utils.HgEngineUtils;
  * BitmapFonts are not thread safe for rendering, *regardless* of what you do!
  */
 public class BasicText extends Drawable {
-    public enum RenderMode {
-        ContinuousCentered, // Line is centered on position
-        ContinuousLeft, // Line is placed to the left of position
-        ContinuousRight, // Line is placed to the right of position
-        BlockCentered, // Block is centered on position
-        BlockLeft, // Block is placed to the left of position
-        BlockRight // Block is placed to the right of position
+    public enum VPos {
+        Top, Center, Bottom
+    }
+
+    public enum HPos {
+        Left, Center, Right
     }
 
     private BitmapFont font;
     private String text;
 
-    private Rectangle blockConstraints = new Rectangle(0, 0, 100, 100);
-    private RenderMode mode = RenderMode.ContinuousRight;
+    private VPos vpos = VPos.Top;
+    private HPos hpos = HPos.Left;
+    private float wrap;
 
     public BasicText() {}
+
+    public BasicText(BitmapFont font, String text) {
+        this.font = font;
+        this.text = text;
+    }
 
     public void setFont(BitmapFont font) {
         this.font = font;
     }
 
-    public void setBlockConstraints(Rectangle rect) {
-        this.blockConstraints.set(rect);
+    public void setConstraints(HPos hpos, VPos vpos, float wrap) {
+        this.hpos = hpos;
+        this.vpos = vpos;
+        this.wrap = Math.max(0f, wrap);
     }
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    public void setRenderMode(RenderMode mode) {
-        this.mode = mode;
     }
 
     @Override
@@ -50,9 +52,8 @@ public class BasicText extends Drawable {
         if (font == null || text == null) {
             return;
         }
-        // RenderMode needs to be implemented
 
         Affine2 transform = HgEngineUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
-        GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text);
+        GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
     }
 }

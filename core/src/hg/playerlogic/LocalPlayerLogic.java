@@ -20,11 +20,11 @@ public class LocalPlayerLogic implements IPlayerLogic {
     }
 
     @Override
-    public List<MappedAction> obtainActions() {
+    public List<Integer> obtainActions() {
         InputEngine input = HgGame.Input();
 
         // Returns the current actions after an update
-        ArrayList<MappedAction> actionsThisFrame = new ArrayList<>();
+        ArrayList<Integer> actionsThisFrame = new ArrayList<>();
         if (input.isActionHeld(MappedAction.MoveUp)) actionsThisFrame.add(MappedAction.MoveUp);
         if (input.isActionHeld(MappedAction.MoveDown)) actionsThisFrame.add(MappedAction.MoveDown);
         if (input.isActionHeld(MappedAction.MoveLeft)) actionsThisFrame.add(MappedAction.MoveLeft);

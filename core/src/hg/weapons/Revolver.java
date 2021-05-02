@@ -10,6 +10,7 @@ import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
 import hg.libraries.ActorLibrary;
 import hg.physics.ColliderGroup;
+import hg.types.ActorType;
 import hg.utils.Angle;
 
 public class Revolver implements IWeapon {
@@ -50,7 +51,7 @@ public class Revolver implements IWeapon {
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
-        var boolet = HgGame.Entities().addActor(ActorLibrary.Types.GenericBullet, ownerPosition, ownerAngle.getDeg());
+        var boolet = HgGame.Entities().addActor(ActorType.GenericBullet, ownerPosition, ownerAngle.getDeg());
         boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
         ((GenericBullet) boolet).setSpeed(38);
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 20f, ColliderGroup.Player);
@@ -77,7 +78,11 @@ public class Revolver implements IWeapon {
 
     @Override
     public boolean onPrimaryFire() {
-        if (owner == null || weaponCooldown > 0 || currentAmmo <= 0) return false;
+        if (owner == null || weaponCooldown > 0) return false;
+        if (currentAmmo <= 0) {
+            onReload(); // Automatically attempts reload
+            return false;
+        }
         tryShot();
         weaponCooldown = shotCooldown;
         return true;

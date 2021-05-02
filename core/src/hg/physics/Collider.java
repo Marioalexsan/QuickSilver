@@ -59,6 +59,12 @@ public abstract class Collider {
     public void setCenter(Vector2 center) { this.center = center; }
     public void setCenterOffset(Vector2 offset) { this.cenOffset = offset; }
 
+    public void setPCA(Vector2 position, Vector2 center, Angle angle) {
+        this.position = position;
+        this.center = center;
+        this.angle = angle;
+    }
+
     public Vector2 trueCenter() {
         return new Vector2(-center.x - cenOffset.x, -center.y - cenOffset.y).rotateDeg(angle.getDeg() + angOffset.getDeg()).add(position).add(posOffset);
     }

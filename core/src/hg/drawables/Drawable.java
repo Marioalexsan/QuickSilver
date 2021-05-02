@@ -60,6 +60,12 @@ public abstract class Drawable {
     public void setCameraUse(boolean relativeToCamera) { this.relativeToCamera = relativeToCamera; }
     public void setLayer(int layer) { this.layer = layer; }
 
+    public void setPCA(Vector2 position, Vector2 center, Angle angle) {
+        this.position = position;
+        this.center = center;
+        this.angle = angle;
+    }
+
     public void setRGB(float r, float g, float b) { this.color.set(r, g, b, color.a); }
     public void setAlpha(float a) { this.color.a = a; }
     public void setColor(Color color) { this.color.set(color); }

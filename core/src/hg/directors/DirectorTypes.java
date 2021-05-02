@@ -1,5 +1,9 @@
 package hg.directors;
 
 public enum DirectorTypes {
-    LEVEL_DIRECTOR
+    InitDirector,
+    MainMenuDirector,
+    LevelDirector,
+    MatchDirector,
+    QuitDirector
 }
