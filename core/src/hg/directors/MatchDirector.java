@@ -1,6 +1,7 @@
 package hg.directors;
 
 import com.badlogic.gdx.math.Vector2;
+import hg.engine.InputEngine;
 import hg.engine.MappedAction;
 import hg.entities.Player;
 import hg.game.EntityManager;
@@ -11,9 +12,13 @@ import hg.playerlogic.LuigiAI;
 import hg.types.ActorType;
 import hg.types.MapType;
 
+import java.awt.*;
+
 public class MatchDirector extends Director {
     private boolean started = false;
+    private boolean menuDecidedStop = false;
 
+    // TODO Remove this crap and replace it with proper match starting
     public Player player;
     public Player enemy;
     public Player enemy2;
@@ -34,6 +39,7 @@ public class MatchDirector extends Director {
         enemy2.setLogic(new LuigiAI());
 
         manager.setLocalPlayer(player);
+        HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
     }
 
     private void stop() {
@@ -51,6 +57,14 @@ public class MatchDirector extends Director {
         toBeDestroyed = true;
     }
 
+    public void receiveStop() {
+        menuDecidedStop = true;
+    }
+
+    private void pauseMenu() {
+        HgGame.Entities().addDirector(DirectorTypes.InGameMenuDirector);
+    }
+
     @Override
     public void clientUpdate() {
         serverUpdate();
@@ -60,12 +74,16 @@ public class MatchDirector extends Director {
     public void serverUpdate() {
         if (!started) start();
 
-        if (HgGame.Input().isActionTapped(MappedAction.Escape))
-            stop();
+        boolean hasFocus = HgGame.Input().inputHasFocus(this);
+
+        if (hasFocus && HgGame.Input().isActionTapped(MappedAction.Escape))
+            pauseMenu();
+
+        if (menuDecidedStop) stop();
     }
 
     @Override
     public void destroy() {
-
+        HgGame.Input().removeFocusInput(this);
     }
 }

@@ -1,16 +1,13 @@
 package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
 import hg.directors.DirectorTypes;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.Player;
-import hg.physics.CollisionEngine;
-import hg.physics.RaycastHit;
+import hg.engine.CollisionEngine;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -51,8 +48,10 @@ public class HgGame extends ApplicationAdapter {
 	public static double getLogicRandom() { return randomLogic.nextDouble(); }
 
 	private int frameCounter = 0;
-	private boolean applicationHasFocus = true;
 	private float factorFOV = 0.75f;
+
+	private boolean applicationHasFocus = true;
+	private boolean quitCalled = false;
 
 	public float getFOVFactor() {
 		return factorFOV;
@@ -66,14 +65,13 @@ public class HgGame extends ApplicationAdapter {
 		factorFOV = fov;
 	}
 
+	public void quitGame() {
+		quitCalled = true;
+	}
+
 	BasicSprite lowhpvignette = new BasicSprite();
 	BasicSprite targetGUI = new BasicSprite();
 	BasicSprite targetWorld = new BasicSprite();
-
-	BasicText debugText0 = new BasicText();
-	BasicText debugText1 = new BasicText();
-	BasicText debugText2 = new BasicText();
-	BasicText debugText3 = new BasicText();
 
 	@Override
 	public void create () {
@@ -86,7 +84,7 @@ public class HgGame extends ApplicationAdapter {
 		collisionEngine = new CollisionEngine();
 		entityManager = new EntityManager();
 
-		collisionEngine.setDebugDraw(true); // This will make colliders visible!
+		collisionEngine.setDebugDraw(false); // This will make colliders visible!
 
 		lowhpvignette.setTexture(assetEngine.loadTexture("Assets/GUI/LowHP.png"));
 		lowhpvignette.registerToEngine();
@@ -104,23 +102,6 @@ public class HgGame extends ApplicationAdapter {
 		targetWorld.centerToRegion();
 		targetWorld.registerToEngine();
 		targetWorld.setEnabled(false);
-
-		debugText0.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
-		debugText0.registerToEngine();
-		debugText0.setCameraUse(false);
-		debugText0.setLayer(DrawLayer.GUIDefault);
-		debugText0.setPosition(new Vector2(-940, -300));
-
-		debugText1.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
-		debugText1.registerToEngine();
-		debugText1.setCameraUse(false);
-		debugText1.setLayer(DrawLayer.GUICursor);
-
-		debugText2.setFont(assetEngine.loadFont("Assets/Fonts/CourierNew36.fnt"));
-		debugText2.setCameraUse(false);
-		debugText2.registerToEngine();
-		debugText2.setLayer(DrawLayer.GUIDefault);
-		debugText2.setPosition(new Vector2(-940, -160));
 
 		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
 		audioEngine.setGlobalSoundVolume(0.5f);
@@ -140,8 +121,6 @@ public class HgGame extends ApplicationAdapter {
 
 		inputEngine.update();
 
-		targetGUI.getAngle().add(1.5f);
-
 		entityManager.update();
 		collisionEngine.update();
 
@@ -151,47 +130,19 @@ public class HgGame extends ApplicationAdapter {
 			graphicsEngine.setCameraOffset(HgGame.Input().getFOVCameraOffset(factorFOV));
 		}
 
+		targetGUI.getAngle().add(1.5f);
 		targetGUI.setPosition(HgGame.Input().getMouse());
 		targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
 
-		DecimalFormat format = new DecimalFormat();
-		format.setMaximumFractionDigits(0);
-		format.setGroupingUsed(false);
-
-		DecimalFormat format2 = new DecimalFormat();
-		format2.setMaximumFractionDigits(2);
-		format2.setGroupingUsed(false);
-
-		ArrayList<RaycastHit> list = new ArrayList<>();
-		if (player != null) {
-			list = collisionEngine.doRaycast(player.getPosition(), player.getAngle(), 500);
-		}
-
-		String str = "Raycast Hits: " + list.size() + " - " + "Point hit: " + "\n";
-		if (player != null) str += "Pos: " + format.format(player.getPosition().x) + " " + format.format(player.getPosition().y) + "\n";
-		str += list.size() > 0 ? list.get(0).target.toString() + " " + format2.format(list.get(0).distance) : "";
-		str += "\n";
-		str += list.size() > 1 ? list.get(1).target.toString() + " " + format2.format(list.get(1).distance) : "\n";
-
-
-		debugText0.setText(str);
-
-		debugText1.setText("(" + format.format(targetWorld.getPosition().x) + ", " + format.format(targetWorld.getPosition().y) + ")\n" +
-				format.format(targetGUI.getPosition().x) + ", " + format.format(targetGUI.getPosition().y) + ")");
-		debugText1.setPosition(new Vector2(targetGUI.getPosition()).add(100, 20));
-
-		debugText2.setText(Integer.toString(frameCounter));
-
-		if (player != null) debugText3.setText(format.format(player.getStats().health) + ", Kills: " + player.DEBUG_killCount);
-
-		if (inputEngine.isActionTapped(MappedAction.SecondaryFire)) {
-			if (player != null) player.setPosition(targetWorld.getPosition()); // Debug teleport
-		}
+		if (player != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
+			player.setPosition(targetWorld.getPosition()); // Debug teleport
 
 		graphicsEngine.render();
 		audioEngine.update();
 
 		frameCounter++;
+
+		if (quitCalled) Gdx.app.exit();
 	}
 
 	@Override

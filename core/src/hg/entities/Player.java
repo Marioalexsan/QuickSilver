@@ -2,16 +2,13 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
-import hg.drawables.AnimatedSprite;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
-import hg.engine.AssetEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
-import hg.libraries.ActorLibrary;
 import hg.libraries.AnimationLibrary;
 import hg.physics.Collider;
 import hg.physics.ColliderGroup;
@@ -40,15 +37,12 @@ public class Player extends Entity {
     protected IWeapon currentWeapon = revolver;
 
     public Player(IPlayerLogic playerLogic) {
-        AssetEngine assets = HgGame.Assets(); // Extra dependency
-
         setLogic(playerLogic);
 
         baseStats = new BaseStats(this);
         collider.group = ColliderGroup.Player;
         collider.baseStats = baseStats;
         collider.owner = this;
-
 
         drawable.addKnownAnimation("Death", AnimationLibrary.GetAnimationInfo("Player_Death"));
 
@@ -224,6 +218,7 @@ public class Player extends Entity {
     public void destroy() {
         collider.unregisterFromEngine(); // Deallocation!
         drawable.unregisterFromEngine(); // Deallocation!
+        playerLogic.setControlledPlayer(null);
     }
 
     @Override

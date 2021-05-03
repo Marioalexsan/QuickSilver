@@ -26,7 +26,7 @@ public class ClickButton extends UIElement {
     public ClickButton(Texture tex, int width, int height, BitmapFont font, String text) {
         drawable = new BasicSprite(tex);
         collider = new BoxCollider(width, height);
-        contents = new BasicText(font, "Play");
+        contents = new BasicText(font, text);
 
         drawable.setLayer(DrawLayer.GUIDefault);
         drawable.setCameraUse(false);

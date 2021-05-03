@@ -65,11 +65,13 @@ public class EntityManager {
         if (directors.get(type) != null) return false;
 
         Director which = null;
-        switch (type) {
+        switch (type) { // TODO Replace switch with dictionary
             case InitDirector -> which = new InitDirector();
+            case QuitDirector -> which = new QuitDirector();
             case MainMenuDirector -> which = new MainMenuDirector();
             case MatchDirector -> which = new MatchDirector();
             case LevelDirector -> which = new LevelDirector();
+            case InGameMenuDirector -> which = new InGameMenuDirector();
             default -> throw new RuntimeException("Coudln't retrieve director of type " + type.toString());
         }
         directors.put(type, which);

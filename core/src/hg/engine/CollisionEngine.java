@@ -1,4 +1,4 @@
-package hg.physics;
+package hg.engine;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicText;
@@ -6,6 +6,7 @@ import hg.drawables.ColliderDrawable;
 import hg.drawables.DrawLayer;
 import hg.game.HgGame;
 import hg.interfaces.IPolygon;
+import hg.physics.*;
 import hg.utils.Angle;
 
 import java.util.*;
@@ -19,12 +20,9 @@ import java.util.*;
  * The generic algorithm used is SAT.
  */
 public class CollisionEngine {
-    private static final Comparator<RaycastHit> RaycastHitComparator = new Comparator<RaycastHit>() {
-        @Override
-        public int compare(RaycastHit o1, RaycastHit o2) {
-            float delta = o1.distance - o2.distance;
-            return delta > 0 ? 1 : (delta < 0 ? -1 : 0);
-        }
+    private static final Comparator<RaycastHit> RaycastHitComparator = (o1, o2) -> {
+        float delta = o1.distance - o2.distance;
+        return delta > 0 ? 1 : (delta < 0 ? -1 : 0);
     };
 
     /** Int Pairs are used as keys for the spatial hashmap */
@@ -78,16 +76,18 @@ public class CollisionEngine {
     private final HashMap<IntPair, HashSet<Collider>> spatialHashMap = new HashMap<>();
 
     private final ColliderDrawable colliderVision = new ColliderDrawable();
-    private final BasicText debugText1 = new BasicText();
+    private final BasicText colliderCount = new BasicText();
 
     public CollisionEngine() {
-        debugText1.setFont(HgGame.Assets().loadFont("Assets/Fonts/CourierNew48.fnt"));
-        debugText1.setPosition(new Vector2(-880, 480));
-        debugText1.setLayer(DrawLayer.GUIDefault);
-        debugText1.setCameraUse(false);
+        colliderCount.setFont(HgGame.Assets().loadFont("Assets/Fonts/CourierNew48.fnt"));
+        colliderCount.setPosition(new Vector2(-880, 480));
+        colliderCount.setLayer(DrawLayer.GUIDefault);
+        colliderCount.setCameraUse(false);
     }
 
-    public void setDebugDraw(boolean drawColliders) { this.debugDrawEnabled = drawColliders; }
+    public void setDebugDraw(boolean drawColliders) {
+        this.debugDrawEnabled = drawColliders;
+    }
 
     public void resolveCollisions(boolean movement, boolean combat) {
         if (!(movement || combat)) return;
@@ -209,12 +209,12 @@ public class CollisionEngine {
             colliderVision.collidersToDraw.clear();
             colliderVision.collidersToDraw.addAll(colliderLibrary);
 
-            debugText1.setText("Colliders: " + colliderLibrary.size());
-            debugText1.registerToEngine();
+            colliderCount.setText("Colliders: " + colliderLibrary.size());
+            colliderCount.registerToEngine();
         }
         else {
             colliderVision.unregisterFromEngine();
-            debugText1.unregisterFromEngine();
+            colliderCount.unregisterFromEngine();
         }
 
         resolveCollisions(true, true);

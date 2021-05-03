@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -22,14 +21,9 @@ import hg.utils.HgMath;
 import java.util.*;
 
 public class GraphicsEngine {
-    private static final Comparator<Drawable> DrawableLayerComparator = new Comparator<Drawable>() {
-        @Override
-        public int compare(Drawable o1, Drawable o2) {
-            return o1.getLayer() - o2.getLayer();
-        }
-    };
+    private static final Comparator<Drawable> DrawableLayerComparator = Comparator.comparingInt(Drawable::getLayer);
 
-    private SpriteBatch batch;
+    private final SpriteBatch batch;
 
     private Vector2 currentResolution = new Vector2(0, 0);
     private static final OrthographicCamera camera = new OrthographicCamera(HgGame.WorldWidth, HgGame.WorldHeight);

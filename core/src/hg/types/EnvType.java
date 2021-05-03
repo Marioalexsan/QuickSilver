@@ -17,5 +17,7 @@ public class EnvType {
     public static final int BoxMedium = 11;
     public static final int BoxSmall = 12;
 
-    public static final int LAST_VALUE = 32767;
+    public static final int PlayerSpawnPoint = 1000;
+
+    public static final int LAST_VALUE = 100000;
 }

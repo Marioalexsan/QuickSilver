@@ -17,25 +17,32 @@ public class LocalPlayerLogic implements IPlayerLogic {
     @Override
     public void setControlledPlayer(Player player) {
         controlledPlayer = player;
+        if (player == null) HgGame.Input().removeFocusInput(this);
+        else HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
     }
 
     @Override
     public List<Integer> obtainActions() {
         InputEngine input = HgGame.Input();
 
+        boolean hasFocus = HgGame.Input().inputHasFocus(this);
+
         // Returns the current actions after an update
         ArrayList<Integer> actionsThisFrame = new ArrayList<>();
-        if (input.isActionHeld(MappedAction.MoveUp)) actionsThisFrame.add(MappedAction.MoveUp);
-        if (input.isActionHeld(MappedAction.MoveDown)) actionsThisFrame.add(MappedAction.MoveDown);
-        if (input.isActionHeld(MappedAction.MoveLeft)) actionsThisFrame.add(MappedAction.MoveLeft);
-        if (input.isActionHeld(MappedAction.MoveRight)) actionsThisFrame.add(MappedAction.MoveRight);
 
-        if (input.isActionHeld(MappedAction.Reload)) actionsThisFrame.add(MappedAction.Reload);
+        if (hasFocus) {
+            if (input.isActionHeld(MappedAction.MoveUp)) actionsThisFrame.add(MappedAction.MoveUp);
+            if (input.isActionHeld(MappedAction.MoveDown)) actionsThisFrame.add(MappedAction.MoveDown);
+            if (input.isActionHeld(MappedAction.MoveLeft)) actionsThisFrame.add(MappedAction.MoveLeft);
+            if (input.isActionHeld(MappedAction.MoveRight)) actionsThisFrame.add(MappedAction.MoveRight);
 
-        if (input.isButtonHeld(Input.Buttons.LEFT)) actionsThisFrame.add(MappedAction.PrimaryFire);
-        if (input.isButtonHeld(Input.Buttons.RIGHT)) actionsThisFrame.add(MappedAction.SecondaryFire);
+            if (input.isActionHeld(MappedAction.Reload)) actionsThisFrame.add(MappedAction.Reload);
 
-        if (input.isActionTapped(MappedAction.QuickSwitchWeapon)) actionsThisFrame.add(MappedAction.QuickSwitchWeapon);
+            if (input.isButtonHeld(Input.Buttons.LEFT)) actionsThisFrame.add(MappedAction.PrimaryFire);
+            if (input.isButtonHeld(Input.Buttons.RIGHT)) actionsThisFrame.add(MappedAction.SecondaryFire);
+
+            if (input.isActionTapped(MappedAction.QuickSwitchWeapon)) actionsThisFrame.add(MappedAction.QuickSwitchWeapon);
+        }
 
         return actionsThisFrame;
     }
@@ -43,6 +50,6 @@ public class LocalPlayerLogic implements IPlayerLogic {
     @Override
     public Vector2 obtainAimPosition() {
         // Returns the current aim position after an update, relative to the player
-        return HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor()).sub(controlledPlayer.getPosition());
+        return HgGame.Input().inputHasFocus(this) ? HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor()).sub(controlledPlayer.getPosition()) : null;
     }
 }

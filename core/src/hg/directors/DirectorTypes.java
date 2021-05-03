@@ -5,5 +5,6 @@ public enum DirectorTypes {
     MainMenuDirector,
     LevelDirector,
     MatchDirector,
-    QuitDirector
+    QuitDirector,
+    InGameMenuDirector
 }

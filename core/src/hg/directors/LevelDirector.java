@@ -19,9 +19,8 @@ public class LevelDirector extends Director {
     }
 
     public void UnloadMap() {
-        for (var env : environments) {
+        for (var env : environments)
             env.signalDestruction();
-        }
         environments.clear();
     }
 

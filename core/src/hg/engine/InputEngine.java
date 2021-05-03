@@ -4,9 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import hg.game.HgGame;
+import hg.interfaces.IDestroyable;
 import hg.utils.HgMath;
 
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Records input.
@@ -14,11 +15,31 @@ import java.util.HashMap;
  */
 
 public class InputEngine {
+    public static class FocusPriorities {
+        public static final int Max = 10000;
+        public static final int Default = 0;
+        public static final int Min = -10000;
+
+        public static final int PlayerInputs = 5;
+        public static final int CommandWindow = 6;
+        public static final int InGameMenu = 7;
+    }
+
+    public static class FocusedInput {
+        public int priority;
+        public Object source;
+
+        public FocusedInput(Object source, int priority) {
+            this.priority = priority;
+            this.source = source;
+        }
+    }
 
     public static final int ButtonMappingOffset = 1024;
 
     private final KeyMouseState keyMouseState = new KeyMouseState();
     private final HashMap<Integer, Integer> keyActionMap = new HashMap<>();
+    private final HashSet<FocusedInput> focusedInputs = new HashSet<>();
 
     public InputEngine() {
         Gdx.input.setCursorCatched(true);
@@ -50,6 +71,35 @@ public class InputEngine {
                 keyMouseState.mouseActivity[i]++;
             }
         }
+    }
+
+    // Focus input stuff
+
+    /** Adds a focus input */
+    public void addFocusInput(Object source, int priority) {
+        focusedInputs.removeIf(input -> input.source == source);
+        focusedInputs.add(new FocusedInput(source, priority));
+    }
+
+    /** Removes a focus input if it was previously added.
+     * InputEngine will also remove any toBeDestroyed sources during its update cycle
+      */
+    public void removeFocusInput(Object source) {
+        focusedInputs.removeIf(input -> input.source == source);
+    }
+
+    /** Check if this object is one of the current focus holders. */
+    public boolean inputHasFocus(Object source) {
+        final int notFoundYet = FocusPriorities.Min - 1;
+        int maxFound = notFoundYet;
+        int sourceFound = notFoundYet;
+
+        for (var input : focusedInputs) {
+            if (input.source == source) sourceFound = input.priority;
+            maxFound = Math.max(input.priority, maxFound);
+            if (sourceFound > notFoundYet && maxFound > sourceFound) return false;
+        }
+        return true;
     }
 
     // Raw Key / Button checking
