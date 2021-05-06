@@ -21,8 +21,9 @@ public class InputEngine {
         public static final int Min = -10000;
 
         public static final int PlayerInputs = 5;
-        public static final int CommandWindow = 6;
-        public static final int InGameMenu = 7;
+        public static final int PauseMenu = 6;
+        public static final int TextField = 7;
+
     }
 
     public static class FocusedInput {
@@ -40,6 +41,7 @@ public class InputEngine {
     private final KeyMouseState keyMouseState = new KeyMouseState();
     private final HashMap<Integer, Integer> keyActionMap = new HashMap<>();
     private final HashSet<FocusedInput> focusedInputs = new HashSet<>();
+    private String textActivityThisFrame = "";
 
     public InputEngine() {
         Gdx.input.setCursorCatched(true);
@@ -71,6 +73,14 @@ public class InputEngine {
                 keyMouseState.mouseActivity[i]++;
             }
         }
+        textActivityThisFrame = keyMouseState.textActivity.toString();
+        keyMouseState.textActivity.delete(0, keyMouseState.textActivity.length());
+    }
+
+    // Text Input stuff
+
+    public String getTextTyped() {
+        return textActivityThisFrame;
     }
 
     // Focus input stuff
@@ -102,6 +112,16 @@ public class InputEngine {
         return true;
     }
 
+    public int getTopFocusPriority() {
+        int maxFound = FocusPriorities.Min - 1;
+
+        for (var input : focusedInputs) {
+            maxFound = Math.max(input.priority, maxFound);
+        }
+
+        return maxFound;
+    }
+
     // Raw Key / Button checking
 
     public boolean isKeyTapped(int key) {
@@ -111,7 +131,7 @@ public class InputEngine {
 
     public boolean isKeyHeldForX(int key, int frames) {
         Integer value = keyMouseState.keyActivity.get(key);
-        return value != null && (value > frames);
+        return value != null && (value >= frames);
     }
 
     public boolean isKeyHeld(int key) {
@@ -128,7 +148,7 @@ public class InputEngine {
     }
 
     public boolean isButtonHeldForX(int key, int frames) {
-        return key >= 0 && key <= 4 && keyMouseState.mouseActivity[key] > frames;
+        return key >= 0 && key <= 4 && keyMouseState.mouseActivity[key] >= frames;
     }
 
     public boolean isButtonHeld(int key) {

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 
 /**
  * This drawable is intended for debug purposes only.
+ * It can also only draw world colliders for the time being, AKA no GUI colliders.
+ *
  * It can draw ISATPolygons and SphereColliders
  * It can also store a list of lines (raycasts) to draw on next draw() call
  */
@@ -44,6 +46,7 @@ public class ColliderDrawable extends Drawable {
         renderer = new ShapeRenderer();
     }
 
+    @Override
     public void draw(SpriteBatch batch) {
         Vector2 cameraOffset = HgGame.Graphics().getCameraOffset().scl(-1f); // Extra dependency
 

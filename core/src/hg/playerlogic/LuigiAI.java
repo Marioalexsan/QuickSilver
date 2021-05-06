@@ -2,7 +2,7 @@ package hg.playerlogic;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.engine.MappedAction;
-import hg.entities.Player;
+import hg.entities.PlayerEntity;
 import hg.game.HgGame;
 import hg.interfaces.IPlayerLogic;
 import hg.utils.Angle;
@@ -16,7 +16,7 @@ import java.util.List;
  * (testing AI)
  */
 public class LuigiAI implements IPlayerLogic {
-    private Player controlledPlayer;
+    private PlayerEntity controlledPlayerEntity;
     private int keksimus = 0;
 
     private final float rotationSpeed;
@@ -26,8 +26,8 @@ public class LuigiAI implements IPlayerLogic {
     }
 
     @Override
-    public void setControlledPlayer(Player player) {
-        controlledPlayer = player;
+    public void setControlledPlayer(PlayerEntity playerEntity) {
+        controlledPlayerEntity = playerEntity;
     }
 
     @Override
@@ -44,12 +44,12 @@ public class LuigiAI implements IPlayerLogic {
 
     @Override
     public Vector2 obtainAdvancedMove() {
-        return controlledPlayer != null ? Angle.NormalVector(controlledPlayer.getAngle().getDeg() - rotationSpeed) : null;
+        return controlledPlayerEntity != null ? Angle.NormalVector(controlledPlayerEntity.getAngle().getDeg() - rotationSpeed) : null;
     }
 
     @Override
     public Vector2 obtainAimPosition() {
-        return controlledPlayer != null ? Angle.NormalVector(controlledPlayer.getAngle().getDeg() - rotationSpeed) : null;
+        return controlledPlayerEntity != null ? Angle.NormalVector(controlledPlayerEntity.getAngle().getDeg() - rotationSpeed) : null;
     }
 
     @Override

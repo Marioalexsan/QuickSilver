@@ -1,15 +1,13 @@
 package hg.ui;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
 import hg.drawables.BasicSprite;
 import hg.drawables.BasicText;
 import hg.drawables.DrawLayer;
 import hg.game.HgGame;
-import hg.interfaces.callbacks.IButtonCallback;
+import hg.interfaces.callbacks.ICallback;
 import hg.physics.BoxCollider;
 import hg.physics.CollisionAlgorithms;
 
@@ -18,10 +16,8 @@ public class ClickButton extends UIElement {
     protected final BoxCollider collider;
     protected final BasicText contents;
 
-    protected IButtonCallback callback;
+    protected ICallback callback;
     protected boolean clickEnabled = true;
-
-    public boolean toBeDestroyed;
 
     public ClickButton(Texture tex, int width, int height, BitmapFont font, String text) {
         drawable = new BasicSprite(tex);
@@ -44,7 +40,7 @@ public class ClickButton extends UIElement {
         contents.registerToEngine();
     }
 
-    public void setCallback(IButtonCallback callback) {
+    public void setCallback(ICallback callback) {
         this.callback = callback;
     }
 
@@ -58,12 +54,6 @@ public class ClickButton extends UIElement {
     public void setClickEnabled(boolean enabled) { this.clickEnabled = enabled; }
 
     @Override
-    public void signalDestruction() { toBeDestroyed = true; }
-
-    @Override
-    public boolean isDestructionSignalled() { return toBeDestroyed; }
-
-    @Override
     public void destroy() {
         drawable.unregisterFromEngine();
         contents.unregisterFromEngine();
@@ -72,7 +62,7 @@ public class ClickButton extends UIElement {
     @Override
     public void onLMBDown(float x, float y) {
         if (enabled && clickEnabled && callback != null && CollisionAlgorithms.PointHit(new Vector2(x, y), collider)) {
-            callback.clicked();
+            callback.doCallback();
             HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/gunclick.ogg"), 1f);
         }
     }

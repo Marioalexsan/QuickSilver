@@ -10,25 +10,19 @@ public class LevelDirector extends Director {
 
     private final LinkedList<Entity> environments = new LinkedList<>();
 
+    // TODO Make something safe for multiplayer
     public void LoadMap(MapPrototype prototype) {
         UnloadMap();
 
-        for (var envProto : prototype.environments) {
-            environments.add(HgGame.Entities().addEnvironment(envProto.ID, envProto.position, envProto.angle));
-        }
+        for (var envProto : prototype.environments)
+            environments.add(HgGame.Manager().addEnvironment(envProto.type, envProto.position, envProto.angle));
     }
 
+    // TODO Make something safe for multiplayer
     public void UnloadMap() {
-        for (var env : environments)
-            env.signalDestruction();
+        environments.forEach(Entity::signalDestroy);
         environments.clear();
     }
-
-    @Override
-    public void clientUpdate() {}
-
-    @Override
-    public void serverUpdate() {}
 
     @Override
     public void destroy() {

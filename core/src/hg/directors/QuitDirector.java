@@ -6,17 +6,10 @@ import hg.libraries.EnvironmentLibrary;
 
 public class QuitDirector extends Director {
     @Override
-    public void destroy() {
-
-    }
+    public void destroy() { }
 
     @Override
-    public void clientUpdate() {
-        serverUpdate();
-    }
-
-    @Override
-    public void serverUpdate() {
+    public void localUpdate() {
         HgGame.Game().quitGame();
         toBeDestroyed = true;
     }

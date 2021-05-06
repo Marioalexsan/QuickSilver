@@ -7,7 +7,6 @@ import hg.entities.Entity;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
-import hg.libraries.ActorLibrary;
 import hg.physics.ColliderGroup;
 import hg.types.ActorType;
 import hg.utils.Angle;
@@ -54,7 +53,7 @@ public class AssaultRifle implements IWeapon {
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
-        var boolet = HgGame.Entities().addActor(ActorType.GenericBullet, ownerPosition, ownerAngle.getDeg());
+        var boolet = HgGame.Manager().addActor(ActorType.GenericBullet, ownerPosition, ownerAngle.getDeg());
         boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
     }

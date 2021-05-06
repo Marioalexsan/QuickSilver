@@ -4,12 +4,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import hg.game.HgGame;
+import hg.interfaces.IEnable;
 import hg.utils.Angle;
 
 /**
  * Abstract class that can draw to the screen.
  */
-public abstract class Drawable {
+public abstract class Drawable implements IEnable {
     protected Vector2 position = new Vector2();
     protected Vector2 center = new Vector2();
     protected Angle angle = new Angle();

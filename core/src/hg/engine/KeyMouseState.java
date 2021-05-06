@@ -11,7 +11,6 @@ public class KeyMouseState extends InputAdapter {
     @Override
     public boolean keyDown (int keycode) {
         if (!HgGame.Game().isFocused()) return false;
-        //int previousValue = keyActivity.containsKey(keycode) ? keyActivity.get(keycode) : 0;
         keyActivity.put(keycode, 0);
         return false;
     }
@@ -26,10 +25,7 @@ public class KeyMouseState extends InputAdapter {
     @Override
     public boolean keyTyped(char character) {
         if (!HgGame.Game().isFocused()) return false;
-        if (textEnabled) {
-            // To be implemented
-            textActivity.append(character);
-        }
+        textActivity.append(character);
         return false;
     }
 

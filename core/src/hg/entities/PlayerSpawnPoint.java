@@ -4,10 +4,10 @@ import hg.gamelogic.AttackStats;
 import hg.gamelogic.BaseStats;
 
 public class PlayerSpawnPoint extends Entity {
-    public void respawnPlayerHere(Player player) {
-        player.setPosition(this.position);
-        player.setAngle(this.angle);
-        player.revive();
+    public void respawnPlayerHere(PlayerEntity playerEntity) {
+        playerEntity.setPosition(this.position);
+        playerEntity.setAngle(this.angle);
+        playerEntity.revive();
     }
 
     @Override

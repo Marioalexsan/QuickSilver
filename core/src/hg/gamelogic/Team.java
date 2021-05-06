@@ -1,7 +1,6 @@
 package hg.gamelogic;
 
 import hg.entities.Entity;
-import hg.entities.Player;
 
 import java.util.ArrayList;
 

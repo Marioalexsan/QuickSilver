@@ -19,7 +19,7 @@ import hg.utils.HgMath;
 import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 
-public class Player extends Entity {
+public class PlayerEntity extends Entity {
 
     private IPlayerLogic playerLogic;
     private final Vector2 smoothSpeed = new Vector2();
@@ -36,7 +36,7 @@ public class Player extends Entity {
 
     protected IWeapon currentWeapon = revolver;
 
-    public Player(IPlayerLogic playerLogic) {
+    public PlayerEntity(IPlayerLogic playerLogic) {
         setLogic(playerLogic);
 
         baseStats = new BaseStats(this);

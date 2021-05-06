@@ -7,20 +7,12 @@ import hg.libraries.EnvironmentLibrary;
  * You likely don't need this to exist after it did its job
  */
 public class InitDirector extends Director {
-
-    public InitDirector() { }
-
     @Override
     public void destroy() { }
 
     @Override
-    public void clientUpdate() {
-        serverUpdate();
-    }
-
-    @Override
-    public void serverUpdate() {
-        HgGame.Entities().addDirector(DirectorTypes.MainMenuDirector);
+    public void localUpdate() {
+        HgGame.Manager().addDirector(DirectorTypes.MainMenu);
 
         String[] texturesToPreload = {
                 "Assets/Sprites/Player/Rifle_Idle.png",
@@ -54,7 +46,7 @@ public class InitDirector extends Director {
 
         // In the future Init may linger for more time
         // or wait for a Job to complete instead
-        // However, for now we just destroy it
+        // However, for now we just destroy it in its first update frame
         toBeDestroyed = true;
     }
 }

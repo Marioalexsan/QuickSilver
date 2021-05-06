@@ -2,8 +2,7 @@ package hg.interfaces;
 
 
 import com.badlogic.gdx.math.Vector2;
-import hg.engine.MappedAction;
-import hg.entities.Player;
+import hg.entities.PlayerEntity;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ import java.util.List;
  */
 public interface IPlayerLogic {
 
-    default void setControlledPlayer(Player entity) {}
+    default void setControlledPlayer(PlayerEntity entity) {}
 
     default void localUpdate() {}
 

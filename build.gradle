@@ -55,6 +55,6 @@ project(":core") {
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        
+        compile "com.esotericsoftware:kryonet:2.22.0-RC1"
     }
 }

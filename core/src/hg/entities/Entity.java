@@ -11,6 +11,7 @@ import hg.utils.Angle;
 
 /**
  * Entities are basic things that exist in the world.
+ * (They don't really follow the whole ECS pattern though)
  */
 public abstract class Entity implements ICollisionObserver, IUpdateable, IDestroyable {
     protected boolean toBeDestroyed = false;
@@ -55,12 +56,12 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
     }
 
     @Override
-    public void signalDestruction() {
+    public void signalDestroy() {
         toBeDestroyed = true;
     }
 
     @Override
-    public boolean isDestructionSignalled() {
+    public boolean isDestroySignalled() {
         return toBeDestroyed;
     }
 

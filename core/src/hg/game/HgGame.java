@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import hg.directors.DirectorTypes;
 import hg.drawables.*;
 import hg.engine.*;
-import hg.entities.Player;
+import hg.entities.PlayerEntity;
 import hg.engine.CollisionEngine;
 
 import java.util.Random;
@@ -26,7 +26,8 @@ public class HgGame extends ApplicationAdapter {
 	public static GraphicsEngine Graphics() { return _instance.graphicsEngine; }
 	public static InputEngine Input() { return _instance.inputEngine; }
 
-	public static EntityManager Entities() { return _instance.entityManager; }
+	public static GameManager Manager() { return _instance.gameManager; }
+	public static NetworkEngine Network() { return _instance.networkEngine; }
 
 	private AudioEngine audioEngine;
 	private AssetEngine assetEngine;
@@ -34,7 +35,8 @@ public class HgGame extends ApplicationAdapter {
 	private GraphicsEngine graphicsEngine;
 	private InputEngine inputEngine;
 
-	private EntityManager entityManager;
+	private GameManager gameManager;
+	private NetworkEngine networkEngine;
 
 	public static final int WorldWidth = 1920;
 	public static final int WorldHeight = 1080;
@@ -82,7 +84,8 @@ public class HgGame extends ApplicationAdapter {
 		audioEngine = new AudioEngine();
 		inputEngine = new InputEngine();
 		collisionEngine = new CollisionEngine();
-		entityManager = new EntityManager();
+		gameManager = new GameManager();
+		networkEngine = new NetworkEngine();
 
 		collisionEngine.setDebugDraw(false); // This will make colliders visible!
 
@@ -105,28 +108,28 @@ public class HgGame extends ApplicationAdapter {
 
 		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
 		audioEngine.setGlobalSoundVolume(0.5f);
-		audioEngine.setGlobalMusicVolume(0.5f);
+		audioEngine.setGlobalMusicVolume(0f);
 
 		graphicsEngine.setVideoMode(1600, 900, false);
 		graphicsEngine.setCameraZoom(1.2);
 
-		entityManager.addDirector(DirectorTypes.InitDirector);
+		gameManager.addDirector(DirectorTypes.InitDirector);
 	}
 
 	// Certain things (such as dragging the window) will cause the game to stop updating
 	// This means that the game loop is inherently unreliable! Keep this in mind when designing game logic for network play.
 	@Override
 	public void render () {
-		Player player = entityManager.getLocalPlayer();
+		PlayerEntity playerEntity = gameManager.localView != null ? gameManager.localView.playerEntity : null;
 
 		inputEngine.update();
 
-		entityManager.update();
+		gameManager.update();
 		collisionEngine.update();
 
-		if (player != null) {
-			graphicsEngine.setCameraCenter(player.getPosition());
-			audioEngine.setListenerPosition(HgGame.Input().getFOVWorldMouse(factorFOV).sub(player.getPosition()).scl(0.5f).add(player.getPosition()));
+		if (playerEntity != null) {
+			graphicsEngine.setCameraCenter(playerEntity.getPosition());
+			audioEngine.setListenerPosition(HgGame.Input().getFOVWorldMouse(factorFOV).sub(playerEntity.getPosition()).scl(0.5f).add(playerEntity.getPosition()));
 			graphicsEngine.setCameraOffset(HgGame.Input().getFOVCameraOffset(factorFOV));
 		}
 
@@ -134,8 +137,8 @@ public class HgGame extends ApplicationAdapter {
 		targetGUI.setPosition(HgGame.Input().getMouse());
 		targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
 
-		if (player != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
-			player.setPosition(targetWorld.getPosition()); // Debug teleport
+		if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
+			playerEntity.setPosition(targetWorld.getPosition()); // Debug teleport
 
 		graphicsEngine.render();
 		audioEngine.update();
@@ -145,35 +148,29 @@ public class HgGame extends ApplicationAdapter {
 		if (quitCalled) Gdx.app.exit();
 	}
 
+	/** This does cleanup on exit */
 	@Override
 	public void dispose () {
-		entityManager.cleanup();
-
+		gameManager.cleanup();
 		graphicsEngine.cleanup();
 		audioEngine.cleanup();
-
 		assetEngine.unloadAll();
+		networkEngine.cleanup();
 	}
 
-	/**
-	 * This function is called by LibGDX whenever the application loses focus.
-	 */
+	/** This is called by LibGDX whenever the application loses focus. */
 	@Override
 	public void pause() {
 		applicationHasFocus = false;
 	}
 
-	/**
-	 * This function is called by LibGDX whenever the application gains focus
-	 */
+	/** This called by LibGDX whenever the application gains focus */
 	@Override
 	public void resume() {
 		applicationHasFocus = true;
 	}
 
-	/**
-	 * Returns true if the application has focus.
-	 */
+	/** Returns true if the application has focus. */
 	public boolean isFocused() {
 		return applicationHasFocus;
 	}

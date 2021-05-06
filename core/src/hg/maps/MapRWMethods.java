@@ -1,8 +1,6 @@
 package hg.maps;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.maps.EnvironmentDescription;
-import hg.maps.MapPrototype;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,7 +22,7 @@ public class MapRWMethods {
 
             file.writeInt(proto.environments.size());
             for (var env : proto.environments) {
-                file.writeInt(env.ID);
+                file.writeInt(env.type);
                 file.writeFloat(env.position.x);
                 file.writeFloat(env.position.y);
                 file.writeFloat(env.angle);

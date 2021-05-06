@@ -5,19 +5,19 @@ import com.badlogic.gdx.math.Vector2;
 import hg.game.HgGame;
 import hg.engine.InputEngine;
 import hg.engine.MappedAction;
-import hg.entities.Player;
+import hg.entities.PlayerEntity;
 import hg.interfaces.IPlayerLogic;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LocalPlayerLogic implements IPlayerLogic {
-    private Player controlledPlayer;
+    private PlayerEntity controlledPlayerEntity;
 
     @Override
-    public void setControlledPlayer(Player player) {
-        controlledPlayer = player;
-        if (player == null) HgGame.Input().removeFocusInput(this);
+    public void setControlledPlayer(PlayerEntity playerEntity) {
+        controlledPlayerEntity = playerEntity;
+        if (playerEntity == null) HgGame.Input().removeFocusInput(this);
         else HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
     }
 
@@ -50,6 +50,6 @@ public class LocalPlayerLogic implements IPlayerLogic {
     @Override
     public Vector2 obtainAimPosition() {
         // Returns the current aim position after an update, relative to the player
-        return HgGame.Input().inputHasFocus(this) ? HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor()).sub(controlledPlayer.getPosition()) : null;
+        return HgGame.Input().inputHasFocus(this) ? HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor()).sub(controlledPlayerEntity.getPosition()) : null;
     }
 }
