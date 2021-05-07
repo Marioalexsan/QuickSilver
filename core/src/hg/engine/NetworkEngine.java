@@ -5,28 +5,42 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import hg.networking.*;
+import hg.networking.Packet;
+import hg.networking.packets.ClientInitRequest;
+import hg.networking.packets.DisconnectNotice;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+// networkLock usage in here could be improved
 
 public class NetworkEngine {
     private class ClientListener extends Listener {
         @Override
         public void connected(Connection connection) {
-            connection.sendTCP(new Packets.ClientInitRequest());
+            connection.sendTCP(new ClientInitRequest());
+            synchronized (networkLock) {
+                netRole = NetworkRole.Client;
+                netStatus = NetworkStatus.Ready;
+            }
         }
 
         @Override
         public void disconnected(Connection connection) {
-            stopNetwork();
+            kryonetClient.stop();
+            synchronized (networkLock) {
+                netRole = NetworkRole.Local;
+                netStatus = NetworkStatus.GotDisconnectedAsClient;
+            }
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            synchronized (messageLock) {
-                receivedMessages.add(object);
+            synchronized (networkLock) {
+                networkMessages.add(new NetworkMessage(0, (Packet) object));
             }
         }
     }
@@ -34,24 +48,22 @@ public class NetworkEngine {
     private class ServerListener extends Listener {
         @Override
         public void connected(Connection connection) {
-            if (!connectionDenyReason.equals("")) {
-                var msg = new Packets.ConnectionDenied();
-                msg.reason = connectionDenyReason;
-                connection.sendTCP(msg);
-                connection.close();
+            synchronized (networkLock) {
+                recentlyConnected.add(connection.getID());
             }
         }
 
         @Override
         public void disconnected(Connection connection) {
-
+            synchronized (networkLock) {
+                recentlyDisconnected.add(connection.getID());
+            }
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            ConnectedClient client = (ConnectedClient) connection;
-            synchronized (messageLock) {
-                receivedMessages.add(object);
+            synchronized (networkLock) {
+                networkMessages.add(new NetworkMessage(connection.getID(), (Packet) object));
             }
         }
     }
@@ -61,124 +73,165 @@ public class NetworkEngine {
     private final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     private NetworkRole netRole = NetworkRole.Local;
-    private NetworkStatus netStatus = NetworkStatus.NotStarted;
+    private NetworkStatus netStatus = NetworkStatus.Ready;
 
     private int TCPPort = 52735;
     private int UDPPort = 52216;
 
-    private final Server server;
-    private final Client client;
+    private final Server kryonetServer;
+    private final Client kryonetClient;
 
-    private String connectionDenyReason = "";
+    private final Object networkLock = new Object();
 
-    private final Object messageLock = new Object();
-    private final ArrayList<Object> receivedMessages = new ArrayList<>();
+    private final LinkedList<NetworkMessage> networkMessages = new LinkedList<>(); // Messages received since last dump
+    private final ArrayList<Integer> recentlyConnected = new ArrayList<>(); // Clients connected since last dump
+    private final ArrayList<Integer> recentlyDisconnected = new ArrayList<>(); // Clients disconnected since last dump
 
     public NetworkEngine() {
-        client = new Client();
-        server = new Server() {
+        kryonetClient = new Client();
+        kryonetServer = new Server() {
             @Override
             public Connection newConnection() {
                 return new ConnectedClient();
             }
         };
 
-        NetworkHelper.KryonetRegisterClasses(server);
-        NetworkHelper.KryonetRegisterClasses(client);
+        NetworkHelper.KryonetRegisterClasses(kryonetServer);
+        NetworkHelper.KryonetRegisterClasses(kryonetClient);
 
-        server.addListener(new NetworkEngine.ServerListener());
-        client.addListener(new NetworkEngine.ClientListener());
+        kryonetServer.addListener(new NetworkEngine.ServerListener());
+        kryonetClient.addListener(new NetworkEngine.ClientListener());
     }
 
     public void startServer() throws IOException, RuntimeException {
         if (netRole != NetworkRole.Local)
             throw new RuntimeException("Tried to start server while another network exists");
 
-        server.bind(TCPPort, UDPPort);
-        server.start();
+        kryonetServer.bind(TCPPort, UDPPort);
+        kryonetServer.start();
 
         netRole = NetworkRole.Server;
         netStatus = NetworkStatus.Ready;
-    }
-
-    public void stopNetwork() {
-        switch (netRole) {
-            case Server -> server.stop();
-            case Client, Local -> client.stop();
-        }
-        netRole = NetworkRole.Local;
-        netStatus = NetworkStatus.NotStarted;
     }
 
     public void tryStartClient(String serverIP) throws RuntimeException {
         if (netRole != NetworkRole.Local)
             throw new RuntimeException("Tried to start server while another network exists");
 
-        client.stop();
-        client.start();
+        kryonetClient.stop();
+        kryonetClient.start();
 
         netStatus = NetworkStatus.ConnectingToServer;
         threadPool.submit(() -> {
             try {
-                client.connect(ConnectionTimeoutInMilli, serverIP, TCPPort, UDPPort);
-                netRole = NetworkRole.Client;
-                netStatus = NetworkStatus.Ready;
+                kryonetClient.connect(ConnectionTimeoutInMilli, serverIP, TCPPort, UDPPort);
             } catch (IOException e) {
                 e.printStackTrace();
                 netStatus = NetworkStatus.ConnectionFailed;
-                client.stop();
+                kryonetClient.stop();
             }
         });
     }
 
-    public NetworkRole getCurrentRole() {
-        return netRole;
-    }
-
-    public NetworkStatus getNetStatus() {
-        return netStatus;
-    }
-
-    /** Sets the connection deny reason for server. If the reason is not equal to the empty string,
-     * clients trying to connect will receive a ConnectionDenied packet and will be disconnected  */
-    public void setConnectionDenyReason(String reason) {
-        connectionDenyReason = reason;
-    }
-
-    public boolean isLocalOrServer() {
-        return netRole != NetworkRole.Client;
-    }
-
-    private ArrayList<Object> getPendingMessages() {
-        ArrayList<Object> currentMessages;
-        synchronized (messageLock) {
-            currentMessages = new ArrayList<>(receivedMessages);
-            receivedMessages.clear();
+    public void stopNetwork() {
+        switch (netRole) {
+            case Server -> kryonetServer.stop();
+            case Client, Local -> kryonetClient.stop();
         }
-        return currentMessages;
+        netRole = NetworkRole.Local;
+        netStatus = NetworkStatus.Ready;
     }
+
+    public NetworkRole getNetRole() { return netRole; }
+
+    public boolean isLocalOrServer() { return netRole != NetworkRole.Client; }
+
+    public NetworkStatus getNetStatus() { return netStatus; }
+
+    // Information Dump methods
+
+    /** Dumps messages received since last call */
+    public LinkedList<NetworkMessage> dumpMessages() {
+        LinkedList<NetworkMessage> recent;
+        synchronized (networkLock) {
+            recent = new LinkedList<>(networkMessages);
+            networkMessages.clear();
+        }
+        return recent;
+    }
+
+    /** Dumps a list of connection identifiers that were added to the server since last call */
+    public ArrayList<Integer> dumpConnectedClients() {
+        ArrayList<Integer> recent;
+        synchronized (networkLock) {
+            recent = new ArrayList<>(recentlyConnected);
+            recentlyConnected.clear();
+        }
+        return recent;
+    }
+
+    /** Dumps a list of connection identifiers that were removed from the server since last call */
+    public ArrayList<Integer> dumpDisconnectedClients() {
+        ArrayList<Integer> recent;
+        synchronized (networkLock) {
+            recent = new ArrayList<>(recentlyDisconnected);
+            recentlyDisconnected.clear();
+        }
+        return recent;
+    }
+
+    // Message sending
+
+    public boolean sendPacketToServer(Packet packet, boolean isVIP) {
+        if (netRole != NetworkRole.Client) return false;
+
+        if (isVIP) {
+            kryonetClient.sendTCP(packet);
+        }
+        else {
+            kryonetClient.sendUDP(packet);
+        }
+
+        return true;
+    }
+
+    public boolean sendPacketToClient(int connectionID, Packet packet, boolean isVIP) {
+        if (netRole != NetworkRole.Server) return false;
+
+        Connection which = null;
+        for (var connection: kryonetServer.getConnections()) {
+            if (connection.getID() == connectionID) {
+                which = connection;
+                break;
+            }
+        }
+
+        if (which == null) return false;
+
+        if (isVIP) {
+            kryonetServer.sendToTCP(connectionID, packet);
+        }
+        else {
+            kryonetServer.sendToUDP(connectionID, packet);
+        }
+        return true;
+    }
+
+    // Other
 
     public void update() {
-        if (netRole == NetworkRole.Server) updateAsServer();
-        else if (netRole == NetworkRole.Client) updateAsClient();
-    }
-
-    private void updateAsServer() {
-    }
-
-    private void updateAsClient() {
 
     }
 
     public void cleanup() {
-        client.stop();
-        server.stop();
+        kryonetClient.stop();
+        kryonetServer.stop();
         try {
-            client.dispose();
+            kryonetClient.dispose();
         }
         catch (IOException ignored) {}
         try {
-            server.dispose();
+            kryonetServer.dispose();
         }
         catch (IOException ignored) {}
     }

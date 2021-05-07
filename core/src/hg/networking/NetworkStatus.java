@@ -1,8 +1,8 @@
 package hg.networking;
 
 public enum NetworkStatus {
-    ConnectingToServer,
     Ready,
+    ConnectingToServer,
     ConnectionFailed,
-    NotStarted
+    GotDisconnectedAsClient
 }

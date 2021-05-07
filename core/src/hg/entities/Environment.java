@@ -7,6 +7,10 @@ import hg.physics.Collider;
 
 import java.util.LinkedList;
 
+
+/** Environments are entities that represent walls, decorations, etc. that don't change their state during a match.
+ * These are not updated by the network (hence, the name Static).
+ * Ideally, Colliders used by Environments should be heavy, movement-only colliders */
 public class Environment extends Entity {
     private final LinkedList<Drawable> drawables;
     private final LinkedList<Collider> colliders;
@@ -24,6 +28,7 @@ public class Environment extends Entity {
             collider.setPosition(position);
             collider.setAngle(angle);
             collider.registerToEngine();
+            collider.makeHeavy();
 
             collider.owner = this;
         }
@@ -40,10 +45,7 @@ public class Environment extends Entity {
     }
 
     @Override
-    public void clientUpdate() {}
-
-    @Override
-    public void serverUpdate() {}
+    public void update() {}
 
     @Override
     public void onGenericCollision(Collider other) {}

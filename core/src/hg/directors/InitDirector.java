@@ -11,7 +11,7 @@ public class InitDirector extends Director {
     public void destroy() { }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         HgGame.Manager().addDirector(DirectorTypes.MainMenu);
 
         String[] texturesToPreload = {

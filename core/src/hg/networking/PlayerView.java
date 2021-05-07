@@ -13,9 +13,8 @@ public class PlayerView {
     public int uniqueID;
     public Type viewType;
 
-    public Connection netConnection;
-
     public String name;
+    public transient ConnectedClient assignedConnection;
     public transient PlayerEntity playerEntity;
 
     public boolean serverInited;

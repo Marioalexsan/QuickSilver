@@ -125,7 +125,7 @@ public class MainMenu extends Director {
     }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         NetworkEngine network = HgGame.Network();
 
         if (waitDuration <= 0 && clientStartLobby) {

@@ -80,12 +80,7 @@ public class GenericBullet extends Entity {
     }
 
     @Override
-    public void clientUpdate() {
-        serverUpdate();
-    }
-
-    @Override
-    public void serverUpdate() {
+    public void update() {
         if (speed <= 0) {
             toBeDestroyed = true;
             return;

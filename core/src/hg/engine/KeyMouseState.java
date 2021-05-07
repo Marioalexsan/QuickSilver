@@ -23,9 +23,10 @@ public class KeyMouseState extends InputAdapter {
     }
 
     @Override
-    public boolean keyTyped(char character) {
+    public boolean keyTyped(char ch) {
         if (!HgGame.Game().isFocused()) return false;
-        textActivity.append(character);
+        if (ch < 32) return false; // Ignore control characters
+        textActivity.append(ch);
         return false;
     }
 

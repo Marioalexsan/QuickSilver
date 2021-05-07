@@ -4,7 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicText;
-import hg.drawables.ColliderDrawable;
+import hg.drawables.DrawLayer;
 import hg.engine.InputEngine;
 import hg.game.HgGame;
 import hg.physics.BoxCollider;
@@ -35,6 +35,7 @@ public class BasicTextInput extends UIElement {
         textDisplay = new BasicText(font, "");
         textDisplay.setConstraints(BasicText.HPos.Left, BasicText.VPos.Center, 0f);
         textDisplay.setCameraUse(false);
+        textDisplay.setLayer(DrawLayer.GUIDefault);
         textDisplay.registerToEngine();
 
         activationZone = new BoxCollider(activationWidth, activationHeight);
@@ -48,10 +49,15 @@ public class BasicTextInput extends UIElement {
         return trueText.toString();
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         activationZone.setEnabled(enabled);
         textDisplay.setEnabled(enabled);
+        if (hasFocus) {
+            if (enabled) HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.TextField);
+            else HgGame.Input().removeFocusInput(this);
+        }
     }
 
     public void setEmptyText(String text) {
@@ -67,17 +73,24 @@ public class BasicTextInput extends UIElement {
         if (enabled) {
             boolean gotHit = CollisionAlgorithms.PointHit(new Vector2(x, y), activationZone);
 
-            if (hasFocus != gotHit) {
-                if (gotHit) {
-                    HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.TextField);
-                    HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/gunclick.ogg"), 1f);
-                }
-                else HgGame.Input().removeFocusInput(this);
-
-                textDisplay.setText(trueText.toString());
-            }
-            hasFocus = gotHit;
+            enter(gotHit);
         }
+    }
+
+    public void enter() {
+        enter(!hasFocus);
+    }
+
+    public void enter(boolean state) {
+        if (hasFocus != state) {
+            if (state) {
+                HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.TextField);
+                HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/gunclick.ogg"), 1f);
+            }
+            else HgGame.Input().removeFocusInput(this);
+            textDisplay.setText(trueText.toString());
+        }
+        hasFocus = state;
     }
 
     @Override
@@ -126,5 +139,13 @@ public class BasicTextInput extends UIElement {
     public void destroy() {
         if (hasFocus) HgGame.Input().removeFocusInput(this);
         textDisplay.unregisterFromEngine();
+    }
+
+    public void setText(String text) {
+        trueText.delete(0, trueText.length()).append(text);
+    }
+
+    public boolean isFocused() {
+        return hasFocus;
     }
 }

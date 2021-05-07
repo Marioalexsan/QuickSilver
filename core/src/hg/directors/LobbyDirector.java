@@ -3,6 +3,7 @@ package hg.directors;
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicText;
 import hg.game.HgGame;
+import hg.networking.NetworkStatus;
 import hg.ui.BasicUIStates;
 import hg.ui.ClickButton;
 
@@ -12,16 +13,20 @@ public class LobbyDirector extends Director {
     public LobbyDirector() {
         // This only has one state for now
 
+        boolean isServer = HgGame.Network().isLocalOrServer();
+
         menus.addState("Lobby");
 
-        ClickButton generic_startGame = new ClickButton(HgGame.Assets().loadTexture("Assets/GUI/Button.png"), 460, 150, HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "Start Game");
-        generic_startGame.setPosition(-660, -400);
-        generic_startGame.setCallback(() -> {
-            MatchDirector director = (MatchDirector) HgGame.Manager().getDirector(DirectorTypes.MatchDirector);
-            if (director != null) director.startMatch();
-            toBeDestroyed = true;
-        });
-        menus.addStateElement("Lobby", "StartGame", generic_startGame);
+        if (isServer) {
+            ClickButton generic_startGame = new ClickButton(HgGame.Assets().loadTexture("Assets/GUI/Button.png"), 460, 150, HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "Start Game");
+            generic_startGame.setPosition(-660, -400);
+            generic_startGame.setCallback(() -> {
+                MatchDirector director = (MatchDirector) HgGame.Manager().getDirector(DirectorTypes.MatchDirector);
+                if (director != null) director.startMatch();
+                toBeDestroyed = true;
+            });
+            menus.addStateElement("Lobby", "StartGame", generic_startGame);
+        }
 
         ClickButton generic_quitLobby = new ClickButton(HgGame.Assets().loadTexture("Assets/GUI/Button.png"), 460, 150, HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "Quit Lobby");
         generic_quitLobby.setPosition(660, -400);
@@ -32,7 +37,7 @@ public class LobbyDirector extends Director {
         });
         menus.addStateElement("Lobby", "QuitLobby", generic_quitLobby);
 
-        BasicText generic_thisIsLobby = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew48.fnt"), "In Lobby" + (HgGame.Network().isLocalOrServer() ? " - as Server" : " - as Client"));
+        BasicText generic_thisIsLobby = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew48.fnt"), "In Lobby" + (isServer ? " - as Server" : " - as Client"));
         generic_thisIsLobby.setConstraints(BasicText.HPos.Center, BasicText.VPos.Center, 0f);
         generic_thisIsLobby.setPosition(new Vector2(0, 480));
         generic_thisIsLobby.setCameraUse(false);
@@ -48,7 +53,7 @@ public class LobbyDirector extends Director {
     }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         menus.onUpdate();
     }
 }

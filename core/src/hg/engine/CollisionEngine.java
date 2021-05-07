@@ -89,6 +89,10 @@ public class CollisionEngine {
         this.debugDrawEnabled = drawColliders;
     }
 
+    public boolean getDebugDraw() {
+        return debugDrawEnabled;
+    }
+
     public void resolveCollisions(boolean movement, boolean combat) {
         if (!(movement || combat)) return;
 

@@ -55,7 +55,7 @@ public class InGameMenu extends Director {
     }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         InputEngine input = HgGame.Input();
 
         if (input.getTopFocusPriority() <= InputEngine.FocusPriorities.PauseMenu && input.isActionTapped(MappedAction.Escape)) {

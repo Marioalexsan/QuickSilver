@@ -73,12 +73,7 @@ public class PlayerEntity extends Entity {
     }
 
     @Override
-    public void clientUpdate() {
-        serverUpdate(); // To be changed later, when / if multiplayer is added
-    }
-
-    @Override
-    public void serverUpdate() {
+    public void update() {
         if (playerLogic == null) {
             playerLogic = new EmptyAI();
         }

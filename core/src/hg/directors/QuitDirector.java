@@ -9,7 +9,7 @@ public class QuitDirector extends Director {
     public void destroy() { }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         HgGame.Game().quitGame();
         toBeDestroyed = true;
     }

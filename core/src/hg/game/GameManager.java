@@ -3,21 +3,20 @@ package hg.game;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.*;
+import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.libraries.ActorLibrary;
 import hg.libraries.EnvironmentLibrary;
 import hg.networking.PlayerView;
 import hg.utils.BadCoderException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 /** Holds various stuff relevant to the game, such as entities */
 public class GameManager {
-    private static final int StartingEntityID = 1;
-    private int nextEntityID = StartingEntityID;
+    private static final int StartingID = 1;
+    private int nextEntityID = StartingID;
+    private int nextStaticEnvID = StartingID; // Is this needed?
 
     private final HashMap<Integer, Entity> actors = new HashMap<>();
     private final HashMap<Integer, Entity> environments = new HashMap<>();
@@ -26,7 +25,21 @@ public class GameManager {
     public PlayerView localView;
     public final ArrayList<PlayerView> playerViews = new ArrayList<>();
 
+    private ChatSystem chatSystem;
+
     public GameManager() {
+        chatSystem = new ChatSystem();
+        chatSystem.setEnabled(false);
+        chatSystem.setPosition(-650, -500);
+    }
+
+    public void enableChatSystem() {
+        chatSystem.setEnabled(true);
+    }
+
+    public void disableChatSystem() {
+        chatSystem.setEnabled(false);
+        chatSystem.clear();
     }
 
     // TODO Probably called by the server. Either this or adjacent code should also send messages to clients
@@ -102,7 +115,7 @@ public class GameManager {
     }
 
     public Entity addEnvironment(int envType, Vector2 position, float direction) {
-        return addEnvironment(nextEntityID++, envType, position, direction);
+        return addEnvironment(nextStaticEnvID++, envType, position, direction);
     }
 
     public Entity addEnvironment(int ID, int envType, Vector2 position, float direction) {
@@ -122,7 +135,7 @@ public class GameManager {
     public boolean addDirector(DirectorTypes type) {
         if (directors.get(type) != null) return false;
 
-        Director which = null;
+        Director which;
         switch (type) { // TODO Replace switch with dictionary
             case InitDirector -> which = new InitDirector();
             case QuitDirector -> which = new QuitDirector();
@@ -154,8 +167,9 @@ public class GameManager {
     /** Clears all entities. This also resets the nextEntityID */
     public void clearEntities() {
         clearActors();
-        clearEnvironment();
-        nextEntityID = StartingEntityID;
+        clearStaticEnvironments();
+        nextEntityID = StartingID;
+        nextStaticEnvID = StartingID;
     }
 
     public void clearActors() {
@@ -166,7 +180,7 @@ public class GameManager {
         actors.clear();
     }
 
-    public void clearEnvironment() {
+    public void clearStaticEnvironments() {
         for (var environment: environments.entrySet()) {
             environment.getValue().signalDestroy();
             environment.getValue().destroy();
@@ -183,32 +197,21 @@ public class GameManager {
     }
 
     public void update() {
-        boolean isLocalOrServer = HgGame.Network().isLocalOrServer(); // TODO implement network roles
-
         // Update all current entities based on network status
 
-        for (var director : new ArrayList<>(directors.values())) {
-            director.localUpdate();
-
-            if (isLocalOrServer) director.serverUpdate();
-            else director.clientUpdate();
+        if (chatSystem != null) {
+            if (chatSystem.isDestroySignalled()) {
+                chatSystem.destroy();
+                chatSystem = null;
+            }
+            else chatSystem.onUpdate();
         }
 
-        for (var actor : new ArrayList<>(actors.values())) {
-            actor.localUpdate();
+        for (var director : new ArrayList<>(directors.values()))
+            director.update();
 
-            if (isLocalOrServer) actor.serverUpdate();
-            else actor.clientUpdate();
-        }
-
-        for (var env : new ArrayList<>(environments.values())) {
-            env.localUpdate();
-
-            if (isLocalOrServer) env.serverUpdate();
-            else env.clientUpdate();
-        }
-
-        // Check for stuff to dispose of
+        for (var actor : new ArrayList<>(actors.values()))
+            actor.update();
 
         // Directors
 
@@ -240,7 +243,52 @@ public class GameManager {
 
     public void cleanup() {
         clearActors();
-        clearEnvironment();
+        clearStaticEnvironments();
         clearDirectors();
+    }
+
+    public void onChatMessageEntered(String message) {
+        if (message.length() > 0 && message.charAt(0) == '/') {
+            String[] parts = message.substring(1).split(" ");
+            for (int i = 0; i < parts.length; i++)
+                parts[i] = parts[i].trim();
+            parseCommand(parts[0], parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]);
+        }
+    }
+
+    public void parseCommand(String command, String[] args) {
+        String casualPrefix = "[" + command + "] ";
+        switch (command) {
+            case "debugColliders" -> {
+                boolean debugDraw = HgGame.Physics().getDebugDraw();
+                HgGame.Physics().setDebugDraw(!debugDraw);
+                chatSystem.addMessage(casualPrefix + "Debug draw is now " + (debugDraw ? "off" : "on"));
+            }
+            default -> chatSystem.addMessage("[System] Unknown command: " + command);
+        }
+    }
+
+    public void parseNetworkMessages() {
+        NetworkEngine network = HgGame.Network();
+        var messages = network.dumpMessages();
+
+        if (network.isLocalOrServer()) {
+            for (var msg: messages) msg.packet.parseOnServer();
+        }
+        else {
+            for (var msg: messages) msg.packet.parseOnClient();
+        }
+    }
+
+    /** Called if this machine is a server and a client disconnected */
+    public void onClientDisconnect() {
+
+    }
+
+    /** Called if this machine is a client and it disconnected from a server */
+    public void onDisconnectFromServer() {
+        MatchDirector match = (MatchDirector) getDirector(DirectorTypes.MatchDirector);
+
+        if (match != null) match.receiveStop();
     }
 }

@@ -25,6 +25,8 @@ public class EnvironmentLibrary {
 
         LinkedList<Drawable> drawableList = new LinkedList<>();
         LinkedList<Collider> colliderList = new LinkedList<>();
+
+        // Colliders will automatically be made heavy by the constructor!
         switch(ID) {
             case EnvType.BrickDefault -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BrickDefault.png"));
@@ -33,7 +35,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 BoxCollider col1 = new BoxCollider(100, 100);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -46,7 +47,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 BoxCollider col1 = new BoxCollider(50, 100);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -59,7 +59,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 RTriangleCollider col1 = new RTriangleCollider(100, 50);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -74,7 +73,6 @@ public class EnvironmentLibrary {
 
                 RTriangleCollider col1 = new RTriangleCollider(50, 100);
                 col1.setAngleOffset(new Angle(-90f));
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -88,17 +86,14 @@ public class EnvironmentLibrary {
 
                 BoxCollider col1 = new BoxCollider(50, 50); // NW
                 col1.setCenterOffset(new Vector2(25, -25));
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
                 BoxCollider col2 = new BoxCollider(50, 50); // NE
                 col2.setCenterOffset(new Vector2(-25, -25));
-                col2.makeHeavy();
                 col2.group = ColliderGroup.Environment;
                 colliderList.add(col2);
                 BoxCollider col3 = new BoxCollider(50, 50); // SW
                 col3.setCenterOffset(new Vector2(25, 25));
-                col3.makeHeavy();
                 col3.group = ColliderGroup.Environment;
                 colliderList.add(col3);
 
@@ -111,7 +106,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 RTriangleCollider col1 = new RTriangleCollider(100, 100);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -124,7 +118,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 SphereCollider col1 = new SphereCollider(25);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -137,7 +130,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 SphereCollider col1 = new SphereCollider(50);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -150,7 +142,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 SphereCollider col1 = new SphereCollider(100);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment;
                 colliderList.add(col1);
 
@@ -172,7 +163,6 @@ public class EnvironmentLibrary {
 
                 BoxCollider col1 = new BoxCollider(80, 80);
                 col1.group = ColliderGroup.Environment;
-                col1.makeHeavy();
                 colliderList.add(col1);
 
                 return new Environment(drawableList, colliderList);
@@ -185,7 +175,6 @@ public class EnvironmentLibrary {
 
                 BoxCollider col1 = new BoxCollider(60, 60);
                 col1.group = ColliderGroup.Environment;
-                col1.makeHeavy();
                 colliderList.add(col1);
 
                 return new Environment(drawableList, colliderList);
@@ -197,7 +186,6 @@ public class EnvironmentLibrary {
                 drawableList.add(draw1);
 
                 BoxCollider col1 = new BoxCollider(100, 20);
-                col1.makeHeavy();
                 col1.group = ColliderGroup.Environment_ShootThrough;
                 colliderList.add(col1);
 

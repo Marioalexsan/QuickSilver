@@ -26,8 +26,5 @@ public class PlayerSpawnPoint extends Entity {
     public void destroy() { }
 
     @Override
-    public void clientUpdate() { }
-
-    @Override
-    public void serverUpdate() { }
+    public void update() { }
 }

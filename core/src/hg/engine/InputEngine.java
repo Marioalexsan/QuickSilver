@@ -60,6 +60,8 @@ public class InputEngine {
 
         keyActionMap.put(MappedAction.PrimaryFire, Input.Buttons.LEFT + ButtonMappingOffset);
         keyActionMap.put(MappedAction.SecondaryFire, Input.Buttons.RIGHT + ButtonMappingOffset);
+
+        keyActionMap.put(MappedAction.ChatSubmit, Input.Keys.ENTER);
     }
 
     public void update() {

@@ -2,9 +2,9 @@ package hg.directors;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.engine.InputEngine;
-import hg.engine.MappedAction;
 import hg.engine.NetworkEngine;
 import hg.entities.PlayerEntity;
+import hg.game.ChatSystem;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamemodes.Deathmatch;
@@ -62,6 +62,8 @@ public class MatchDirector extends Director {
     public void startAsClient() {
         if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
 
+        HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
+
         started = true;
     }
 
@@ -71,7 +73,7 @@ public class MatchDirector extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        network.setConnectionDenyReason("Match has started already!");
+        manager.enableChatSystem();
 
         if (!network.isLocalOrServer()) throw new BadCoderException("Tried to start match as non-host!");
 
@@ -115,15 +117,17 @@ public class MatchDirector extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
+        manager.disableChatSystem();
+
         LevelDirector level = (LevelDirector) manager.getDirector(DirectorTypes.LevelDirector);
         if (level != null) level.UnloadMap();
 
         manager.clearActors();
-        manager.localView.playerEntity = null;
+        if (manager.localView != null)
+            manager.localView.playerEntity = null;
         manager.playerViews.clear();
 
         network.stopNetwork();
-        network.setConnectionDenyReason("");
 
         HgGame.Manager().addDirector(DirectorTypes.MainMenu);
         toBeDestroyed = true;
@@ -134,15 +138,10 @@ public class MatchDirector extends Director {
     }
 
     @Override
-    public void clientUpdate() {
-        serverUpdate();
-    }
-
-    @Override
-    public void serverUpdate() {
+    public void update() {
         boolean hasFocus = HgGame.Input().inputHasFocus(this);
 
-        if (gamemode != null) gamemode.serverUpdate();
+        if (gamemode != null) gamemode.update();
 
         if (stopDecided) stop();
     }

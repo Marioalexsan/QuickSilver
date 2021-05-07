@@ -123,6 +123,9 @@ public class HgGame extends ApplicationAdapter {
 		PlayerEntity playerEntity = gameManager.localView != null ? gameManager.localView.playerEntity : null;
 
 		inputEngine.update();
+		networkEngine.update();
+
+		gameManager.parseNetworkMessages();
 
 		gameManager.update();
 		collisionEngine.update();

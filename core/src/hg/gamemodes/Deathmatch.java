@@ -4,12 +4,7 @@ public class Deathmatch extends Gamemode {
     private int timeElapsed = 0;
 
     @Override
-    public void clientUpdate() {
-        serverUpdate();
-    }
-
-    @Override
-    public void serverUpdate() {
+    public void update() {
         timeElapsed++;
 
         if (timeElapsed > 6000) {
