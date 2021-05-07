@@ -101,7 +101,7 @@ public class NetworkEngine {
         netStatus = NetworkStatus.Ready;
     }
 
-    public void stopNetwork() throws RuntimeException {
+    public void stopNetwork() {
         switch (netRole) {
             case Server -> server.stop();
             case Client, Local -> client.stop();

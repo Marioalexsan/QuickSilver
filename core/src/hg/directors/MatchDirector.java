@@ -79,7 +79,8 @@ public class MatchDirector extends Director {
         gamemode = new Deathmatch();
 
         for (var view : manager.playerViews) {
-            if (view.playerEntity != null) throw new BadCoderException("Player Entity already exists lool");
+            if (view.playerEntity != null)
+                throw new BadCoderException("Player Entity already exists lool");
 
             PlayerEntity entity = (PlayerEntity) manager.addActor(ActorType.PlayerEntity, new Vector2(3450, 1500), 0f);
 
