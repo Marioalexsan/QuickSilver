@@ -9,29 +9,31 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import java.util.HashMap;
 
 /**
- * Offers basic load / unload functionality. You should probably not use this from a dedicated load thread.
- * Loading is supported for textures, sounds files, and fonts.
- * Music files aren't loadable by AssetEngine. Refer to AudioEngine for how to play music.
+ * Offers basic load / unload functionality for various things.
+ * This class requires external synchronization if used from multiple threads.
+ * Music files aren't loadable. Refer to AudioEngine for how to play music.
  */
 public class AssetEngine {
-    // Libraries
     private final HashMap<String, Texture> textureLibrary = new HashMap<>();
     private final HashMap<String, Sound> soundLibrary = new HashMap<>();
     private final HashMap<String, BitmapFont> fontLibrary = new HashMap<>();
 
     /** Loads a texture from disk. Repeated calls for the same path will return the same object. */
     public Texture loadTexture(String path) {
-        if (textureLibrary.containsKey(path)) return textureLibrary.get(path);
+        Texture tex = textureLibrary.get(path);
 
-        try {
-            Texture tex = new Texture(new FileHandle(path));
-            tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            textureLibrary.put(path, tex);
-            return tex;
-        } catch (Exception e) {
-            System.out.println("Couldn't load image at " + path);
-            return null;
+        if (tex == null) {
+            try {
+                tex = new Texture(new FileHandle(path));
+                tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                textureLibrary.put(path, tex);
+            } catch (Exception e) {
+                System.out.println("Couldn't load image at " + path);
+                tex = null;
+            }
         }
+
+        return tex;
     }
 
     /** Unloads a texture. */
@@ -42,16 +44,19 @@ public class AssetEngine {
 
     /** Loads a sound from disk. Repeated calls for the same path will return the same object. */
     public Sound loadSound(String path) {
-        if (soundLibrary.containsKey(path)) return soundLibrary.get(path);
+        Sound audio = soundLibrary.get(path);
 
-        try {
-            Sound audio = Gdx.audio.newSound(new FileHandle(path));
-            soundLibrary.put(path, audio);
-            return audio;
-        } catch (Exception e) {
-            System.out.println("Couldn't load sound at " + path);
-            return null;
+        if (audio == null) {
+            try {
+                audio = Gdx.audio.newSound(new FileHandle(path));
+                soundLibrary.put(path, audio);
+            } catch (Exception e) {
+                System.out.println("Couldn't load sound at " + path);
+                audio = null;
+            }
         }
+
+        return audio;
     }
 
     /** Unloads a sound. */
@@ -63,17 +68,20 @@ public class AssetEngine {
     /** Loads a font based on the data file provided. Repeated calls for the same path will return the same object.
      * Use https://www.angelcode.com/products/bmfont/ for generating fonts. */
     public BitmapFont loadFont(String path) {
-        if (fontLibrary.containsKey(path)) return fontLibrary.get(path);
+        BitmapFont font = fontLibrary.get(path);
 
-        try {
-            BitmapFont font = new BitmapFont(new FileHandle(path));
-            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            fontLibrary.put(path, font);
-            return font;
-        } catch (Exception e) {
-            System.out.println("Couldn't load font at " + path);
-            return null;
+        if (font == null) {
+            try {
+                font = new BitmapFont(new FileHandle(path));
+                font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                fontLibrary.put(path, font);
+            } catch (Exception e) {
+                System.out.println("Couldn't load font at " + path);
+                font = null;
+            }
         }
+
+        return font;
     }
 
     /** Unloads a sound. Does nothing if the sound isn't loaded. */

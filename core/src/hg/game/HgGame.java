@@ -38,6 +38,10 @@ public class HgGame extends ApplicationAdapter {
 	private GameManager gameManager;
 	private NetworkEngine networkEngine;
 
+	private boolean crashed = false;
+
+	public String localName = "Anonymous" + (Math.abs(new Random().nextInt()) % 9999);
+
 	public static final int WorldWidth = 1920;
 	public static final int WorldHeight = 1080;
 
@@ -110,7 +114,7 @@ public class HgGame extends ApplicationAdapter {
 		audioEngine.setGlobalSoundVolume(0.5f);
 		audioEngine.setGlobalMusicVolume(0f);
 
-		graphicsEngine.setVideoMode(1600, 900, false);
+		graphicsEngine.setVideoMode(1280, 720, false);
 		graphicsEngine.setCameraZoom(1.2);
 
 		gameManager.addDirector(DirectorTypes.InitDirector);
@@ -120,40 +124,50 @@ public class HgGame extends ApplicationAdapter {
 	// This means that the game loop is inherently unreliable! Keep this in mind when designing game logic for network play.
 	@Override
 	public void render () {
-		PlayerEntity playerEntity = gameManager.localView != null ? gameManager.localView.playerEntity : null;
+		try {
+			PlayerEntity playerEntity = gameManager.localView != null ? gameManager.localView.playerEntity : null;
 
-		inputEngine.update();
-		networkEngine.update();
+			inputEngine.update();
+			networkEngine.update();
 
-		gameManager.parseNetworkMessages();
+			gameManager.networkUpdate();
 
-		gameManager.update();
-		collisionEngine.update();
+			gameManager.update();
+			collisionEngine.update();
 
-		if (playerEntity != null) {
-			graphicsEngine.setCameraCenter(playerEntity.getPosition());
-			audioEngine.setListenerPosition(HgGame.Input().getFOVWorldMouse(factorFOV).sub(playerEntity.getPosition()).scl(0.5f).add(playerEntity.getPosition()));
-			graphicsEngine.setCameraOffset(HgGame.Input().getFOVCameraOffset(factorFOV));
+			if (playerEntity != null) {
+				graphicsEngine.setCameraCenter(playerEntity.getPosition());
+				audioEngine.setListenerPosition(HgGame.Input().getFOVWorldMouse(factorFOV).sub(playerEntity.getPosition()).scl(0.5f).add(playerEntity.getPosition()));
+				graphicsEngine.setCameraOffset(HgGame.Input().getFOVCameraOffset(factorFOV));
+			}
+
+			targetGUI.getAngle().add(1.5f);
+			targetGUI.setPosition(HgGame.Input().getMouse());
+			targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
+
+			if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
+				playerEntity.setPosition(targetWorld.getPosition()); // Debug teleport
+
+			graphicsEngine.render();
+			audioEngine.update();
+
+			frameCounter++;
+		}
+		catch (Throwable crash) {
+			crash.printStackTrace();
+			crashed = true;
 		}
 
-		targetGUI.getAngle().add(1.5f);
-		targetGUI.setPosition(HgGame.Input().getMouse());
-		targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
-
-		if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
-			playerEntity.setPosition(targetWorld.getPosition()); // Debug teleport
-
-		graphicsEngine.render();
-		audioEngine.update();
-
-		frameCounter++;
-
-		if (quitCalled) Gdx.app.exit();
+		if (crashed || quitCalled) Gdx.app.exit();
 	}
 
 	/** This does cleanup on exit */
 	@Override
 	public void dispose () {
+		if (crashed) {
+			System.out.println("Game crashed due to an unhandled exception! Sorry about that...");
+		}
+
 		gameManager.cleanup();
 		graphicsEngine.cleanup();
 		audioEngine.cleanup();

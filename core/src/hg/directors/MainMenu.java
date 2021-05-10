@@ -119,6 +119,13 @@ public class MainMenu extends Director {
         menus.scheduleSwitchState("MainMenu"); // Start menu in this state
     }
 
+    public void onDisconnectFromServer() {
+        menus.scheduleSwitchState("MainMenu");
+        waitDuration = 0;
+        clientStartLobby = false;
+        tryClientConnect = false;
+    }
+
     @Override
     public void destroy() {
         menus.destroy();

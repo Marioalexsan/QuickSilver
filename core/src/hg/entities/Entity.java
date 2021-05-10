@@ -2,6 +2,7 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.Drawable;
+import hg.game.State;
 import hg.gamelogic.BaseStats;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.IUpdateable;
@@ -19,7 +20,6 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
 
     protected final Vector2 position = new Vector2();
     protected final Angle angle = new Angle();
-    protected final Vector2 knockback = new Vector2();
 
     protected BaseStats baseStats = null; // Entities should set this themselves!
 
@@ -47,14 +47,6 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
 
     // Some other stuff
 
-    public void applyKnockbackStep() {
-        position.add(new Vector2(knockback).scl(0.1f));
-        knockback.scl(0.9f);
-        if (knockback.len2() < 0.5) {
-            knockback.set(0, 0);
-        }
-    }
-
     @Override
     public void signalDestroy() {
         toBeDestroyed = true;
@@ -72,5 +64,11 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
     public Collider getColliderIfAny() {
         return null;
     }
+
+    public State tryGenerateState() {
+        return null;
+    }
+
+    public void tryApplyState(State state) { }
 
 }

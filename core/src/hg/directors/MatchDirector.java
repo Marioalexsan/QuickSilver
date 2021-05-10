@@ -4,13 +4,14 @@ import com.badlogic.gdx.math.Vector2;
 import hg.engine.InputEngine;
 import hg.engine.NetworkEngine;
 import hg.entities.PlayerEntity;
-import hg.game.ChatSystem;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamemodes.Deathmatch;
 import hg.gamemodes.Gamemode;
 import hg.libraries.MapLibrary;
 import hg.networking.PlayerView;
+import hg.networking.packets.GameSessionStart;
+import hg.networking.packets.PlayerViewUpdate;
 import hg.playerlogic.LocalPlayerLogic;
 import hg.playerlogic.LuigiAI;
 import hg.playerlogic.NetworkPlayerLogic;
@@ -26,13 +27,8 @@ public class MatchDirector extends Director {
 
     private Gamemode gamemode;
 
-    // TODO Remove this crap and replace it with proper match starting
-    public PlayerEntity playerEntity;
-    public PlayerEntity enemy;
-    public PlayerEntity enemy2;
-
     public MatchDirector() {
-
+        HgGame.Manager().enableChatSystem();
     }
 
     public void startAsServer() {
@@ -48,11 +44,10 @@ public class MatchDirector extends Director {
             throw new BadCoderException("Server failed!");
         }
 
-        // Probably not needed, but...
-        manager.playerViews.forEach(PlayerView::onRemove);
-        manager.playerViews.clear();
+        manager.removeAllPlayerViews(); // Probably not needed, but done just in case
 
         manager.localView = manager.createPlayerView(PlayerView.Type.Host);
+        manager.localView.name = HgGame.Game().localName;
 
         HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
 
@@ -68,47 +63,51 @@ public class MatchDirector extends Director {
     }
 
     public void startMatch() {
-        if (!started) throw new BadCoderException("Tried to start match without being started!");
+        if (!started) throw new BadCoderException("Tried to start match without Match Director being started!");
 
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
+        boolean isServer = network.isLocalOrServer();
 
-        manager.enableChatSystem();
+        if (isServer) {
+            gamemode = new Deathmatch();
 
-        if (!network.isLocalOrServer()) throw new BadCoderException("Tried to start match as non-host!");
+            for (var view : manager.getPlayerViews()) {
+                if (view.playerEntity != null) throw new BadCoderException("Player Entity already exists lool");
 
-        started = true;
-        gamemode = new Deathmatch();
+                PlayerEntity entity = (PlayerEntity) manager.addActor(ActorType.PlayerEntity, new Vector2(3450, 1500), 0f);
 
-        for (var view : manager.playerViews) {
-            if (view.playerEntity != null)
-                throw new BadCoderException("Player Entity already exists lool");
-
-            PlayerEntity entity = (PlayerEntity) manager.addActor(ActorType.PlayerEntity, new Vector2(3450, 1500), 0f);
-
-            if (view == manager.localView) entity.setLogic(new LocalPlayerLogic());
-            else {
-                if (network.isLocalOrServer()) {
+                if (view == manager.localView) entity.setLogic(new LocalPlayerLogic());
+                else if (network.isLocalOrServer()) {
                     if (view.viewType == PlayerView.Type.HostAI) entity.setLogic(new LuigiAI());
                     else entity.setLogic(new NetworkPlayerLogic());
                 }
                 else entity.setLogic(new NetworkPlayerLogic());
-            }
 
-            view.playerEntity = entity;
+                view.playerEntity = entity;
+            }
         }
 
         LevelDirector level = (LevelDirector) manager.addAndGetDirector(DirectorTypes.LevelDirector);
         level.LoadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
 
-        enemy = (PlayerEntity) manager.addActor(ActorType.PlayerEntity, new Vector2(3450, 1800), 0f);
-        enemy2 = (PlayerEntity) manager.addActor(ActorType.PlayerEntity, new Vector2(3450, 2100), 0f);
-
-        enemy2.setLogic(new LuigiAI());
-
         HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
 
         HgGame.Manager().addDirector(DirectorTypes.InGameMenu);
+
+        if (isServer) {
+            // Jojo, it's time to gogo
+
+            GameSessionStart msg = new GameSessionStart();
+            network.sendPacketToAllClients(msg, true);
+
+            for (var view: manager.getPlayerViews()) {
+                PlayerViewUpdate viewMsg = new PlayerViewUpdate();
+                viewMsg.targetUniqueID = view.uniqueID;
+                viewMsg.controlledEntityID = view.playerEntity.getID();
+                network.sendPacketToAllClients(viewMsg, true);
+            }
+        }
     }
 
     private void stop() {
@@ -117,15 +116,14 @@ public class MatchDirector extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        manager.disableChatSystem();
-
         LevelDirector level = (LevelDirector) manager.getDirector(DirectorTypes.LevelDirector);
         if (level != null) level.UnloadMap();
 
         manager.clearActors();
         if (manager.localView != null)
             manager.localView.playerEntity = null;
-        manager.playerViews.clear();
+
+        manager.removeAllPlayerViews();
 
         network.stopNetwork();
 
@@ -148,6 +146,12 @@ public class MatchDirector extends Director {
 
     @Override
     public void destroy() {
+        GameManager manager = HgGame.Manager();
+
         HgGame.Input().removeFocusInput(this);
+        manager.disableChatSystem();
+
+        LobbyDirector lobby = (LobbyDirector) manager.getDirector(DirectorTypes.LobbyDirector);
+        if (lobby != null) lobby.signalDestroy();
     }
 }

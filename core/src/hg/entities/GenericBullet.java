@@ -4,9 +4,11 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.engine.AssetEngine;
 import hg.game.HgGame;
+import hg.game.State;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.physics.*;
+import hg.types.EntityType;
 import hg.utils.Angle;
 
 public class GenericBullet extends Entity {
@@ -95,5 +97,38 @@ public class GenericBullet extends Entity {
     @Override
     public Collider getColliderIfAny() {
         return collider;
+    }
+
+    public static class GenericBulletState extends State {
+        public float posX;
+        public float posY;
+        public float angle;
+        public float speed;
+        public float maxDistance;
+        public float currentDistance;
+    }
+
+    @Override
+    public State tryGenerateState() {
+        GenericBulletState stuff = new GenericBulletState();
+        stuff.posX = position.x;
+        stuff.posY = position.y;
+        stuff.angle = angle.getDeg();
+        stuff.speed = speed;
+        stuff.currentDistance = currentDistance;
+        stuff.maxDistance = maxDistance;
+        return stuff;
+    }
+
+    @Override
+    public void tryApplyState(State state) {
+        if (state instanceof GenericBulletState) {
+            GenericBulletState stuff = (GenericBulletState) state;
+            this.position.set(stuff.posX, stuff.posY);
+            this.angle.set(stuff.angle);
+            this.speed = stuff.speed;
+            this.currentDistance = stuff.currentDistance;
+            this.maxDistance = stuff.maxDistance;
+        }
     }
 }

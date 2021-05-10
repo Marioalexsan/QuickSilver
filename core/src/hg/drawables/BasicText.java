@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Affine2;
 import hg.engine.GraphicsEngine;
-import hg.utils.HgEngineUtils;
+import hg.utils.GraphicsUtils;
 
 /** TO DO: Take a look at GlyphLayout / GlyphRun
  * Drawable that renders text using a BitmapFont.
@@ -53,7 +53,7 @@ public class BasicText extends Drawable {
             return;
         }
 
-        Affine2 transform = HgEngineUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
+        Affine2 transform = GraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
         GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
     }
 }

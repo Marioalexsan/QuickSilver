@@ -5,16 +5,7 @@ import static java.lang.Math.abs;
 /**
  * Provides various utilities for dealing with QuickSilver's insane design choices.
  */
-public class HgMath {
-    public static final double PI = Math.PI;
-
-    public static double RadToDeg(double rads) { return rads * (180.0 / PI); }
-
-    public static double DegToRad(double degrees) { return degrees / (180.0 / PI); }
-
-    public static float RadToDeg(float rads) { return rads * (180f / (float) PI); }
-
-    public static float DegToRad(float degrees) { return degrees / (180f / (float) PI); }
+public class MathUtils {
 
     /**
      * Returns a value that is in the range [leftBorder; rightBorder).

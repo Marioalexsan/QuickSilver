@@ -1,5 +1,7 @@
 package hg.interfaces;
 
+import hg.game.State;
+
 public interface IWeapon {
 
     // "Callbacks"
@@ -34,4 +36,12 @@ public interface IWeapon {
 
     /** Called if owner picks up another weapon of the same type */
     void onWeaponPickup();
+
+    /** Gets weapon state */
+    default State tryGetState() {
+        return null;
+    }
+
+    /** Applies weapon state */
+    default void tryApplyState(State state) {}
 }

@@ -23,18 +23,18 @@ public class Angle {
     }
 
     public Angle(float value) {
-        this.value = HgMath.ScrollValue(value, 0f, 360f);
+        this.value = MathUtils.ScrollValue(value, 0f, 360f);
     }
 
     // Instance Methods
 
     public Angle set(Angle other) {
-        this.value = HgMath.ScrollValue(other.value, 0f, 360f);
+        this.value = MathUtils.ScrollValue(other.value, 0f, 360f);
         return this;
     }
 
     public Angle set(float value) {
-        this.value = HgMath.ScrollValue(value, 0f, 360f);
+        this.value = MathUtils.ScrollValue(value, 0f, 360f);
         return this;
     }
 
@@ -43,26 +43,26 @@ public class Angle {
     }
 
     public float getRad() {
-        return HgMath.DegToRad(value);
+        return (float) Math.toRadians(value);
     }
 
     public Angle add(Angle rhs) {
-        value = HgMath.ScrollValue(value + rhs.value, 0f, 360f);
+        value = MathUtils.ScrollValue(value + rhs.value, 0f, 360f);
         return this;
     }
 
     public Angle add(float rhs) {
-        value = HgMath.ScrollValue(value + rhs, 0f, 360f);
+        value = MathUtils.ScrollValue(value + rhs, 0f, 360f);
         return this;
     }
 
     public Angle sub(Angle rhs) {
-        value = HgMath.ScrollValue(value - rhs.value, 0f, 360f);
+        value = MathUtils.ScrollValue(value - rhs.value, 0f, 360f);
         return this;
     }
 
     public Angle sub(float rhs) {
-        value = HgMath.ScrollValue(value - rhs, 0f, 360f);
+        value = MathUtils.ScrollValue(value - rhs, 0f, 360f);
         return this;
     }
 
@@ -100,7 +100,7 @@ public class Angle {
     }
 
     public Vector2 normalVector() {
-        float rads = HgMath.DegToRad(value);
+        float rads = (float) Math.toRadians(value);
         return new Vector2((float) Math.cos(rads), (float) Math.sin(rads));
     }
 

@@ -16,13 +16,12 @@ import com.badlogic.gdx.utils.Align;
 import hg.drawables.BasicText;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
-import hg.utils.HgMath;
+import hg.utils.GraphicsUtils;
+import hg.utils.MathUtils;
 
 import java.util.*;
 
 public class GraphicsEngine {
-    private static final Comparator<Drawable> DrawableLayerComparator = Comparator.comparingInt(Drawable::getLayer);
-
     private final SpriteBatch batch;
 
     private Vector2 currentResolution = new Vector2(0, 0);
@@ -47,7 +46,7 @@ public class GraphicsEngine {
     }
 
     public void setCameraZoom(double zoom) {
-        camera.zoom = (float) HgMath.ClampValue(zoom, 0.25, 4.0);
+        camera.zoom = (float) MathUtils.ClampValue(zoom, 0.25, 4.0);
         camera.update();
     }
 
@@ -120,7 +119,7 @@ public class GraphicsEngine {
 
         // Prepare sorted drawables
         ArrayList<Drawable> heightSortedDrawables = new ArrayList<>(drawableLibrary);
-        heightSortedDrawables.sort(DrawableLayerComparator);
+        heightSortedDrawables.sort(GraphicsUtils.DrawableLayerComparator);
 
         // Draw everything that is enabled
         batch.begin();
@@ -136,10 +135,7 @@ public class GraphicsEngine {
 
     // Following static helper functions are used by Drawables for reducing implementation junk
 
-
-
-    // Functionality resembles RenderCopyEx from SDL
-    // Transforms the output if the drawable doesn't use the camera
+    /** Renders the given texture region with the given parameters to the sprite batch */
     public static void RenderTextureRegion(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, TextureRegion textureRegion, boolean mirror, boolean flip) {
         batch.setColor(color);
         Affine2 targetTransform = new Affine2(transform);

@@ -19,7 +19,7 @@ public class LobbyDirector extends Director {
 
         if (isServer) {
             ClickButton generic_startGame = new ClickButton(HgGame.Assets().loadTexture("Assets/GUI/Button.png"), 460, 150, HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "Start Game");
-            generic_startGame.setPosition(-660, -400);
+            generic_startGame.setPosition(660, -200);
             generic_startGame.setCallback(() -> {
                 MatchDirector director = (MatchDirector) HgGame.Manager().getDirector(DirectorTypes.MatchDirector);
                 if (director != null) director.startMatch();

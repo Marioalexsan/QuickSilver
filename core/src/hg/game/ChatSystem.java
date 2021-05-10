@@ -1,22 +1,27 @@
 package hg.game;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import hg.drawables.BasicText;
 import hg.drawables.DrawLayer;
 import hg.engine.InputEngine;
 import hg.engine.MappedAction;
+import hg.networking.PlayerView;
 import hg.ui.BasicTextInput;
 import hg.ui.UIElement;
 
 import java.util.LinkedList;
 
 public class ChatSystem extends UIElement {
+    private final String font = "Assets/Fonts/CourierNew24.fnt";
+    private int messageSpacing = 24;
+
     private static class Message {
         public int displayTimeLeft;
         public BasicText drawable;
 
-        public Message(int displayTime, String message) {
+        public Message(BitmapFont fontToUse, String message, int displayTime) {
             this.displayTimeLeft = displayTime;
-            drawable = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), message);
+            drawable = new BasicText(fontToUse, message);
             drawable.setConstraints(BasicText.HPos.Left, BasicText.VPos.Center, 0f);
             drawable.setLayer(DrawLayer.GUIDefault);
             drawable.setCameraUse(false);
@@ -24,21 +29,24 @@ public class ChatSystem extends UIElement {
         }
     }
 
-    private int maxMessagesToKeep = 4;
+    private int maxMessagesToKeep = 8;
     private int messageLifetime = 360;
     private int fadeoutStartAt = 120;
-    private int messageSpacing = 36;
 
     private final LinkedList<Message> messages = new LinkedList<>();
     private final BasicTextInput chatInput;
 
     public ChatSystem() {
-        chatInput = new BasicTextInput(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), 250, 500, 36);
+        chatInput = new BasicTextInput(HgGame.Assets().loadFont(font), 250, 500, 36);
         chatInput.setEmptyText("--- Chat ---");
     }
 
+    public void addMessageFromView(String message, PlayerView view) {
+        addMessage(view.name + ": " + message);
+    }
+
     public void addMessage(String message) {
-        Message msg = new Message(messageLifetime, message);
+        Message msg = new Message(HgGame.Assets().loadFont(font), message, messageLifetime);
         msg.drawable.setEnabled(true);
         messages.addFirst(msg);
 
@@ -63,6 +71,16 @@ public class ChatSystem extends UIElement {
     public void onUpdate() {
         if (!enabled) return;
         InputEngine inputEngine = HgGame.Input();
+        GameManager manager = HgGame.Manager();
+
+        String playerName;
+        if (manager.localView != null && manager.localView.name != null) {
+            playerName = manager.localView.name;
+        }
+        else {
+            playerName = "Anonymous";
+        }
+        chatInput.setEmptyText("--- Chat as " + playerName + " ---");
 
         boolean submit = inputEngine.isActionTapped(MappedAction.ChatSubmit);
 
@@ -79,9 +97,9 @@ public class ChatSystem extends UIElement {
                 String potentialMessage = chatInput.getText().trim();
 
                 if (!potentialMessage.equals("")) {
-                    if (potentialMessage.startsWith("/"))
-                        if (potentialMessage.length() > 1) HgGame.Manager().onChatMessageEntered(potentialMessage);
-                    else addMessage(potentialMessage);
+                    if (!potentialMessage.startsWith("/"))
+                        addMessageFromView(potentialMessage, manager.localView);
+                    HgGame.Manager().onChatMessageEntered(potentialMessage);
                 }
                 chatInput.setText("");
                 chatInput.enter(false);
@@ -100,7 +118,8 @@ public class ChatSystem extends UIElement {
 
         int height = 0;
         for (var msg: messages) {
-            msg.drawable.setAlpha(Math.min(1f, msg.displayTimeLeft / (float) fadeoutStartAt));
+            if (chatInput.isFocused()) msg.drawable.setAlpha(1f);
+            else msg.drawable.setAlpha(Math.min(1f, msg.displayTimeLeft / (float) fadeoutStartAt));
             msg.drawable.getPosition().set(position.x, position.y + (++height * messageSpacing));
         }
     }

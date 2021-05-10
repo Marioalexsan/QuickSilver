@@ -14,16 +14,9 @@ public class PlayerView {
     public Type viewType;
 
     public String name;
-    public transient ConnectedClient assignedConnection;
+
+    public transient int connectionID = -1;
     public transient PlayerEntity playerEntity;
 
     public boolean serverInited;
-
-    public void onAdd() {
-
-    }
-
-    public void onRemove() {
-
-    }
 }

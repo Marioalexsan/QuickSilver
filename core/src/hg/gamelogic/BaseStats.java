@@ -8,7 +8,7 @@ import hg.interfaces.ICollisionObserver;
  */
 public class BaseStats {
 
-    public Entity owner;
+    public transient Entity owner;
 
     public boolean isDead = false; // 0 HP may not necessarily mean dead, and death may not necessarily mean the entity should be gone
     public float maxHealth = 100f;
@@ -25,4 +25,21 @@ public class BaseStats {
     public BaseStats(Entity owner) {
         this.owner = owner;
     }
+
+    public void copyFrom(BaseStats other) {
+        if (other == null) return;
+        isDead = other.isDead;
+        maxHealth = other.maxHealth;
+        health = other.health;
+        maxHeavyArmor = other.maxHeavyArmor;
+        heavyArmor = other.heavyArmor;
+        maxArmorPlates = other.maxArmorPlates;
+        armorPlates = other.armorPlates;
+        hasKevlarVest = other.hasKevlarVest;
+        invulnerabilityFrames = other.invulnerabilityFrames;
+        baseMoveSpeed = other.baseMoveSpeed;
+    }
+
+    // Do not use. This is for Kryonet
+    public BaseStats() { }
 }

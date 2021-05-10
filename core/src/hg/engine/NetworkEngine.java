@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import hg.game.HgGame;
 import hg.networking.*;
 import hg.networking.Packet;
 import hg.networking.packets.ClientInitRequest;
@@ -21,7 +22,9 @@ public class NetworkEngine {
     private class ClientListener extends Listener {
         @Override
         public void connected(Connection connection) {
-            connection.sendTCP(new ClientInitRequest());
+            ClientInitRequest msg = new ClientInitRequest();
+            msg.clientName = HgGame.Game().localName;
+            connection.sendTCP(msg);
             synchronized (networkLock) {
                 netRole = NetworkRole.Client;
                 netStatus = NetworkStatus.Ready;
@@ -40,7 +43,9 @@ public class NetworkEngine {
         @Override
         public void received(Connection connection, Object object) {
             synchronized (networkLock) {
-                networkMessages.add(new NetworkMessage(0, (Packet) object));
+                // Kryonet internal messages can also be received, but we shouldn't store (or drop) them
+                if (object instanceof Packet)
+                    networkMessages.add(new NetworkMessage(0, (Packet) object));
             }
         }
     }
@@ -63,7 +68,9 @@ public class NetworkEngine {
         @Override
         public void received(Connection connection, Object object) {
             synchronized (networkLock) {
-                networkMessages.add(new NetworkMessage(connection.getID(), (Packet) object));
+                // Kryonet internal messages can also be received, but we shouldn't store (or drop) them
+                if (object instanceof Packet)
+                    networkMessages.add(new NetworkMessage(connection.getID(), (Packet) object));
             }
         }
     }
@@ -148,6 +155,14 @@ public class NetworkEngine {
 
     public NetworkStatus getNetStatus() { return netStatus; }
 
+    public void clearStatus() {
+        if (netRole == NetworkRole.Local && (netStatus == NetworkStatus.ConnectionFailed || netStatus == NetworkStatus.GotDisconnectedAsClient)) {
+            synchronized (networkLock) {
+                netStatus = NetworkStatus.Ready;
+            }
+        }
+    }
+
     // Information Dump methods
 
     /** Dumps messages received since last call */
@@ -217,6 +232,15 @@ public class NetworkEngine {
         return true;
     }
 
+    public void sendPacketToAllClients(Packet packet, boolean isVIP) {
+        if (isVIP) {
+            kryonetServer.sendToAllTCP(packet);
+        }
+        else {
+            kryonetServer.sendToAllUDP(packet);
+        }
+    }
+
     // Other
 
     public void update() {
@@ -234,5 +258,6 @@ public class NetworkEngine {
             kryonetServer.dispose();
         }
         catch (IOException ignored) {}
+        threadPool.shutdown();
     }
 }

@@ -5,8 +5,10 @@ import hg.networking.Packet;
 
 public class DisconnectNotice extends Packet {
     public String reason = "unknown";
+    public int uniqueID = -1;
+
     @Override
     public void parseOnClient() {
-        HgGame.Manager().onDisconnectFromServer();
+
     }
 }

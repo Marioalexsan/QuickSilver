@@ -6,6 +6,7 @@ import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
+import hg.game.State;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
@@ -15,16 +16,14 @@ import hg.physics.ColliderGroup;
 import hg.physics.SphereCollider;
 import hg.playerlogic.EmptyAI;
 import hg.interfaces.IPlayerLogic;
-import hg.utils.HgMath;
+import hg.types.EntityType;
+import hg.utils.MathUtils;
 import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 
 public class PlayerEntity extends Entity {
-
     private IPlayerLogic playerLogic;
     private final Vector2 smoothSpeed = new Vector2();
-
-    public int DEBUG_killCount = 0;
 
     protected Animation drawable = new Animation();
     protected SphereCollider collider = new SphereCollider(50);
@@ -151,7 +150,6 @@ public class PlayerEntity extends Entity {
 
     @Override
     public void onKill(Entity other) {
-        DEBUG_killCount++;
     }
 
     @Override
@@ -172,11 +170,11 @@ public class PlayerEntity extends Entity {
         if (baseStats.hasKevlarVest) reduction += 0.2f;
         if (baseStats.heavyArmor > 0) {
             reduction += 0.5f;
-            baseStats.heavyArmor = HgMath.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
+            baseStats.heavyArmor = MathUtils.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
         }
-        damage *= HgMath.ClampValue(1f - reduction, 0f, 1f);
+        damage *= MathUtils.ClampValue(1f - reduction, 0f, 1f);
 
-        baseStats.health = HgMath.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
+        baseStats.health = MathUtils.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
 
         if (baseStats.health <= 0.0) onDeath(attacker.owner);
         else HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);
@@ -219,5 +217,37 @@ public class PlayerEntity extends Entity {
     @Override
     public Drawable getDrawableIfAny() {
         return drawable;
+    }
+
+    public static class PlayerState extends State {
+        public float posX;
+        public float posY;
+        public float angle;
+        public float smoothSpeedX;
+        public float smoothSpeedY;
+        public BaseStats baseStats; // Does not send Entity
+    }
+
+    @Override
+    public State tryGenerateState() {
+        PlayerState stuff = new PlayerState();
+        stuff.posX = position.x;
+        stuff.posY = position.y;
+        stuff.angle = angle.getDeg();
+        stuff.smoothSpeedX = smoothSpeed.x;
+        stuff.smoothSpeedY = smoothSpeed.y;
+        stuff.baseStats = baseStats;
+        return stuff;
+    }
+
+    @Override
+    public void tryApplyState(State state) {
+        if (state instanceof PlayerState) {
+            PlayerState stuff = (PlayerState) state;
+            position.set(stuff.posX, stuff.posY);
+            angle.set(stuff.angle);
+            smoothSpeed.set(stuff.smoothSpeedX, stuff.smoothSpeedY);
+            baseStats.copyFrom(stuff.baseStats);
+        }
     }
 }
