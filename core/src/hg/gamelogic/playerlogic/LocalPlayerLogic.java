@@ -1,18 +1,37 @@
-package hg.playerlogic;
+package hg.gamelogic.playerlogic;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import hg.engine.NetworkEngine;
 import hg.game.HgGame;
 import hg.engine.InputEngine;
 import hg.engine.MappedAction;
 import hg.entities.PlayerEntity;
-import hg.interfaces.IPlayerLogic;
+import hg.networking.packets.InputUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocalPlayerLogic implements IPlayerLogic {
+public class LocalPlayerLogic extends PlayerLogic {
     private PlayerEntity controlledPlayerEntity;
+
+    public void sendActions() {
+        NetworkEngine network = HgGame.Network();
+        List<Integer> actions = obtainActions();
+        int[] mappedActions = new int[actions.size()];
+        for (int i = 0; i < mappedActions.length; i++)
+            mappedActions[i] = actions.get(i);
+
+        Vector2 aimPosition = obtainAimPosition();
+        if (aimPosition == null) aimPosition = new Vector2();
+        InputUpdate msg = new InputUpdate(mappedActions, aimPosition.x, aimPosition.y);
+
+        if (network.isLocalOrServer()) {
+            msg.uniqueID = HgGame.Manager().localView.uniqueID;
+            network.sendToAllClients(msg, false);
+        }
+        else network.sendToServer(msg, false);
+    }
 
     @Override
     public void setControlledPlayer(PlayerEntity playerEntity) {

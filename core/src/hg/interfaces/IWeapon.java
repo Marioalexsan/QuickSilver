@@ -1,6 +1,6 @@
 package hg.interfaces;
 
-import hg.game.State;
+import hg.gamelogic.states.State;
 
 public interface IWeapon {
 

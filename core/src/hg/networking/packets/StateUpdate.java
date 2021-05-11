@@ -3,34 +3,39 @@ package hg.networking.packets;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
-import hg.game.State;
+import hg.gamelogic.states.State;
 import hg.networking.Packet;
-import hg.types.EntityType;
+import hg.types.TargetType;
+import hg.utils.DebugLevels;
 
 public class StateUpdate extends Packet {
 
-    /** The ID subset to target (Entities / Directors / Environments etc.). Takes values from StateTargetType */
-    public int targetType;
+    public int targetType; // The ID subset to target . Takes values from StateTargetType
+    public int targetID; // The ID object to target (Specific entity / director etc.) IDs depend on current status of GameManager.
+    public State payload; // What we actually want to send. Take care to register subclasses of State with NetworkHelper
 
-    /** The ID object to target (Specific entity / director etc.) IDs depend on current status of GameManager. */
-    public int targetID;
-
-    public State payload;
+    public StateUpdate(int targetType, int targetID, State payload) {
+        this.targetType = targetType;
+        this.targetID = targetID;
+        this.payload = payload;
+    }
 
     @Override
     public void parseOnClient() {
         GameManager manager = HgGame.Manager();
 
         switch (targetType) {
-            case EntityType.Actors -> {
+            case TargetType.Actors -> {
                 Entity target = manager.getActor(targetID);
                 if (target == null) {
-                    //manager.getChatSystem().addMessage("[Warn] Update for unknown actor " + targetID);
+                    manager.getChatSystem().addDebugMessage("Update for unknown actor " + targetID, DebugLevels.Warn);
                     return;
                 }
                 target.tryApplyState(payload);
             }
-            //default -> manager.getChatSystem().addMessage("[Warn] Update for unallowed type " + targetType);
+            default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + targetType, DebugLevels.Warn);
         }
     }
+
+    public StateUpdate() {} // For Kryonet
 }

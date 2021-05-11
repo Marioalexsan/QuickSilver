@@ -18,4 +18,6 @@ public class GameSessionStart extends Packet {
         LobbyDirector lobby = (LobbyDirector) manager.getDirector(DirectorTypes.LobbyDirector);
         if (lobby != null) lobby.signalDestroy();
     }
+
+    public GameSessionStart() {} // For Kryonet
 }

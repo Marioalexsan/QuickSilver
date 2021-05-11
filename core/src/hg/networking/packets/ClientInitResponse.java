@@ -9,6 +9,11 @@ public class ClientInitResponse extends Packet {
     public int clientViewID;
     public PlayerView[] allViews;
 
+    public ClientInitResponse(int clientViewID, PlayerView[] allViews) {
+        this.clientViewID = clientViewID;
+        this.allViews = allViews;
+    }
+
     @Override
     public void parseOnClient() {
         GameManager manager = HgGame.Manager();
@@ -20,4 +25,6 @@ public class ClientInitResponse extends Packet {
             }
         }
     }
+
+    public ClientInitResponse() {} // For Kryonet
 }

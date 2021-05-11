@@ -53,8 +53,10 @@ public class MainMenu extends Director {
         startServer_startGame.setPosition(-660, -400);
         startServer_startGame.setCallback(() -> {
             MatchDirector match = (MatchDirector) HgGame.Manager().addAndGetDirector(DirectorTypes.MatchDirector);
-            match.startAsServer();
-            toBeDestroyed = true;
+            if (match.startAsServer()) {
+                // Server started OK, quit Main Menu
+                toBeDestroyed = true;
+            }
         });
         menus.addStateElement("StartServerMenu", "CreateServerButton", startServer_startGame);
 

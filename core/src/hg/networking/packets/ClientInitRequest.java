@@ -12,6 +12,10 @@ import hg.networking.PlayerView;
 public class ClientInitRequest extends Packet {
     public String clientName;
 
+    public ClientInitRequest(String clientName) {
+        this.clientName = clientName;
+    }
+
     @Override
     public void parseOnServer(int connectionID) {
         GameManager manager = HgGame.Manager();
@@ -23,22 +27,21 @@ public class ClientInitRequest extends Packet {
 
         // Tell info to source
 
-        ClientInitResponse response = new ClientInitResponse();
-        response.clientViewID = newView.uniqueID;
-        response.allViews = manager.getPlayerViews();
-        network.sendPacketToClient(connectionID, response, true);
+        ClientInitResponse response = new ClientInitResponse(newView.uniqueID, manager.getPlayerViews());
+        network.sendToClient(response, true, connectionID);
 
         // Tell everyone else about a new player view
 
-        PlayerViewConnected msg = new PlayerViewConnected();
-        msg.newView = newView;
+        PlayerViewConnected msg = new PlayerViewConnected(newView);
 
         for (var view: manager.getPlayerViews()) {
             if (view.uniqueID != newView.uniqueID && view != manager.localView) {
-                network.sendPacketToClient(view.connectionID, msg, true);
+                network.sendToClient(msg, true, view.connectionID);
             }
         }
 
         HgGame.Manager().getChatSystem().addMessage(newView.name + " connected.");
     }
+
+    public ClientInitRequest() {} // For Kryonet
 }

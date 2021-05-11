@@ -8,7 +8,6 @@ import hg.game.HgGame;
 import hg.networking.*;
 import hg.networking.Packet;
 import hg.networking.packets.ClientInitRequest;
-import hg.networking.packets.DisconnectNotice;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,13 +21,12 @@ public class NetworkEngine {
     private class ClientListener extends Listener {
         @Override
         public void connected(Connection connection) {
-            ClientInitRequest msg = new ClientInitRequest();
-            msg.clientName = HgGame.Game().localName;
-            connection.sendTCP(msg);
             synchronized (networkLock) {
                 netRole = NetworkRole.Client;
                 netStatus = NetworkStatus.Ready;
             }
+            ClientInitRequest msg = new ClientInitRequest(HgGame.Game().localName);
+            connection.sendTCP(msg);
         }
 
         @Override
@@ -67,10 +65,11 @@ public class NetworkEngine {
 
         @Override
         public void received(Connection connection, Object object) {
-            synchronized (networkLock) {
-                // Kryonet internal messages can also be received, but we shouldn't store (or drop) them
-                if (object instanceof Packet)
+            // Kryonet internal messages can also be received, but we shouldn't store them
+            if (object instanceof Packet) {
+                synchronized (networkLock) {
                     networkMessages.add(new NetworkMessage(connection.getID(), (Packet) object));
+                }
             }
         }
     }
@@ -84,6 +83,9 @@ public class NetworkEngine {
 
     private int TCPPort = 52735;
     private int UDPPort = 52216;
+
+    public int getTCPPort() { return TCPPort; }
+    public int getUDPPort() { return UDPPort; }
 
     private final Server kryonetServer;
     private final Client kryonetClient;
@@ -197,48 +199,30 @@ public class NetworkEngine {
 
     // Message sending
 
-    public boolean sendPacketToServer(Packet packet, boolean isVIP) {
-        if (netRole != NetworkRole.Client) return false;
+    public void sendToServer(Packet packet, boolean isVIP) {
+        if (netRole != NetworkRole.Client) return;
 
-        if (isVIP) {
-            kryonetClient.sendTCP(packet);
-        }
-        else {
-            kryonetClient.sendUDP(packet);
-        }
-
-        return true;
+        if (isVIP) kryonetClient.sendTCP(packet);
+        else kryonetClient.sendUDP(packet);
     }
 
-    public boolean sendPacketToClient(int connectionID, Packet packet, boolean isVIP) {
-        if (netRole != NetworkRole.Server) return false;
+    public void sendToClient(Packet packet, boolean isVIP, int connectionID) {
+        if (netRole != NetworkRole.Server || getConnection(connectionID) == null) return;
 
-        Connection which = null;
-        for (var connection: kryonetServer.getConnections()) {
-            if (connection.getID() == connectionID) {
-                which = connection;
-                break;
-            }
-        }
-
-        if (which == null) return false;
-
-        if (isVIP) {
-            kryonetServer.sendToTCP(connectionID, packet);
-        }
-        else {
-            kryonetServer.sendToUDP(connectionID, packet);
-        }
-        return true;
+        if (isVIP) kryonetServer.sendToTCP(connectionID, packet);
+        else kryonetServer.sendToUDP(connectionID, packet);
     }
 
-    public void sendPacketToAllClients(Packet packet, boolean isVIP) {
-        if (isVIP) {
-            kryonetServer.sendToAllTCP(packet);
-        }
-        else {
-            kryonetServer.sendToAllUDP(packet);
-        }
+    public void sendToAllClients(Packet packet, boolean isVIP) {
+        if (isVIP) kryonetServer.sendToAllTCP(packet);
+        else kryonetServer.sendToAllUDP(packet);
+    }
+
+    public void sendToAllClientsExcept(Packet packet, boolean isVIP, int connectionIDtoSkip) {
+        if (netRole != NetworkRole.Server || getConnection(connectionIDtoSkip) == null) return;
+
+        if (isVIP) kryonetServer.sendToAllExceptTCP(connectionIDtoSkip, packet);
+        else kryonetServer.sendToAllExceptUDP(connectionIDtoSkip, packet);
     }
 
     // Other
@@ -259,5 +243,11 @@ public class NetworkEngine {
         }
         catch (IOException ignored) {}
         threadPool.shutdown();
+    }
+
+    private Connection getConnection(int connectionID) {
+        for (var connection: kryonetServer.getConnections())
+            if (connection.getID() == connectionID) return connection;
+        return null;
     }
 }

@@ -1,9 +1,11 @@
 package hg.libraries;
 
+import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.GenericBullet;
 import hg.entities.PlayerEntity;
-import hg.playerlogic.EmptyAI;
+import hg.game.HgGame;
+import hg.gamelogic.playerlogic.EmptyAI;
 import hg.types.ActorType;
 
 /**

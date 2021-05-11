@@ -1,10 +1,9 @@
-package hg.playerlogic;
+package hg.gamelogic.playerlogic;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.engine.MappedAction;
 import hg.entities.PlayerEntity;
 import hg.game.HgGame;
-import hg.interfaces.IPlayerLogic;
 import hg.utils.Angle;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.List;
  * Luigi wins by doing absolutely nuffin'!
  * (testing AI)
  */
-public class LuigiAI implements IPlayerLogic {
+public class LuigiAI extends PlayerLogic {
     private PlayerEntity controlledPlayerEntity;
     private int keksimus = 0;
 
@@ -53,7 +52,7 @@ public class LuigiAI implements IPlayerLogic {
     }
 
     @Override
-    public void localUpdate() {
+    public void update() {
         keksimus = (keksimus + 1) % 120;
     }
 }

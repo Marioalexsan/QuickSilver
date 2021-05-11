@@ -6,15 +6,15 @@ import hg.engine.NetworkEngine;
 import hg.entities.PlayerEntity;
 import hg.game.GameManager;
 import hg.game.HgGame;
-import hg.gamemodes.Deathmatch;
-import hg.gamemodes.Gamemode;
+import hg.gamelogic.gamemodes.Deathmatch;
+import hg.gamelogic.gamemodes.Gamemode;
 import hg.libraries.MapLibrary;
 import hg.networking.PlayerView;
 import hg.networking.packets.GameSessionStart;
 import hg.networking.packets.PlayerViewUpdate;
-import hg.playerlogic.LocalPlayerLogic;
-import hg.playerlogic.LuigiAI;
-import hg.playerlogic.NetworkPlayerLogic;
+import hg.gamelogic.playerlogic.LocalPlayerLogic;
+import hg.gamelogic.playerlogic.LuigiAI;
+import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.types.ActorType;
 import hg.types.MapType;
 import hg.utils.BadCoderException;
@@ -31,7 +31,7 @@ public class MatchDirector extends Director {
         HgGame.Manager().enableChatSystem();
     }
 
-    public void startAsServer() {
+    public boolean startAsServer() {
         if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
 
         GameManager manager = HgGame.Manager();
@@ -41,7 +41,9 @@ public class MatchDirector extends Director {
             network.startServer();
         }
         catch(IOException ignored) {
-            throw new BadCoderException("Server failed!");
+            manager.setNotice("Couldn't open server!\nAre ports " + network.getTCPPort() + " TCP and " + network.getUDPPort() + " UDP open?", 180);
+            toBeDestroyed = true;
+            return false;
         }
 
         manager.removeAllPlayerViews(); // Probably not needed, but done just in case
@@ -52,14 +54,17 @@ public class MatchDirector extends Director {
         HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
 
         started = true;
+        return true;
     }
 
-    public void startAsClient() {
+    public boolean startAsClient() {
         if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
 
         HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
 
         started = true;
+
+        return true;
     }
 
     public void startMatch() {
@@ -99,13 +104,11 @@ public class MatchDirector extends Director {
             // Jojo, it's time to gogo
 
             GameSessionStart msg = new GameSessionStart();
-            network.sendPacketToAllClients(msg, true);
+            network.sendToAllClients(msg, true);
 
             for (var view: manager.getPlayerViews()) {
-                PlayerViewUpdate viewMsg = new PlayerViewUpdate();
-                viewMsg.targetUniqueID = view.uniqueID;
-                viewMsg.controlledEntityID = view.playerEntity.getID();
-                network.sendPacketToAllClients(viewMsg, true);
+                PlayerViewUpdate viewMsg = new PlayerViewUpdate(view.uniqueID, view.playerEntity.getID());
+                network.sendToAllClients(viewMsg, true);
             }
         }
     }

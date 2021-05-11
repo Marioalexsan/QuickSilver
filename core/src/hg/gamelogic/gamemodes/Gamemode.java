@@ -1,9 +1,6 @@
-package hg.gamemodes;
+package hg.gamelogic.gamemodes;
 
-import hg.gamelogic.Team;
 import hg.interfaces.IUpdateable;
-
-import java.util.ArrayList;
 
 public abstract class Gamemode implements IUpdateable {
     public enum GameStatus {

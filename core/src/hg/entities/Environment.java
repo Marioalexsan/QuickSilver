@@ -48,20 +48,8 @@ public class Environment extends Entity {
     public void update() {}
 
     @Override
-    public void onGenericCollision(Collider other) {}
-
-    @Override
-    public void onCombatCollision(Collider other) {}
-
-    @Override
     public void onAttackHit(BaseStats defender) { }
 
     @Override
-    public void onHitByAttack(AttackStats attacker) {}
-
-    @Override
-    public void onKill(Entity victim) { }
-
-    @Override
-    public void onDeath(Entity killer) { }
+    public void onHitByAttack(AttackStats attacker) { }
 }

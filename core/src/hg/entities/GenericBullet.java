@@ -4,11 +4,11 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.engine.AssetEngine;
 import hg.game.HgGame;
-import hg.game.State;
+import hg.gamelogic.states.GenericBulletState;
+import hg.gamelogic.states.State;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.physics.*;
-import hg.types.EntityType;
 import hg.utils.Angle;
 
 public class GenericBullet extends Entity {
@@ -97,15 +97,6 @@ public class GenericBullet extends Entity {
     @Override
     public Collider getColliderIfAny() {
         return collider;
-    }
-
-    public static class GenericBulletState extends State {
-        public float posX;
-        public float posY;
-        public float angle;
-        public float speed;
-        public float maxDistance;
-        public float currentDistance;
     }
 
     @Override

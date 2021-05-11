@@ -1,6 +1,5 @@
 package hg.networking.packets;
 
-import hg.game.ChatSystem;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.networking.Packet;
@@ -13,10 +12,15 @@ public class ChatMessage extends Packet {
     public String message;
     public int senderUniqueID;
 
+    public ChatMessage(String message, int senderUniqueID) {
+        this.message = message;
+        this.senderUniqueID = senderUniqueID;
+    }
+
     @Override
     public void parseOnClient() {
-        HgGame.Manager().getChatSystem().addMessageFromView(message, HgGame.Manager().getUniqueIDPlayerView(senderUniqueID));
-    };
+        HgGame.Manager().getChatSystem().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
+    }
 
     @Override
     public void parseOnServer(int connectionID) {
@@ -24,15 +28,11 @@ public class ChatMessage extends Packet {
 
         GameManager manager = HgGame.Manager();
 
-        PlayerView sender = manager.getConnectionIDPlayerView(connectionID);
+        PlayerView sender = manager.getPlayerViewByConnectionID(connectionID);
 
-        for (var view : manager.getPlayerViews()) {
-            if (view != manager.localView && view.connectionID != connectionID) {
-                ChatMessage msg = new ChatMessage();
-                msg.message = message;
-                msg.senderUniqueID = sender == null ? -1 : sender.uniqueID;
-                HgGame.Network().sendPacketToClient(view.connectionID, this, true);
-            }
-        }
-    };
+        ChatMessage msg = new ChatMessage(message, sender == null ? -1 : sender.uniqueID);
+        HgGame.Network().sendToAllClientsExcept(msg, true, connectionID);
+    }
+
+    public ChatMessage() {} // For Kryonet
 }

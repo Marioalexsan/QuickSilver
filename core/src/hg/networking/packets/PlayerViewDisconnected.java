@@ -8,6 +8,10 @@ import hg.networking.PlayerView;
 public class PlayerViewDisconnected extends Packet {
     public int deadUniqueID;
 
+    public PlayerViewDisconnected(int deadUniqueID) {
+        this.deadUniqueID = deadUniqueID;
+    }
+
     @Override
     public void parseOnClient() {
         GameManager manager = HgGame.Manager();
@@ -15,4 +19,6 @@ public class PlayerViewDisconnected extends Packet {
         PlayerView deadView = manager.removePlayerView(deadUniqueID);
         HgGame.Manager().getChatSystem().addMessage(deadView.name + " disconnected.");
     }
+
+    public PlayerViewDisconnected() {} // For Kryonet
 }

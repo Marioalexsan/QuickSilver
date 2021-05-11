@@ -1,5 +1,5 @@
 package hg.types;
 
-public class EntityType {
+public class TargetType {
     public static final int Actors = 0;
 }

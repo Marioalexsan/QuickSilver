@@ -8,12 +8,14 @@ import hg.engine.MappedAction;
 import hg.networking.PlayerView;
 import hg.ui.BasicTextInput;
 import hg.ui.UIElement;
+import hg.utils.DebugLevels;
+import hg.utils.MathUtils;
 
 import java.util.LinkedList;
 
 public class ChatSystem extends UIElement {
+
     private final String font = "Assets/Fonts/CourierNew24.fnt";
-    private int messageSpacing = 24;
 
     private static class Message {
         public int displayTimeLeft;
@@ -29,16 +31,29 @@ public class ChatSystem extends UIElement {
         }
     }
 
-    private int maxMessagesToKeep = 8;
-    private int messageLifetime = 360;
-    private int fadeoutStartAt = 120;
-
     private final LinkedList<Message> messages = new LinkedList<>();
     private final BasicTextInput chatInput;
+    private int debugMessageLevel = DebugLevels.DEFAULT;
 
     public ChatSystem() {
         chatInput = new BasicTextInput(HgGame.Assets().loadFont(font), 250, 500, 36);
         chatInput.setEmptyText("--- Chat ---");
+    }
+
+    public void setDebugMessageLevel(int debugLevel) {
+        debugMessageLevel = MathUtils.ClampValue(debugLevel, DebugLevels.WORST, DebugLevels.ALL);
+    }
+
+    public void addDebugMessage(String message, int debugLevel) {
+        if (debugLevel <= debugMessageLevel) {
+            switch (debugLevel) {
+                case DebugLevels.Error -> addMessage("[Error] " + message);
+                case DebugLevels.Warn -> addMessage("[Warn] " + message);
+                case DebugLevels.Info -> addMessage("[Info] " + message);
+                case DebugLevels.Fatal -> addMessage("[FATAL] " + message);
+                default -> addMessage("[Other] " + message);
+            }
+        }
     }
 
     public void addMessageFromView(String message, PlayerView view) {
@@ -46,10 +61,12 @@ public class ChatSystem extends UIElement {
     }
 
     public void addMessage(String message) {
+        int messageLifetime = 360;
         Message msg = new Message(HgGame.Assets().loadFont(font), message, messageLifetime);
         msg.drawable.setEnabled(true);
         messages.addFirst(msg);
 
+        int maxMessagesToKeep = 8;
         if (messages.size() > maxMessagesToKeep) removeLastMessage();
 
         updateElements();
@@ -57,6 +74,11 @@ public class ChatSystem extends UIElement {
 
     public void removeLastMessage() {
         messages.removeLast().drawable.unregisterFromEngine();
+    }
+
+    public void clear() {
+        while (messages.size() > 0) removeLastMessage();
+        chatInput.setText("");
     }
 
     @Override
@@ -118,14 +140,11 @@ public class ChatSystem extends UIElement {
 
         int height = 0;
         for (var msg: messages) {
+            int fadeoutStartAt = 120;
             if (chatInput.isFocused()) msg.drawable.setAlpha(1f);
             else msg.drawable.setAlpha(Math.min(1f, msg.displayTimeLeft / (float) fadeoutStartAt));
+            int messageSpacing = 24;
             msg.drawable.getPosition().set(position.x, position.y + (++height * messageSpacing));
         }
-    }
-
-    public void clear() {
-        while (messages.size() > 0) removeLastMessage();
-        chatInput.setText("");
     }
 }

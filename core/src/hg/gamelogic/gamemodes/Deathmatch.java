@@ -1,4 +1,4 @@
-package hg.gamemodes;
+package hg.gamelogic.gamemodes;
 
 public class Deathmatch extends Gamemode {
     private int timeElapsed = 0;

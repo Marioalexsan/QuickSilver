@@ -6,7 +6,10 @@ import hg.drawables.Drawable;
 import hg.entities.Entity;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
+import hg.gamelogic.states.AssaultRifleState;
+import hg.gamelogic.states.State;
 import hg.interfaces.IWeapon;
+import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
 import hg.types.ActorType;
 import hg.utils.Angle;
@@ -50,6 +53,8 @@ public class AssaultRifle implements IWeapon {
     }
 
     private void createBullet() {
+        if (HgGame.Network().getNetRole() == NetworkRole.Client) return;
+
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
@@ -148,4 +153,26 @@ public class AssaultRifle implements IWeapon {
         reserveAmmo = Math.min(reserveAmmo + ammoPackAmmo, maxTotalAmmo - currentAmmo);
     }
 
+    @Override
+    public State tryGetState() {
+        AssaultRifleState stuff = new AssaultRifleState();
+        stuff.currentAmmo = currentAmmo;
+        stuff.reserveAmmo = reserveAmmo;
+        stuff.bulletsToFire = bulletsToFire;
+        stuff.burstShotCooldown = burstShotCooldown;
+        stuff.reloadCounter = reloadCounter;
+        return stuff;
+    }
+
+    @Override
+    public void tryApplyState(State state) {
+        if (state instanceof AssaultRifleState) {
+            AssaultRifleState stuff = (AssaultRifleState) state;
+            currentAmmo = stuff.currentAmmo;
+            reserveAmmo = stuff.reserveAmmo;
+            bulletsToFire = stuff.bulletsToFire;
+            burstShotCooldown = stuff.burstShotCooldown;
+            reloadCounter = stuff.reloadCounter;
+        }
+    }
 }

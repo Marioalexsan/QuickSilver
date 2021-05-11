@@ -5,24 +5,33 @@ import hg.animation.*;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
 import hg.engine.MappedAction;
+import hg.engine.NetworkEngine;
+import hg.game.GameManager;
 import hg.game.HgGame;
-import hg.game.State;
+import hg.gamelogic.playerlogic.LocalPlayerLogic;
+import hg.gamelogic.states.PlayerState;
+import hg.gamelogic.states.State;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
 import hg.libraries.AnimationLibrary;
+import hg.networking.packets.NetInstruction;
 import hg.physics.Collider;
 import hg.physics.ColliderGroup;
 import hg.physics.SphereCollider;
-import hg.playerlogic.EmptyAI;
-import hg.interfaces.IPlayerLogic;
-import hg.types.EntityType;
+import hg.gamelogic.playerlogic.EmptyAI;
+import hg.gamelogic.playerlogic.PlayerLogic;
+import hg.types.TargetType;
+import hg.types.WeaponType;
+import hg.utils.DebugLevels;
 import hg.utils.MathUtils;
 import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 
+import java.util.HashMap;
+
 public class PlayerEntity extends Entity {
-    private IPlayerLogic playerLogic;
+    private PlayerLogic playerLogic;
     private final Vector2 smoothSpeed = new Vector2();
 
     protected Animation drawable = new Animation();
@@ -30,13 +39,19 @@ public class PlayerEntity extends Entity {
 
     protected int deathCounter = 0;
 
-    protected AssaultRifle rifle = new AssaultRifle(this);
-    protected Revolver revolver = new Revolver(this);
+    protected HashMap<Integer, IWeapon> weapons = new HashMap<>();
 
-    protected IWeapon currentWeapon = revolver;
+    protected int lastWeapon;
+    protected int currentWeapon;
 
-    public PlayerEntity(IPlayerLogic playerLogic) {
+    public PlayerEntity(PlayerLogic playerLogic) {
         setLogic(playerLogic);
+
+        weapons.put(WeaponType.Revolver, new Revolver(this));
+        weapons.put(WeaponType.AssaultRifle, new AssaultRifle(this));
+
+        lastWeapon = WeaponType.AssaultRifle;
+        currentWeapon = WeaponType.Revolver;
 
         baseStats = new BaseStats(this);
         collider.group = ColliderGroup.Player;
@@ -64,30 +79,34 @@ public class PlayerEntity extends Entity {
         drawable.registerToEngine(); // Allocation!
     }
 
-    public void setLogic(IPlayerLogic newLogic) {
+    public void setLogic(PlayerLogic newLogic) {
         if (playerLogic != null) playerLogic.setControlledPlayer(null);
         if (newLogic == null) newLogic = new EmptyAI();
         playerLogic = newLogic;
         playerLogic.setControlledPlayer(this);
     }
 
+    public PlayerLogic getLogic() {
+        return playerLogic;
+    }
+
     @Override
     public void update() {
-        if (playerLogic == null) {
-            playerLogic = new EmptyAI();
-        }
+        boolean isServer = HgGame.Network().isLocalOrServer();
 
-        if (baseStats.isDead) {
-            deathCounter++;
-            if (deathCounter >= 180) {
-                revive();
-                deathCounter = 0;
+        if (isServer) {
+            if (baseStats.isDead) {
+                deathCounter++;
+                if (deathCounter >= 180) {
+                    revive();
+                    deathCounter = 0;
+                }
             }
         }
 
         drawable.update();
 
-        playerLogic.localUpdate();
+        playerLogic.update();
         var actions = playerLogic.obtainActions();
         var aim = playerLogic.obtainAimPosition();
 
@@ -121,20 +140,28 @@ public class PlayerEntity extends Entity {
             if (aim != null)
                 angle.set(new Vector2(aim).angleDeg());
 
-            if (currentWeapon != null) {
+            IWeapon heldWeapon = weapons.get(currentWeapon);
+
+            if (heldWeapon != null) {
                 if (actions != null) {
-                    if (actions.contains(MappedAction.QuickSwitchWeapon)) {
-                        currentWeapon.onUnequip();
-                        if (currentWeapon == revolver) currentWeapon = rifle;
-                        else currentWeapon = revolver;
-                        currentWeapon.onEquip();
+                    if (actions.contains(MappedAction.QuickSwitchWeapon) && currentWeapon != lastWeapon) {
+                        heldWeapon.onUnequip();
+                        int swap = currentWeapon;
+                        currentWeapon = lastWeapon;
+                        lastWeapon = swap;
+                        heldWeapon = weapons.get(currentWeapon);
+                        heldWeapon.onEquip();
                     }
-                    if (actions.contains(MappedAction.Reload)) currentWeapon.onReload();
-                    if (actions.contains(MappedAction.PrimaryFire)) currentWeapon.onPrimaryFire();
+                    if (actions.contains(MappedAction.Reload)) heldWeapon.onReload();
+                    if (actions.contains(MappedAction.PrimaryFire)) heldWeapon.onPrimaryFire();
                 }
 
-                currentWeapon.onUpdate();
+                heldWeapon.onUpdate();
             }
+        }
+
+        if (playerLogic instanceof LocalPlayerLogic) {
+            ((LocalPlayerLogic) playerLogic).sendActions();
         }
     }
 
@@ -156,8 +183,18 @@ public class PlayerEntity extends Entity {
     public void onHitByAttack(AttackStats attacker) {
         if (baseStats.invulnerabilityFrames > 0 || attacker.baseDamage <= 0.0) return;
 
-        float damage = attacker.baseDamage;
+        NetworkEngine network = HgGame.Network();
 
+        if (network.isLocalOrServer()) {
+            takeDamage(attacker.baseDamage);
+
+            if (baseStats.health <= 0.0) onDeath(attacker.owner);
+        }
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/GenericHurt.ogg"), 1f);
+    }
+
+    public void takeDamage(float damage) {
         // Apply armor plates
         if (baseStats.armorPlates > 0) {
             baseStats.armorPlates--;
@@ -176,21 +213,31 @@ public class PlayerEntity extends Entity {
 
         baseStats.health = MathUtils.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
 
-        if (baseStats.health <= 0.0) onDeath(attacker.owner);
-        else HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);
+        if (baseStats.health >= 0.0)
+            HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);
 
-        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/GenericHurt.ogg"), 1f);
+        NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 0).setFloats(damage);
+        HgGame.Network().sendToAllClients(msg, true);
     }
 
     @Override
     public void onDeath(Entity killer) {
+        NetworkEngine network = HgGame.Network();
         if (baseStats != null && !baseStats.isDead) {
-            baseStats.isDead = true;
-            killer.onKill(this);
             drawable.setLayer(DrawLayer.FloorAir);
             drawable.switchAnimation("Death");
             collider.setEnabled(false);
-            if (currentWeapon != null) currentWeapon.onOwnerDeath();
+
+            baseStats.isDead = true;
+            if (killer != null) killer.onKill(this);
+
+            IWeapon heldWeapon = weapons.get(currentWeapon);
+            if (heldWeapon != null) heldWeapon.onOwnerDeath();
+
+            if (network.isLocalOrServer()) {
+                NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 1).setInts(killer.ID);
+                HgGame.Network().sendToAllClients(msg, true);
+            }
         }
     }
 
@@ -205,6 +252,26 @@ public class PlayerEntity extends Entity {
         drawable.setLayer(DrawLayer.Default);
 
         collider.setEnabled(true);
+
+        if (HgGame.Network().isLocalOrServer()) {
+            NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 2);
+            HgGame.Network().sendToAllClients(msg, true);
+        }
+    }
+
+    @Override
+    public void onInstructionFromServer(NetInstruction msg) {
+        GameManager manager = HgGame.Manager();
+
+        switch (msg.insType) {
+            case 0 -> takeDamage(msg.floatParams[0]);
+            case 1 -> {
+                Entity killer = manager.getActor(msg.intParams[0]);
+                if (killer != null) onDeath(killer);
+            }
+            case 2 -> revive();
+            default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + msg.insType, DebugLevels.Warn);
+        }
     }
 
     @Override
@@ -219,15 +286,6 @@ public class PlayerEntity extends Entity {
         return drawable;
     }
 
-    public static class PlayerState extends State {
-        public float posX;
-        public float posY;
-        public float angle;
-        public float smoothSpeedX;
-        public float smoothSpeedY;
-        public BaseStats baseStats; // Does not send Entity
-    }
-
     @Override
     public State tryGenerateState() {
         PlayerState stuff = new PlayerState();
@@ -237,6 +295,13 @@ public class PlayerEntity extends Entity {
         stuff.smoothSpeedX = smoothSpeed.x;
         stuff.smoothSpeedY = smoothSpeed.y;
         stuff.baseStats = baseStats;
+
+        stuff.currentWeapon = currentWeapon;
+
+        stuff.weaponStates = new HashMap<>();
+        for (var weapon: weapons.entrySet()) {
+            stuff.weaponStates.put(weapon.getKey(), weapon.getValue().tryGetState());
+        }
         return stuff;
     }
 
@@ -248,6 +313,12 @@ public class PlayerEntity extends Entity {
             angle.set(stuff.angle);
             smoothSpeed.set(stuff.smoothSpeedX, stuff.smoothSpeedY);
             baseStats.copyFrom(stuff.baseStats);
+            currentWeapon = stuff.currentWeapon;
+
+            for (var weaponState: stuff.weaponStates.entrySet()) {
+                IWeapon weapon = weapons.get(weaponState.getKey());
+                if (weapon != null) weapon.tryApplyState(weaponState.getValue());
+            }
         }
     }
 }

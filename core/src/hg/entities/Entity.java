@@ -2,9 +2,10 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.Drawable;
-import hg.game.State;
+import hg.gamelogic.states.State;
 import hg.gamelogic.BaseStats;
 import hg.interfaces.IDestroyable;
+import hg.interfaces.INetInterface;
 import hg.interfaces.IUpdateable;
 import hg.interfaces.ICollisionObserver;
 import hg.physics.Collider;
@@ -14,7 +15,7 @@ import hg.utils.Angle;
  * Entities are basic things that exist in the world.
  * (They don't really follow the whole ECS pattern though)
  */
-public abstract class Entity implements ICollisionObserver, IUpdateable, IDestroyable {
+public abstract class Entity implements ICollisionObserver, IUpdateable, IDestroyable, INetInterface {
     protected boolean toBeDestroyed = false;
     protected int ID;
 
@@ -39,8 +40,8 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
 
     public BaseStats getStats() { return baseStats; }
 
-    public abstract void onDeath(Entity killer);
-    public abstract void onKill(Entity victim);
+    public void onDeath(Entity killer) {};
+    public void onKill(Entity victim) {};
 
     public int getID() { return ID; }
     public void setID(int ID) { this.ID = ID; }
@@ -70,5 +71,4 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
     }
 
     public void tryApplyState(State state) { }
-
 }

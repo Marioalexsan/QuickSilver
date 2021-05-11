@@ -7,7 +7,10 @@ import hg.entities.Entity;
 import hg.entities.GenericBullet;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
+import hg.gamelogic.states.RevolverState;
+import hg.gamelogic.states.State;
 import hg.interfaces.IWeapon;
+import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
 import hg.types.ActorType;
 import hg.utils.Angle;
@@ -47,6 +50,8 @@ public class Revolver implements IWeapon {
     }
 
     private void createBullet() {
+        if (HgGame.Network().getNetRole() == NetworkRole.Client) return;
+
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
@@ -141,4 +146,24 @@ public class Revolver implements IWeapon {
         reserveAmmo = Math.min(reserveAmmo + ammoPackAmmo, maxTotalAmmo - currentAmmo);
     }
 
+    @Override
+    public State tryGetState() {
+        RevolverState stuff = new RevolverState();
+        stuff.currentAmmo = currentAmmo;
+        stuff.reserveAmmo = reserveAmmo;
+        stuff.weaponCooldown = weaponCooldown;
+        stuff.reloadCounter = reloadCounter;
+        return stuff;
+    }
+
+    @Override
+    public void tryApplyState(State state) {
+        if (state instanceof RevolverState) {
+            RevolverState stuff = (RevolverState) state;
+            currentAmmo = stuff.currentAmmo;
+            reserveAmmo = stuff.reserveAmmo;
+            weaponCooldown = stuff.weaponCooldown;
+            reloadCounter = stuff.reloadCounter;
+        }
+    }
 }

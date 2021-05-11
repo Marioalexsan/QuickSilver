@@ -6,14 +6,17 @@ import hg.directors.*;
 import hg.drawables.BasicText;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
+import hg.gamelogic.states.State;
 import hg.libraries.ActorLibrary;
 import hg.libraries.EnvironmentLibrary;
 import hg.networking.NetworkRole;
 import hg.networking.NetworkStatus;
 import hg.networking.PlayerView;
 import hg.networking.packets.*;
-import hg.types.EntityType;
+import hg.types.TargetType;
+import hg.utils.Angle;
 import hg.utils.BadCoderException;
+import hg.utils.DebugLevels;
 
 import java.util.*;
 
@@ -38,10 +41,7 @@ public class GameManager {
     // Network Update stuff
 
     private int actorHeavyUpdateInterval = 8;
-
     private int actorNextHeavyUpdate = 0;
-
-
 
     public GameManager() {
         chatSystem = new ChatSystem();
@@ -79,8 +79,7 @@ public class GameManager {
     // Player Views
     // ---
 
-    // TODO Probably called by the server. Either this or adjacent code should also send messages to clients
-    /** Creates a player view and adds it to current views */
+    /** Creates a player view and adds it to current views. This should be called by Server only. */
     public PlayerView createPlayerView(PlayerView.Type type) {
         if (!HgGame.Network().isLocalOrServer()) throw new BadCoderException("Non-server tried to create player views lol");
 
@@ -92,15 +91,14 @@ public class GameManager {
         return view;
     }
 
-    // TODO Probably called by clients
+    /** Adds an existing view to the list. This should be called by Clients to add views received from Server. */
     public void addPlayerView(PlayerView newView) {
         for (var view : playerViews)
             if (view.uniqueID == newView.uniqueID) throw new BadCoderException("ID conflict when adding player view!");
         playerViews.add(newView);
     }
 
-    // TODO Probably called by the server. Either this or adjacent code should also send messages to clients
-    /** Removes a PlayerView by Unique ID and returns it */
+    /** Removes a PlayerView by Unique ID and returns it for final processing. */
     public PlayerView removePlayerView(int uniqueID) {
         PlayerView target = null;
         for (var view : playerViews) {
@@ -111,7 +109,8 @@ public class GameManager {
         }
 
         if (target == null) return null;
-        if (target == localView) throw new BadCoderException("Someone tried to remove localview via uniqueID!");
+        if (target == localView)
+            chatSystem.addDebugMessage("Someone tried to remove localview via uniqueID!", DebugLevels.Error);
 
         playerViews.remove(target);
         return target;
@@ -123,7 +122,7 @@ public class GameManager {
         playerViews.clear();
     }
 
-    /** Returns an ID that is not in use by any other PlayerView right now */
+    /** Returns an ID that is not in use by any other PlayerView right now. Should be used by Server only. */
     private int generatePlayerViewID() {
         Random rand = new Random();
         boolean isUnique = false;
@@ -142,14 +141,14 @@ public class GameManager {
         return ID;
     }
 
-    public PlayerView getUniqueIDPlayerView(int uniqueID) {
+    public PlayerView getPlayerViewByUniqueID(int uniqueID) {
         for (var view: playerViews) {
             if (view.uniqueID == uniqueID) return view;
         }
         return null;
     }
 
-    public PlayerView getConnectionIDPlayerView(int connectionID) {
+    public PlayerView getPlayerViewByConnectionID(int connectionID) {
         for (var view: playerViews) {
             if (view.connectionID != -1 && view.connectionID == connectionID) return view;
         }
@@ -171,23 +170,15 @@ public class GameManager {
             newEntity.setAngle(direction);
 
             if (actors.put(ID, newEntity) != null) {
-                chatSystem.addMessage("[Warn] Tried to add an entity with an existing ID");
+                chatSystem.addDebugMessage("Trying to add an entity with an existing ID!", DebugLevels.Warn);
             }
             newEntity.setID(ID);
         }
 
-
         NetworkEngine network = HgGame.Network();
         if (newEntity != null && network.isLocalOrServer()) {
-            EntityAdded msg = new EntityAdded();
-            msg.entityType = EntityType.Actors;
-            msg.entitySubType = entityType;
-            msg.entityID = ID;
-            msg.posX = position.x;
-            msg.posY = position.y;
-            msg.angle = direction;
-
-            network.sendPacketToAllClients(msg, true);
+            EntityAdded msg = new EntityAdded(TargetType.Actors, entityType, ID, position.x, position.y, direction);
+            network.sendToAllClients(msg, true);
         }
 
         return newEntity;
@@ -207,7 +198,9 @@ public class GameManager {
         newEntity.setPosition(position);
         newEntity.setAngle(direction);
 
-        if (environments.put(ID, newEntity) != null) throw new RuntimeException("Tried to add an entity with an existing ID");
+        if (environments.put(ID, newEntity) != null) {
+            chatSystem.addDebugMessage("Trying to add an environment with an existing ID!", DebugLevels.Warn);
+        }
         newEntity.setID(ID);
 
         return newEntity;
@@ -316,10 +309,7 @@ public class GameManager {
         for (var key : actorsToRemove) actors.remove(key).destroy();
         if (isServer) {
             for (var key : actorsToRemove) {
-                EntityDestroyed msg = new EntityDestroyed();
-                msg.entityType = EntityType.Actors;
-                msg.entityID = key;
-                network.sendPacketToAllClients(msg, true);
+                network.sendToAllClients(new EntityDestroyed(TargetType.Actors, key), true);
             }
         }
 
@@ -333,20 +323,25 @@ public class GameManager {
         for (var key : environmentsToRemove) environments.remove(key).destroy();
 
 
-        // Send network updates
+        // Send network updates if Server
 
-        if (isServer && actorNextHeavyUpdate-- <= 0) {
-            actorNextHeavyUpdate = actorHeavyUpdateInterval;
-            for (var actor: actors.entrySet()) {
-                State stuff = actor.getValue().tryGenerateState();
-                if (stuff != null) {
-                    StateUpdate update = new StateUpdate();
-                    update.targetType = EntityType.Actors;
-                    update.payload = stuff;
-                    update.targetID = actor.getKey();
-                    network.sendPacketToAllClients(update, false); // UDP
+        if (isServer) {
+            if (actorNextHeavyUpdate-- <= 0) {
+                actorNextHeavyUpdate = actorHeavyUpdateInterval;
+                for (var actor: actors.entrySet()) {
+                    State stuff = actor.getValue().tryGenerateState();
+                    if (stuff != null)
+                        network.sendToAllClients(new StateUpdate(TargetType.Actors, actor.getKey(), stuff), false); // UDP Packet
                 }
             }
+            else {
+                for (var actor: actors.entrySet()) {
+                    Vector2 position = actor.getValue().getPosition();
+                    Angle angle = actor.getValue().getAngle();
+                    network.sendToAllClients(new PositionUpdate(actor.getKey(), position.x, position.y, angle.getDeg()), false); // UDP Packet
+                }
+            }
+
         }
     }
 
@@ -365,18 +360,15 @@ public class GameManager {
             parseCommand(parts[0], parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]);
         }
         else {
-            ChatMessage broadcast = new ChatMessage();
-            broadcast.message = message;
-            broadcast.senderUniqueID = localView.uniqueID;
-
+            ChatMessage broadcast = new ChatMessage(message, localView.uniqueID);
             // Send in network
             if (HgGame.Network().isLocalOrServer()) {
                 for (var view : playerViews) {
-                    if (view != localView) HgGame.Network().sendPacketToClient(view.connectionID, broadcast, true);
+                    if (view != localView) HgGame.Network().sendToClient(broadcast, true, view.connectionID);
                 }
             }
             else {
-                HgGame.Network().sendPacketToServer(broadcast, true);
+                HgGame.Network().sendToServer(broadcast, true);
             }
         }
     }
@@ -390,6 +382,11 @@ public class GameManager {
                 boolean debugDraw = HgGame.Physics().getDebugDraw();
                 HgGame.Physics().setDebugDraw(!debugDraw);
                 chatSystem.addMessage(casualPrefix + "Debug draw is now " + (debugDraw ? "off" : "on"));
+            }
+            case "tellmeviews" -> {
+                for (var view: playerViews) {
+                    chatSystem.addMessage(view.playerEntity.getLogic().toString());
+                }
             }
             default -> chatSystem.addMessage("[System] Unknown command: " + command);
         }
@@ -436,16 +433,15 @@ public class GameManager {
     public void onClientDisconnect(int connectionID) {
         // Tell everyone a playerview disconnected if applicable
 
-        PlayerView deadView = getConnectionIDPlayerView(connectionID);
+        PlayerView deadView = getPlayerViewByConnectionID(connectionID);
 
         if (deadView != null) {
             removePlayerView(deadView.uniqueID);
 
-            PlayerViewDisconnected msg = new PlayerViewDisconnected();
-            msg.deadUniqueID = deadView.uniqueID;
+            PlayerViewDisconnected msg = new PlayerViewDisconnected(deadView.uniqueID);
 
             for (var view: playerViews) {
-                if (view != localView) HgGame.Network().sendPacketToClient(view.connectionID, msg, true);
+                if (view != localView) HgGame.Network().sendToClient(msg, true, view.connectionID);
             }
 
             HgGame.Manager().getChatSystem().addMessage(deadView.name + " disconnected.");

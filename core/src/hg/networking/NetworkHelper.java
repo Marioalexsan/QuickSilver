@@ -3,12 +3,16 @@ package hg.networking;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 import hg.engine.NetworkEngine;
-import hg.entities.GenericBullet;
-import hg.entities.PlayerEntity;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
+import hg.gamelogic.states.AssaultRifleState;
+import hg.gamelogic.states.GenericBulletState;
+import hg.gamelogic.states.PlayerState;
+import hg.gamelogic.states.RevolverState;
 import hg.networking.packets.*;
+
+import java.util.HashMap;
 
 public class NetworkHelper {
     public static void KryonetRegisterClasses(EndPoint point) {
@@ -24,10 +28,12 @@ public class NetworkHelper {
         kryo.register(EntityAdded.class);
         kryo.register(EntityDestroyed.class);
         kryo.register(GameSessionStart.class);
-        kryo.register(MappedActionUpdate.class);
+        kryo.register(InputUpdate.class);
+        kryo.register(NetInstruction.class);
         kryo.register(PlayerViewConnected.class);
         kryo.register(PlayerViewDisconnected.class);
         kryo.register(PlayerViewUpdate.class);
+        kryo.register(PositionUpdate.class);
         kryo.register(StateUpdate.class);
 
         // Other things which are sent / used by packets
@@ -37,18 +43,17 @@ public class NetworkHelper {
         kryo.register(PlayerView.Type.class);
         kryo.register(PlayerView[].class);
 
-        // Entity States
+        // States
 
-        kryo.register(PlayerEntity.PlayerState.class);
-        kryo.register(GenericBullet.GenericBulletState.class);
-    }
+        kryo.register(PlayerState.class);
+        kryo.register(GenericBulletState.class);
+        kryo.register(AssaultRifleState.class);
+        kryo.register(RevolverState.class);
 
-    public static void SendToClients(Packet message) {
-        NetworkEngine network = HgGame.Network();
-        GameManager manager = HgGame.Manager();
+        // Other
 
-        for (var view: manager.getPlayerViews()) {
-
-        }
+        kryo.register(int[].class);
+        kryo.register(float[].class);
+        kryo.register(HashMap.class);
     }
 }
