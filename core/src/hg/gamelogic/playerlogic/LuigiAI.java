@@ -8,6 +8,7 @@ import hg.utils.Angle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -21,7 +22,7 @@ public class LuigiAI extends PlayerLogic {
     private final float rotationSpeed;
 
     public LuigiAI() {
-        rotationSpeed = (float) HgGame.getLogicRandom() * 2.0f + 2.0f;
+        rotationSpeed = (float) new Random().nextDouble() * 2.0f + 2.0f;
     }
 
     @Override

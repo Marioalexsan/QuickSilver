@@ -10,6 +10,7 @@ import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.NetworkRole;
 import hg.networking.Packet;
 import hg.types.TargetType;
+import hg.utils.DebugLevels;
 
 public class EntityAdded extends Packet {
     public int entityType;
@@ -42,10 +43,8 @@ public class EntityAdded extends Packet {
                         ((PlayerEntity) actor).setLogic(new NetworkPlayerLogic());
                     }
                 }
-
-                manager.getChatSystem().addMessage("Added entity of type " + entityType + ", ID " + entityID);
             }
-            default -> manager.getChatSystem().addMessage("[Warn] Unallowed add of entity type " + entityType);
+            default -> manager.getChatSystem().addDebugMessage("Unknown entity type " + entityType, DebugLevels.Warn);
         }
     }
 

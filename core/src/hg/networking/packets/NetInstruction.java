@@ -1,8 +1,12 @@
 package hg.networking.packets;
 
+import hg.directors.DirectorTypes;
+import hg.directors.MatchDirector;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
+import hg.gamelogic.gamemodes.Gamemode;
+import hg.gamelogic.states.State;
 import hg.networking.Packet;
 import hg.types.TargetType;
 import hg.utils.DebugLevels;
@@ -49,6 +53,13 @@ public class NetInstruction extends Packet {
                     return;
                 }
                 target.onInstructionFromServer(this);
+            }
+            case TargetType.Gamemodes -> {
+                MatchDirector match = (MatchDirector) manager.getDirector(DirectorTypes.MatchDirector);
+                Gamemode mode = null;
+                if (match != null) mode = match.getGamemode();
+                if (mode != null) mode.onInstructionFromServer(this);
+                if (mode == null) manager.getChatSystem().addDebugMessage("Lmao", DebugLevels.DEFAULT);
             }
             default -> manager.getChatSystem().addDebugMessage("Instruction for other type " + targetType, DebugLevels.Warn);
         }

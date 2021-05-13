@@ -9,6 +9,8 @@ import hg.game.HgGame;
 import hg.utils.AudioUtils;
 import hg.utils.MathUtils;
 
+import java.util.Random;
+
 // Note: GDX has a "fire and forget" type of attitude towards played Sounds
 // There's little point in trying to control sound instance behavior
 
@@ -73,7 +75,7 @@ public class AudioEngine {
             // Simulate positional sound
             float[] simData = AudioUtils.SimulatePositionalAudio(audioListener, position, data.minDistance, data.maxDistance);
             float playVolume = volume * simData[0] * globalSoundVolume;
-            float playPitch = (float) (0.5 - HgGame.getVisualRandom()) * data.randomPitch + data.pitch;
+            float playPitch = (float) (0.5 - new Random().nextDouble()) * data.randomPitch + data.pitch;
             sound.play(playVolume, playPitch, simData[1]);
         }
         else sound.play(volume * globalSoundVolume, data == null ? 1f : data.pitch, 0f);

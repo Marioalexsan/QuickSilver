@@ -6,6 +6,9 @@ import hg.directors.*;
 import hg.drawables.BasicText;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
+import hg.entities.PlayerEntity;
+import hg.gamelogic.BaseStats;
+import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.states.State;
 import hg.libraries.ActorLibrary;
 import hg.libraries.EnvironmentLibrary;
@@ -43,6 +46,9 @@ public class GameManager {
     private int actorHeavyUpdateInterval = 8;
     private int actorNextHeavyUpdate = 0;
 
+    private int gamemodeHeavyUpdateInterval = 30;
+    private int gamemodeNextHeavyUpdate = 0;
+
     public GameManager() {
         chatSystem = new ChatSystem();
         chatSystem.setEnabled(false);
@@ -53,6 +59,7 @@ public class GameManager {
         notice = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "");
         notice.setConstraints(BasicText.HPos.Center, BasicText.VPos.Center, 0f);
         notice.setAlpha(0f);
+        notice.setCameraUse(false);
         notice.registerToEngine();
         noticeTimeLeft = 0;
     }
@@ -155,8 +162,35 @@ public class GameManager {
         return null;
     }
 
+    public PlayerView getPlayerViewByActorID(int actorID) {
+        for (var view: playerViews) {
+            if (view.playerEntity != null && view.playerEntity.getID() == actorID) return view;
+        }
+        return null;
+    }
+
     public PlayerView[] getPlayerViews() {
         return playerViews.toArray(new PlayerView[0]);
+    }
+
+    public Entity[] getDeadActors() {
+        ArrayList<Entity> deadEntities = new ArrayList<>();
+        for (var actor: actors.values()) {
+            BaseStats stats = actor.getStats();
+            if (stats != null && stats.isDead)
+                deadEntities.add(actor);
+        }
+        return deadEntities.toArray(new Entity[0]);
+    }
+
+    public PlayerEntity[] getDeadPlayerEntities() {
+        Entity[] deadEntities = getDeadActors();
+        ArrayList<PlayerEntity> deadPlayers = new ArrayList<>();
+        for (var actor: deadEntities) {
+            if (actor instanceof PlayerEntity)
+                deadPlayers.add((PlayerEntity) actor);
+        }
+        return deadPlayers.toArray(new PlayerEntity[0]);
     }
 
     public Entity addActor(int entityType, Vector2 position, float direction) {
@@ -340,6 +374,17 @@ public class GameManager {
                     Angle angle = actor.getValue().getAngle();
                     network.sendToAllClients(new PositionUpdate(actor.getKey(), position.x, position.y, angle.getDeg()), false); // UDP Packet
                 }
+            }
+
+            if (gamemodeNextHeavyUpdate-- <= 0) {
+                gamemodeNextHeavyUpdate = gamemodeHeavyUpdateInterval;
+                MatchDirector match = (MatchDirector) getDirector(DirectorTypes.MatchDirector);
+                Gamemode mode = null;
+                State stuff = null;
+                if (match != null) mode = match.getGamemode();
+                if (mode != null) stuff = mode.tryGenerateState();
+                if (stuff != null)
+                    network.sendToAllClients(new StateUpdate(TargetType.Gamemodes, -1337, stuff), false); // UDP Packet
             }
 
         }

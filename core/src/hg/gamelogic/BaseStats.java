@@ -2,11 +2,12 @@ package hg.gamelogic;
 
 import hg.entities.Entity;
 import hg.interfaces.ICollisionObserver;
+import hg.interfaces.IUpdateable;
 
 /**
  * Structure that holds information about entities.
  */
-public class BaseStats {
+public class BaseStats implements IUpdateable {
 
     public transient Entity owner;
 
@@ -22,8 +23,19 @@ public class BaseStats {
 
     public float baseMoveSpeed = 10f;
 
+    public int deathCounter = 0;
+
+
     public BaseStats(Entity owner) {
         this.owner = owner;
+    }
+
+    @Override
+    public void update() {
+        if (isDead) deathCounter++;
+        else deathCounter = 0;
+
+        if (invulnerabilityFrames > 0) invulnerabilityFrames--;
     }
 
     public void copyFrom(BaseStats other) {
@@ -38,6 +50,7 @@ public class BaseStats {
         hasKevlarVest = other.hasKevlarVest;
         invulnerabilityFrames = other.invulnerabilityFrames;
         baseMoveSpeed = other.baseMoveSpeed;
+        deathCounter = other.deathCounter;
     }
 
     // Do not use. This is for Kryonet

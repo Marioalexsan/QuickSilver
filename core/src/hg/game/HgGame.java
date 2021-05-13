@@ -47,12 +47,6 @@ public class HgGame extends ApplicationAdapter {
 
 	// TO DO: rewrite / encapsulate random sources
 
-	private static final Random randomVisual = new Random();
-	private static final Random randomLogic = new Random();
-
-	public static double getVisualRandom() { return randomVisual.nextDouble(); }
-	public static double getLogicRandom() { return randomLogic.nextDouble(); }
-
 	private int frameCounter = 0;
 	private float factorFOV = 0.75f;
 

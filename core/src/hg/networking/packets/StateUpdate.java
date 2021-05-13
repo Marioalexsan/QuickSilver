@@ -1,8 +1,11 @@
 package hg.networking.packets;
 
+import hg.directors.DirectorTypes;
+import hg.directors.MatchDirector;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
+import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.states.State;
 import hg.networking.Packet;
 import hg.types.TargetType;
@@ -32,6 +35,14 @@ public class StateUpdate extends Packet {
                     return;
                 }
                 target.tryApplyState(payload);
+            }
+            case TargetType.Gamemodes -> {
+                // targetID ignored. There's only one gamemode running
+                MatchDirector match = (MatchDirector) manager.getDirector(DirectorTypes.MatchDirector);
+                Gamemode mode = null;
+                if (match != null) mode = match.getGamemode();
+                if (mode != null) mode.tryApplyState(payload);
+
             }
             default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + targetType, DebugLevels.Warn);
         }

@@ -12,6 +12,14 @@ public class MapLibrary {
             case MapType.TestArea01 -> {
                 MapPrototype proto = new MapPrototype();
 
+                var randoms = proto.randomSpawnpoints;
+
+                randoms.add(new Vector2(800, 800));
+                randoms.add(new Vector2(1600, 500));
+                randoms.add(new Vector2(3400, 2400));
+                randoms.add(new Vector2(4700, 2400));
+                randoms.add(new Vector2(800, 1750));
+
                 var environments = proto.environments;
 
                 // === Level Boundary Walls and Flooring ===

@@ -31,6 +31,10 @@ public class MatchDirector extends Director {
         HgGame.Manager().enableChatSystem();
     }
 
+    public Gamemode getGamemode() {
+        return gamemode;
+    }
+
     public boolean startAsServer() {
         if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
 
@@ -74,8 +78,9 @@ public class MatchDirector extends Director {
         NetworkEngine network = HgGame.Network();
         boolean isServer = network.isLocalOrServer();
 
+        gamemode = new Deathmatch();
+        gamemode.restart();
         if (isServer) {
-            gamemode = new Deathmatch();
 
             for (var view : manager.getPlayerViews()) {
                 if (view.playerEntity != null) throw new BadCoderException("Player Entity already exists lool");
@@ -94,10 +99,9 @@ public class MatchDirector extends Director {
         }
 
         LevelDirector level = (LevelDirector) manager.addAndGetDirector(DirectorTypes.LevelDirector);
-        level.LoadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
+        level.loadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
 
         HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
-
         HgGame.Manager().addDirector(DirectorTypes.InGameMenu);
 
         if (isServer) {
@@ -120,7 +124,7 @@ public class MatchDirector extends Director {
         NetworkEngine network = HgGame.Network();
 
         LevelDirector level = (LevelDirector) manager.getDirector(DirectorTypes.LevelDirector);
-        if (level != null) level.UnloadMap();
+        if (level != null) level.unloadMap();
 
         manager.clearActors();
         if (manager.localView != null)

@@ -6,10 +6,7 @@ import hg.engine.NetworkEngine;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
-import hg.gamelogic.states.AssaultRifleState;
-import hg.gamelogic.states.GenericBulletState;
-import hg.gamelogic.states.PlayerState;
-import hg.gamelogic.states.RevolverState;
+import hg.gamelogic.states.*;
 import hg.networking.packets.*;
 
 import java.util.HashMap;
@@ -45,9 +42,10 @@ public class NetworkHelper {
 
         // States
 
-        kryo.register(PlayerState.class);
-        kryo.register(GenericBulletState.class);
         kryo.register(AssaultRifleState.class);
+        kryo.register(DeathmatchState.class);
+        kryo.register(GenericBulletState.class);
+        kryo.register(PlayerState.class);
         kryo.register(RevolverState.class);
 
         // Other

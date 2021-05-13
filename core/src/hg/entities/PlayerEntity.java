@@ -2,12 +2,15 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
+import hg.directors.DirectorTypes;
+import hg.directors.MatchDirector;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
 import hg.engine.MappedAction;
 import hg.engine.NetworkEngine;
 import hg.game.GameManager;
 import hg.game.HgGame;
+import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.states.PlayerState;
 import hg.gamelogic.states.State;
@@ -36,8 +39,6 @@ public class PlayerEntity extends Entity {
 
     protected Animation drawable = new Animation();
     protected SphereCollider collider = new SphereCollider(50);
-
-    protected int deathCounter = 0;
 
     protected HashMap<Integer, IWeapon> weapons = new HashMap<>();
 
@@ -94,17 +95,11 @@ public class PlayerEntity extends Entity {
     public void update() {
         boolean isServer = HgGame.Network().isLocalOrServer();
 
-        if (isServer) {
-            if (baseStats.isDead) {
-                deathCounter++;
-                if (deathCounter >= 180) {
-                    revive();
-                    deathCounter = 0;
-                }
-            }
-        }
-
         drawable.update();
+
+        if (isServer) {
+            baseStats.update();
+        }
 
         playerLogic.update();
         var actions = playerLogic.obtainActions();
@@ -229,7 +224,15 @@ public class PlayerEntity extends Entity {
             collider.setEnabled(false);
 
             baseStats.isDead = true;
-            if (killer != null) killer.onKill(this);
+            if (killer != null) {
+                killer.onKill(this);
+
+                MatchDirector match = (MatchDirector) HgGame.Manager().getDirector(DirectorTypes.MatchDirector);
+                if (match != null) {
+                    Gamemode mode = match.getGamemode();
+                    if (mode != null) mode.onKillCallback(killer, this);
+                }
+            }
 
             IWeapon heldWeapon = weapons.get(currentWeapon);
             if (heldWeapon != null) heldWeapon.onOwnerDeath();
