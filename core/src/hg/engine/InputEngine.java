@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import hg.game.HgGame;
-import hg.utils.MathUtils;
+import hg.utils.HgMathUtils;
 
 import java.util.*;
 
@@ -201,6 +201,20 @@ public class InputEngine {
         );
     }
 
+    // Mouse sensitivity
+
+    public void setMouseSensitivity(float sensitivity) {
+        keyMouseState.mouseSensitivity = HgMathUtils.ClampValue(sensitivity, 0.6f, 1.6f);
+    }
+
+    public float getMouseSensitivity() {
+        return keyMouseState.mouseSensitivity;
+    }
+
+    public void modifySensitivity(float delta) {
+        setMouseSensitivity(keyMouseState.mouseSensitivity + delta);
+    }
+
     // FOV Mechanic - factor:
     // Consider the center of the world as a vector, and the camera's position as a vector.
     // The cursor always renders independent of camera.
@@ -214,7 +228,7 @@ public class InputEngine {
      * @return Two vectors - the mouse world position according to factor, and the camera displacement
      */
     public Vector2[] getWorldMouseAndFOVOffset(float factor) {
-        factor = MathUtils.ClampValue(factor, 0f, 1f);
+        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
         Vector2 camera = HgGame.Graphics().getCameraCenter();
         Vector2 originalMouse = getMouse();
         Vector2 distance = new Vector2(originalMouse).sub(camera);
@@ -229,13 +243,13 @@ public class InputEngine {
     }
 
     public Vector2 getFOVWorldMouse(float factor) {
-        factor = MathUtils.ClampValue(factor, 0f, 1f);
+        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
         Vector2 distance = getMouse();
         return new Vector2(distance).scl(factor * HgGame.Graphics().getCameraZoom()).add(getWorldMouse());
     }
 
     public Vector2 getFOVCameraOffset(float factor) {
-        factor = MathUtils.ClampValue(factor, 0f, 1f);
+        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
         return new Vector2(getMouse()).scl(factor * HgGame.Graphics().getCameraZoom());
     }
 }

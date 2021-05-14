@@ -5,7 +5,7 @@ import static java.lang.Math.abs;
 /**
  * Provides various utilities for dealing with QuickSilver's insane design choices.
  */
-public class MathUtils {
+public class HgMathUtils {
 
     /**
      * Returns a value that is in the range [leftBorder; rightBorder).

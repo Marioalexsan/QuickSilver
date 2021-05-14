@@ -2,7 +2,7 @@ package hg.utils;
 
 import com.badlogic.gdx.math.Vector2;
 
-public class AudioUtils {
+public class HgAudioUtils {
 
     /**
      * Helper function for calculating volume and panning for positional audio.
@@ -18,13 +18,13 @@ public class AudioUtils {
 
         float distance = direction.len();
         float segment = maxDistance - minDistance;
-        float relativeDistance = (float) MathUtils.ClampValue(maxDistance - distance, 0.0, segment);
+        float relativeDistance = (float) HgMathUtils.ClampValue(maxDistance - distance, 0.0, segment);
 
         float powerFactor = relativeDistance / segment;
 
         return new float[] {
                 (float) Math.pow(powerFactor, 1.15),
-                (float) Math.cos(direction.angleRad()) * (float) Math.pow(MathUtils.ClampValue(1f - powerFactor, 0f, 1f), 0.25)
+                (float) Math.cos(direction.angleRad()) * (float) Math.pow(HgMathUtils.ClampValue(1f - powerFactor, 0f, 1f), 0.25)
         };
     }
 

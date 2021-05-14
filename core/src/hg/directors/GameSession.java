@@ -16,18 +16,20 @@ import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.playerlogic.LuigiAI;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.types.ActorType;
+import hg.types.DirectorType;
 import hg.types.MapType;
 import hg.utils.BadCoderException;
+import hg.utils.DebugLevels;
 
-import java.io.IOException;
-
-public class MatchDirector extends Director {
-    private boolean started = false;
+/** GameSession is the director that encapsulates the "core" game.
+ * GameSession is started once this machine becomes a Server / initialized Client */
+public class GameSession extends Director {
+    private int matchState = 0;
     private boolean stopDecided = false;
 
     private Gamemode gamemode;
 
-    public MatchDirector() {
+    public GameSession() {
         HgGame.Manager().enableChatSystem();
     }
 
@@ -35,47 +37,42 @@ public class MatchDirector extends Director {
         return gamemode;
     }
 
-    public boolean startAsServer() {
-        if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
-
+    public void startLobby() {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        try {
-            network.startServer();
-        }
-        catch(IOException ignored) {
-            manager.setNotice("Couldn't open server!\nAre ports " + network.getTCPPort() + " TCP and " + network.getUDPPort() + " UDP open?", 180);
-            toBeDestroyed = true;
-            return false;
+        if (matchState == 1) {
+            manager.getChatSystem().addDebugMessage("Tried to enter lobby while already in lobby", DebugLevels.Error);
+            return;
         }
 
-        manager.removeAllPlayerViews(); // Probably not needed, but done just in case
+        boolean isServer = network.isLocalOrServer();
 
-        manager.localView = manager.createPlayerView(PlayerView.Type.Host);
-        manager.localView.name = HgGame.Game().localName;
+        if (isServer) {
+            manager.localView = manager.createPlayerView(PlayerView.Type.Host);
+            manager.localView.name = HgGame.Game().localName;
+        }
 
-        HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
+        manager.tryAddDirector(DirectorType.LobbyMenu);
 
-        started = true;
-        return true;
-    }
-
-    public boolean startAsClient() {
-        if (started) throw new BadCoderException("Tried to start a started MatchDirector!");
-
-        HgGame.Manager().addDirector(DirectorTypes.LobbyDirector);
-
-        started = true;
-
-        return true;
+        matchState = 1;
     }
 
     public void startMatch() {
-        if (!started) throw new BadCoderException("Tried to start match without Match Director being started!");
-
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
+        InputEngine input = HgGame.Input();
+
+        if (matchState == 2) {
+            manager.getChatSystem().addDebugMessage("Tried to start a started match", DebugLevels.Error);
+            return;
+        }
+
+        manager.tryRetireDirector(DirectorType.LobbyMenu);
+
+        Level level = (Level) manager.tryAddDirector(DirectorType.Level);
+        level.loadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
+
         boolean isServer = network.isLocalOrServer();
 
         gamemode = new Deathmatch();
@@ -98,15 +95,11 @@ public class MatchDirector extends Director {
             }
         }
 
-        LevelDirector level = (LevelDirector) manager.addAndGetDirector(DirectorTypes.LevelDirector);
-        level.loadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
-
-        HgGame.Input().addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
-        HgGame.Manager().addDirector(DirectorTypes.InGameMenu);
+        input.addFocusInput(this, InputEngine.FocusPriorities.PlayerInputs);
+        manager.tryAddDirector(DirectorType.PauseMenu);
 
         if (isServer) {
             // Jojo, it's time to gogo
-
             GameSessionStart msg = new GameSessionStart();
             network.sendToAllClients(msg, true);
 
@@ -115,6 +108,8 @@ public class MatchDirector extends Director {
                 network.sendToAllClients(viewMsg, true);
             }
         }
+
+        matchState = 2;
     }
 
     private void stop() {
@@ -123,7 +118,7 @@ public class MatchDirector extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        LevelDirector level = (LevelDirector) manager.getDirector(DirectorTypes.LevelDirector);
+        Level level = (Level) manager.getDirector(DirectorType.Level);
         if (level != null) level.unloadMap();
 
         manager.clearActors();
@@ -134,11 +129,14 @@ public class MatchDirector extends Director {
 
         network.stopNetwork();
 
-        HgGame.Manager().addDirector(DirectorTypes.MainMenu);
+        HgGame.Manager().tryAddDirector(DirectorType.MainMenu);
+
+        matchState = -1;
+
         toBeDestroyed = true;
     }
 
-    public void receiveStop() {
+    public void signalStop() {
         stopDecided = true;
     }
 
@@ -158,7 +156,7 @@ public class MatchDirector extends Director {
         HgGame.Input().removeFocusInput(this);
         manager.disableChatSystem();
 
-        LobbyDirector lobby = (LobbyDirector) manager.getDirector(DirectorTypes.LobbyDirector);
+        LobbyMenu lobby = (LobbyMenu) manager.getDirector(DirectorType.LobbyMenu);
         if (lobby != null) lobby.signalDestroy();
     }
 }

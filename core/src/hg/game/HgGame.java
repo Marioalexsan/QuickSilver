@@ -2,7 +2,7 @@ package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import hg.directors.DirectorTypes;
+import hg.types.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
@@ -111,7 +111,7 @@ public class HgGame extends ApplicationAdapter {
 		graphicsEngine.setVideoMode(1280, 720, false);
 		graphicsEngine.setCameraZoom(1.2);
 
-		gameManager.addDirector(DirectorTypes.InitDirector);
+		gameManager.tryAddDirector(DirectorType.GameInit);
 	}
 
 	// Certain things (such as dragging the window) will cause the game to stop updating
@@ -140,7 +140,7 @@ public class HgGame extends ApplicationAdapter {
 			targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
 
 			if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
-				playerEntity.setPosition(targetWorld.getPosition()); // Debug teleport
+				playerEntity.getPosition().set(targetWorld.getPosition()); // Debug teleport
 
 			graphicsEngine.render();
 			audioEngine.update();

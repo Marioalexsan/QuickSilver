@@ -225,6 +225,22 @@ public class NetworkEngine {
         else kryonetServer.sendToAllExceptUDP(connectionIDtoSkip, packet);
     }
 
+    // Disconnect methods
+
+    public void disconnectClient(int connectionID) {
+        if (netRole != NetworkRole.Server) return;
+
+        ConnectedClient connection = (ConnectedClient) getConnection(connectionID);
+
+        if (connection != null) connection.close();
+    }
+
+    public void disconnect() {
+        if (netRole != NetworkRole.Client) return;
+
+        if (kryonetClient.isConnected()) kryonetClient.close();
+    }
+
     // Other
 
     public void update() {

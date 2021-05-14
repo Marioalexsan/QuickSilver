@@ -2,8 +2,8 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
-import hg.directors.DirectorTypes;
-import hg.directors.MatchDirector;
+import hg.types.DirectorType;
+import hg.directors.GameSession;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
 import hg.engine.MappedAction;
@@ -27,7 +27,7 @@ import hg.gamelogic.playerlogic.PlayerLogic;
 import hg.types.TargetType;
 import hg.types.WeaponType;
 import hg.utils.DebugLevels;
-import hg.utils.MathUtils;
+import hg.utils.HgMathUtils;
 import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 
@@ -202,11 +202,11 @@ public class PlayerEntity extends Entity {
         if (baseStats.hasKevlarVest) reduction += 0.2f;
         if (baseStats.heavyArmor > 0) {
             reduction += 0.5f;
-            baseStats.heavyArmor = MathUtils.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
+            baseStats.heavyArmor = HgMathUtils.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
         }
-        damage *= MathUtils.ClampValue(1f - reduction, 0f, 1f);
+        damage *= HgMathUtils.ClampValue(1f - reduction, 0f, 1f);
 
-        baseStats.health = MathUtils.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
+        baseStats.health = HgMathUtils.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
 
         if (baseStats.health >= 0.0)
             HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);
@@ -227,7 +227,7 @@ public class PlayerEntity extends Entity {
             if (killer != null) {
                 killer.onKill(this);
 
-                MatchDirector match = (MatchDirector) HgGame.Manager().getDirector(DirectorTypes.MatchDirector);
+                GameSession match = (GameSession) HgGame.Manager().getDirector(DirectorType.GameSession);
                 if (match != null) {
                     Gamemode mode = match.getGamemode();
                     if (mode != null) mode.onKillCallback(killer, this);

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
 import hg.engine.GraphicsEngine;
 import hg.utils.Angle;
-import hg.utils.GraphicsUtils;
+import hg.utils.HgGraphicsUtils;
 
 public class BasicSprite extends Drawable {
     protected TextureRegion frame = new TextureRegion();
@@ -42,7 +42,7 @@ public class BasicSprite extends Drawable {
     public void draw(SpriteBatch batch) {
         if (frame.getTexture() == null) return;
 
-        Affine2 transform = GraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, new Angle(angOffset).add(textureAngle));
+        Affine2 transform = HgGraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, new Angle(angOffset).add(textureAngle));
         GraphicsEngine.RenderTextureRegion(batch, transform, color, relativeToCamera, frame, mirrored, flipped);
     }
 

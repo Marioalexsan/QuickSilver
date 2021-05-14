@@ -1,8 +1,7 @@
 package hg.gamelogic.gamemodes;
 
-import com.badlogic.gdx.math.Vector2;
-import hg.directors.DirectorTypes;
-import hg.directors.LevelDirector;
+import hg.types.DirectorType;
+import hg.directors.Level;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
@@ -134,14 +133,14 @@ public class Deathmatch extends Gamemode {
     // Only server calls this
     private void tryReviveDeadPlayers() {
         GameManager manager = HgGame.Manager();
-        LevelDirector level = (LevelDirector) manager.getDirector(DirectorTypes.LevelDirector);
+        Level level = (Level) manager.getDirector(DirectorType.Level);
         PlayerEntity[] deadPlayers = manager.getDeadPlayerEntities();
 
         for (var player: deadPlayers) {
             if (player.getStats().deathCounter > 180) {
                 player.revive();
                 if (level != null) {
-                    player.setPosition(level.getRandomSpawnpoint());
+                    player.getPosition().set(level.getRandomSpawnpoint());
 
                     NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 4);
                     msg.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
@@ -210,11 +209,6 @@ public class Deathmatch extends Gamemode {
     }
 
     @Override
-    public boolean isTeamGamemode() {
-        return false;
-    }
-
-    @Override
     public void onInstructionFromServer(NetInstruction msg) {
         GameManager manager = HgGame.Manager();
 
@@ -230,7 +224,7 @@ public class Deathmatch extends Gamemode {
             case 4 -> {
                 Entity target = manager.getActor(msg.intParams[0]);
                 if (target != null) {
-                    target.setPosition(msg.floatParams[0], msg.floatParams[1]);
+                    target.getPosition().set(msg.floatParams[0], msg.floatParams[1]);
                 }
             }
             default -> manager.getChatSystem().addDebugMessage("Unknown Deathmatch instruction " + msg.insType, DebugLevels.Warn);

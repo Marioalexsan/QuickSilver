@@ -10,7 +10,10 @@ import hg.game.HgGame;
 import hg.interfaces.callbacks.ICallback;
 import hg.physics.BoxCollider;
 import hg.physics.CollisionAlgorithms;
+import hg.enums.HPos;
+import hg.enums.VPos;
 
+/** ClickButton is a button with a square trigger area that can execute a callback upon being clicked */
 public class ClickButton extends UIElement {
     protected final BasicSprite drawable;
     protected final BoxCollider collider;
@@ -30,7 +33,7 @@ public class ClickButton extends UIElement {
 
         contents.setLayer(DrawLayer.GUIDefault + 1);
         contents.setCameraUse(false);
-        contents.setConstraints(BasicText.HPos.Center, BasicText.VPos.Center, tex.getWidth());
+        contents.setConstraints(HPos.Center, VPos.Center, tex.getWidth());
 
         drawable.setPCA(position, center, angle);
         collider.setPCA(position, center, angle);

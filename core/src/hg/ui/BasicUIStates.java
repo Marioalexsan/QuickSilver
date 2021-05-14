@@ -6,10 +6,13 @@ import hg.game.HgGame;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.IEnable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
+/** BasicUIStates is a simple way of creating menus by switching between states (submenus) */
 public class BasicUIStates extends UIElement {
-    private final HashMap<String, HashMap<String, Object>> states = new HashMap<>();
+    private final HashMap<String, LinkedList<Object>> states = new HashMap<>();
 
     private String currentState = "";
     private String scheduledState = "";
@@ -19,51 +22,44 @@ public class BasicUIStates extends UIElement {
         var pos = HgGame.Input().getMouse();
         var clicked = HgGame.Input().isButtonTapped(Input.Buttons.LEFT);
 
-        for (var elements: states.entrySet()) {
-            for (var KVP : elements.getValue().entrySet()) {
-                var element = KVP.getValue();
-
+        for (var elementLists: states.values()) {
+            for (var element : elementLists) {
                 if (element instanceof UIElement) {
                     UIElement ui = (UIElement) element;
-                    if (clicked) ui.onLMBDown(pos.x, pos.y);
 
+                    if (clicked)
+                        ui.onLMBDown(pos.x, pos.y);
                     ui.onUpdate();
                 }
             }
         }
 
-        // State switches are best done after an update ends, to prevent stupid interactions
-        if (!scheduledState.equals("")) {
+        // State switches are best done after an update ends, to prevent "double interactions"
+        if (!scheduledState.isEmpty() && states.containsKey(scheduledState)) {
             switchState(scheduledState);
             scheduledState = "";
         }
     }
 
-    public boolean addState(String state) {
-        if (states.containsKey(state)) return false;
-
-        states.put(state, new HashMap<>());
-
-        return true;
+    /** Adds a state with no elements if it doesn't exist yet. */
+    public void addState(String state) {
+        states.computeIfAbsent(state, k -> new LinkedList<>());
     }
 
-    public boolean addStateElement(String state, String element, Object thing) {
-        var targetState = states.get(state);
-        if (targetState == null || targetState.containsKey(element)) return false;
+    /** Bulk adds objects to given state.
+     * If the states does not exist, it will be created. */
+    public void addObjects(String state, Object... things) {
+        for (var thing: things) addObject(state, thing);
+    }
 
-        targetState.put(element, thing);
+    /** Adds an objects to the given state.
+     * If the states does not exist, it will be created. */
+    public void addObject(String state, Object thing) {
+        var targetState = states.computeIfAbsent(state, k -> new LinkedList<>());
+        targetState.add(thing);
 
         // IEnable elements need to be disabled at start
         if (thing instanceof IEnable) ((IEnable) thing).setEnabled(false);
-
-        return true;
-    }
-
-    public Object getStateElement(String state, String element) {
-        var targetState = states.get(state);
-        if (targetState == null) return null;
-
-        return targetState.get(element);
     }
 
     public String getCurrentState() {
@@ -71,14 +67,10 @@ public class BasicUIStates extends UIElement {
     }
 
     /** Schedules a menu state switch.
-     * The actual switch will happen after onUpdate() is called!
-     */
-    public boolean scheduleSwitchState(String newState) {
-        if (!states.containsKey(newState)) return false;
-
+     * The actual switch will happen after onUpdate() is called! */
+    public void scheduleStateSwitch(String newState) {
         scheduledState = newState;
 
-        return true;
     }
 
     private void switchState(String newState) {
@@ -91,11 +83,9 @@ public class BasicUIStates extends UIElement {
         var elements = states.get(state);
         if (elements == null) return;
 
-        for (var KVP: elements.entrySet()) {
-            var element = KVP.getValue();
-            if (element instanceof IEnable) {
+        for (var element: elements) {
+            if (element instanceof IEnable)
                 ((IEnable) element).setEnabled(false);
-            }
         }
     }
 
@@ -103,20 +93,16 @@ public class BasicUIStates extends UIElement {
         var elements = states.get(state);
         if (elements == null) return;
 
-        for (var KVP: elements.entrySet()) {
-            var element = KVP.getValue();
-            if (element instanceof IEnable) {
+        for (var element: elements) {
+            if (element instanceof IEnable)
                 ((IEnable) element).setEnabled(true);
-            }
         }
     }
 
     @Override
     public void destroy() {
-        for (var elements: states.entrySet()) {
-            for (var KVP: elements.getValue().entrySet()) {
-                var element = KVP.getValue();
-
+        for (var elements: states.values()) {
+            for (var element: elements) {
                 if (element instanceof IEnable) ((IEnable) element).setEnabled(false);
 
                 if (element instanceof Drawable) ((Drawable) element).unregisterFromEngine();

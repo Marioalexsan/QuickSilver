@@ -5,9 +5,8 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
-import hg.game.HgGame;
-import hg.utils.AudioUtils;
-import hg.utils.MathUtils;
+import hg.utils.HgAudioUtils;
+import hg.utils.HgMathUtils;
 
 import java.util.Random;
 
@@ -73,7 +72,7 @@ public class AudioEngine {
         if (sound == null) return;
         if (position != null && data != null) {
             // Simulate positional sound
-            float[] simData = AudioUtils.SimulatePositionalAudio(audioListener, position, data.minDistance, data.maxDistance);
+            float[] simData = HgAudioUtils.SimulatePositionalAudio(audioListener, position, data.minDistance, data.maxDistance);
             float playVolume = volume * simData[0] * globalSoundVolume;
             float playPitch = (float) (0.5 - new Random().nextDouble()) * data.randomPitch + data.pitch;
             sound.play(playVolume, playPitch, simData[1]);
@@ -121,7 +120,7 @@ public class AudioEngine {
         if (musicState.isStopping) {
             // Apply fade out
             musicState.transitionMod -= 0.5f / TRANSITION_TIME_IN_FRAMES;
-            musicState.transitionMod = (float) MathUtils.ClampValue(musicState.transitionMod, 0, 1);
+            musicState.transitionMod = (float) HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
 
             if (musicState.transitionMod <= 0.05f) {
                 // Stop music, dispose of resources
@@ -152,7 +151,7 @@ public class AudioEngine {
         else {
             // Apply fade in
             musicState.transitionMod += 0.5f / TRANSITION_TIME_IN_FRAMES;
-            musicState.transitionMod = (float) MathUtils.ClampValue(musicState.transitionMod, 0, 1);
+            musicState.transitionMod = (float) HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
         }
 
         if (musicState != null && music != null) music.setVolume(musicState.volume * globalMusicVolume * musicState.transitionMod); // Updates volume

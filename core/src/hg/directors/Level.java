@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class LevelDirector extends Director {
+public class Level extends Director {
 
     private final LinkedList<Entity> environments = new LinkedList<>();
     private final ArrayList<Vector2> randomSpawnpoints = new ArrayList<>();

@@ -9,7 +9,12 @@ import hg.engine.InputEngine;
 import hg.game.HgGame;
 import hg.physics.BoxCollider;
 import hg.physics.CollisionAlgorithms;
+import hg.enums.HPos;
+import hg.enums.VPos;
 
+/** BasicTextInput can be used to enter text in the game. It works by capturing and releasing input focus.
+ * Clicking in the activation area captures focus, while clicking outside of it releases focus.
+ * Owner objects can manually enter / exit focus state by calling enter() */
 public class BasicTextInput extends UIElement {
     private final int BlinkInFrames = 30;
 
@@ -33,7 +38,7 @@ public class BasicTextInput extends UIElement {
         this.maxLength = maxLength;
 
         textDisplay = new BasicText(font, "");
-        textDisplay.setConstraints(BasicText.HPos.Left, BasicText.VPos.Center, 0f);
+        textDisplay.setConstraints(HPos.Left, VPos.Center, 0f);
         textDisplay.setCameraUse(false);
         textDisplay.setLayer(DrawLayer.GUIDefault);
         textDisplay.registerToEngine();

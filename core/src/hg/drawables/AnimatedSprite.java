@@ -1,7 +1,7 @@
 package hg.drawables;
 
 import com.badlogic.gdx.graphics.Texture;
-import hg.utils.MathUtils;
+import hg.utils.HgMathUtils;
 
 public class AnimatedSprite extends BasicSprite {
     public enum PlayMode {
@@ -39,7 +39,7 @@ public class AnimatedSprite extends BasicSprite {
     }
 
     public void setFrame(int frame) {
-        currentFrame = MathUtils.ClampValue(frame, 0, finalFrame);
+        currentFrame = HgMathUtils.ClampValue(frame, 0, finalFrame);
     }
 
     public void setMode(PlayMode mode) {

@@ -21,16 +21,8 @@ public abstract class UIElement implements IDestroyable, IEnable {
     public void onUpdate() {}
 
     public Vector2 getPosition() { return position; }
-    public void setPosition(Vector2 position) { this.position.set(position); }
-    public void setPosition(float x, float y) { this.position.set(x, y); }
-
     public Vector2 getCenter() { return center; }
-    public void setCenter(Vector2 center) { this.center.set(center); }
-    public void setCenter(float x, float y) { this.center.set(x, y); }
-
     public Angle getAngle() { return angle; }
-    public void setAngle(Angle angle) { this.angle.set(angle); }
-    public void setAngle(float angle) { this.angle.set(angle); }
 
     public void setEnabled(boolean enable) { this.enabled = enable; }
 

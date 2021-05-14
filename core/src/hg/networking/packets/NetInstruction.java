@@ -1,12 +1,11 @@
 package hg.networking.packets;
 
-import hg.directors.DirectorTypes;
-import hg.directors.MatchDirector;
+import hg.types.DirectorType;
+import hg.directors.GameSession;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.gamemodes.Gamemode;
-import hg.gamelogic.states.State;
 import hg.networking.Packet;
 import hg.types.TargetType;
 import hg.utils.DebugLevels;
@@ -55,7 +54,7 @@ public class NetInstruction extends Packet {
                 target.onInstructionFromServer(this);
             }
             case TargetType.Gamemodes -> {
-                MatchDirector match = (MatchDirector) manager.getDirector(DirectorTypes.MatchDirector);
+                GameSession match = (GameSession) manager.getDirector(DirectorType.GameSession);
                 Gamemode mode = null;
                 if (match != null) mode = match.getGamemode();
                 if (mode != null) mode.onInstructionFromServer(this);

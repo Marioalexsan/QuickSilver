@@ -4,20 +4,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Affine2;
 import hg.engine.GraphicsEngine;
-import hg.utils.GraphicsUtils;
+import hg.enums.HPos;
+import hg.utils.HgGraphicsUtils;
+import hg.enums.VPos;
 
 /** TO DO: Take a look at GlyphLayout / GlyphRun
  * Drawable that renders text using a BitmapFont.
  * BitmapFonts are not thread safe for rendering, *regardless* of what you do!
  */
 public class BasicText extends Drawable {
-    public enum VPos {
-        Top, Center, Bottom
-    }
-
-    public enum HPos {
-        Left, Center, Right
-    }
 
     private BitmapFont font;
     private String text;
@@ -53,7 +48,7 @@ public class BasicText extends Drawable {
             return;
         }
 
-        Affine2 transform = GraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
+        Affine2 transform = HgGraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
         GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
     }
 }

@@ -38,11 +38,8 @@ public class EntityAdded extends Packet {
             case TargetType.Actors -> {
                 Entity actor = manager.addActor(entityID, entitySubType, new Vector2(posX, posY), angle);
 
-                if (actor instanceof PlayerEntity) {
-                    if (network.getNetRole() == NetworkRole.Client) {
-                        ((PlayerEntity) actor).setLogic(new NetworkPlayerLogic());
-                    }
-                }
+                if (actor instanceof PlayerEntity)
+                    ((PlayerEntity) actor).setLogic(new NetworkPlayerLogic());
             }
             default -> manager.getChatSystem().addDebugMessage("Unknown entity type " + entityType, DebugLevels.Warn);
         }

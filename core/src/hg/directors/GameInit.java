@@ -2,17 +2,18 @@ package hg.directors;
 
 import hg.game.HgGame;
 import hg.libraries.EnvironmentLibrary;
+import hg.types.DirectorType;
 
 /** InitDirector inititates the game and launches MainMenuDirector, then self-destructs
  * You likely don't need this to exist after it did its job
  */
-public class InitDirector extends Director {
+public class GameInit extends Director {
     @Override
     public void destroy() { }
 
     @Override
     public void update() {
-        HgGame.Manager().addDirector(DirectorTypes.MainMenu);
+        HgGame.Manager().tryAddDirector(DirectorType.MainMenu);
 
         String[] texturesToPreload = {
                 "Assets/Sprites/Player/Rifle_Idle.png",

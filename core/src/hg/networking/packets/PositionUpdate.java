@@ -25,8 +25,8 @@ public class PositionUpdate extends Packet {
 
         if (target == null) return;
 
-        target.setPosition(posX, posY);
-        target.setAngle(new Angle(angle));
+        target.getPosition().set(posX, posY);
+        target.getAngle().set(angle);
     }
 
     public PositionUpdate() {} // For Kryonet

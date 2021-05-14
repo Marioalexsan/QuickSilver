@@ -20,10 +20,11 @@ public class ClientInitResponse extends Packet {
 
         for (var view : allViews) {
             manager.addPlayerView(view);
-            if (view.uniqueID == clientViewID) {
+            if (view.uniqueID == clientViewID)
                 manager.localView = view;
-            }
         }
+
+        manager.onInitializedByServer();
     }
 
     public ClientInitResponse() {} // For Kryonet

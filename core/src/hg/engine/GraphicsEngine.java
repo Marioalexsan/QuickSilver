@@ -11,17 +11,21 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
-import hg.drawables.BasicText;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
-import hg.utils.GraphicsUtils;
-import hg.utils.MathUtils;
+import hg.enums.HPos;
+import hg.utils.HgGraphicsUtils;
+import hg.utils.HgMathUtils;
+import hg.enums.VPos;
 
 import java.util.*;
 
 public class GraphicsEngine {
+    private final ArrayList<Rectangle> resolutionSelection = new ArrayList<>();
+
     private final SpriteBatch batch;
 
     private Vector2 currentResolution = new Vector2(0, 0);
@@ -34,6 +38,15 @@ public class GraphicsEngine {
         batch = new SpriteBatch();
         Gdx.graphics.setResizable(false);
         setVideoMode(1600, 900, false);
+
+        resolutionSelection.add(new Rectangle(0, 0, 2560, 1440));
+        resolutionSelection.add(new Rectangle(0, 0, 1920, 1080));
+        resolutionSelection.add(new Rectangle(0, 0, 1680, 1050));
+        resolutionSelection.add(new Rectangle(0, 0, 1600, 900));
+        resolutionSelection.add(new Rectangle(0, 0, 1440, 900));
+        resolutionSelection.add(new Rectangle(0, 0, 1366, 768));
+        resolutionSelection.add(new Rectangle(0, 0, 1280, 720));
+        resolutionSelection.add(new Rectangle(0, 0, 800, 600));
     }
 
     public void setCameraCenter(Vector2 center) {
@@ -46,7 +59,7 @@ public class GraphicsEngine {
     }
 
     public void setCameraZoom(double zoom) {
-        camera.zoom = (float) MathUtils.ClampValue(zoom, 0.25, 4.0);
+        camera.zoom = (float) HgMathUtils.ClampValue(zoom, 0.25, 4.0);
         camera.update();
     }
 
@@ -99,8 +112,28 @@ public class GraphicsEngine {
         return foundCompatible;
     }
 
+    public ArrayList<Rectangle> getSupportedResolutions() {
+        Graphics.DisplayMode[] allModes = Gdx.graphics.getDisplayModes();
+        ArrayList<Rectangle> compatibleResolutions = new ArrayList<>();
+
+        Graphics.DisplayMode bestMatch = null;
+        for (var resolution : resolutionSelection) {
+            for (var mode : allModes) {
+                if (mode.width == resolution.width && mode.height == resolution.height) {
+                    compatibleResolutions.add(new Rectangle(resolution));
+                    break;
+                }
+            }
+        }
+        return compatibleResolutions;
+    }
+
     public Vector2 getCurrentResolution() {
         return new Vector2(currentResolution);
+    }
+
+    public boolean isFullscreen() {
+        return Gdx.graphics.isFullscreen();
     }
 
     public void registerDrawable(Drawable object) {
@@ -119,7 +152,7 @@ public class GraphicsEngine {
 
         // Prepare sorted drawables
         ArrayList<Drawable> heightSortedDrawables = new ArrayList<>(drawableLibrary);
-        heightSortedDrawables.sort(GraphicsUtils.DrawableLayerComparator);
+        heightSortedDrawables.sort(HgGraphicsUtils.DrawableLayerComparator);
 
         // Draw everything that is enabled
         batch.begin();
@@ -161,7 +194,7 @@ public class GraphicsEngine {
 
     // Functionality resembles RenderCopyEx from SDL
     // Transforms the output if the drawable doesn't use the camera
-    public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text, BasicText.HPos hpos, BasicText.VPos vpos, float wrap) {
+    public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text, HPos hpos, VPos vpos, float wrap) {
         //font.setColor(color);
         Affine2 targetTransform = new Affine2(transform);
 

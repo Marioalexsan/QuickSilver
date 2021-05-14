@@ -23,7 +23,9 @@ public class EntityDestroyed extends Packet {
         switch (entityType) {
             case TargetType.Actors -> {
                 Entity which = manager.getActor(entityID);
-                if (which == null) manager.getChatSystem().addDebugMessage("Tried to remove missing actor " + entityID, DebugLevels.Warn);
+
+                if (which == null)
+                    manager.getChatSystem().addDebugMessage("Tried to remove missing actor " + entityID, DebugLevels.Warn);
                 else which.signalDestroy();
             }
             default -> manager.getChatSystem().addDebugMessage("Unknown entity type to remove: " + entityType, DebugLevels.Warn);

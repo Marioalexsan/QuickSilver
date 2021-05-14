@@ -9,7 +9,9 @@ import hg.networking.PlayerView;
 import hg.ui.BasicTextInput;
 import hg.ui.UIElement;
 import hg.utils.DebugLevels;
-import hg.utils.MathUtils;
+import hg.enums.HPos;
+import hg.utils.HgMathUtils;
+import hg.enums.VPos;
 
 import java.util.LinkedList;
 
@@ -24,7 +26,7 @@ public class ChatSystem extends UIElement {
         public Message(BitmapFont fontToUse, String message, int displayTime) {
             this.displayTimeLeft = displayTime;
             drawable = new BasicText(fontToUse, message);
-            drawable.setConstraints(BasicText.HPos.Left, BasicText.VPos.Center, 0f);
+            drawable.setConstraints(HPos.Left, VPos.Center, 0f);
             drawable.setLayer(DrawLayer.GUIDefault);
             drawable.setCameraUse(false);
             drawable.registerToEngine();
@@ -41,7 +43,7 @@ public class ChatSystem extends UIElement {
     }
 
     public void setDebugMessageLevel(int debugLevel) {
-        debugMessageLevel = MathUtils.ClampValue(debugLevel, DebugLevels.WORST, DebugLevels.ALL);
+        debugMessageLevel = HgMathUtils.ClampValue(debugLevel, DebugLevels.WORST, DebugLevels.ALL);
     }
 
     public void addDebugMessage(String message, int debugLevel) {
@@ -136,7 +138,7 @@ public class ChatSystem extends UIElement {
     }
 
     private void updateElements() {
-        chatInput.setPosition(position);
+        chatInput.getPosition().set(position);
 
         int height = 0;
         for (var msg: messages) {

@@ -33,14 +33,9 @@ public class ClientInitRequest extends Packet {
         // Tell everyone else about a new player view
 
         PlayerViewConnected msg = new PlayerViewConnected(newView);
+        network.sendToAllClientsExcept(msg, true, newView.connectionID);
 
-        for (var view: manager.getPlayerViews()) {
-            if (view.uniqueID != newView.uniqueID && view != manager.localView) {
-                network.sendToClient(msg, true, view.connectionID);
-            }
-        }
-
-        HgGame.Manager().getChatSystem().addMessage(newView.name + " connected.");
+        manager.onClientInitialized(newView.uniqueID);
     }
 
     public ClientInitRequest() {} // For Kryonet

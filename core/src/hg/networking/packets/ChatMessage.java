@@ -24,9 +24,8 @@ public class ChatMessage extends Packet {
 
     @Override
     public void parseOnServer(int connectionID) {
-        parseOnClient();
-
         GameManager manager = HgGame.Manager();
+        manager.getChatSystem().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
 
         PlayerView sender = manager.getPlayerViewByConnectionID(connectionID);
 

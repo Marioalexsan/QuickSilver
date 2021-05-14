@@ -1,7 +1,7 @@
 package hg.networking.packets;
 
-import hg.directors.DirectorTypes;
-import hg.directors.MatchDirector;
+import hg.types.DirectorType;
+import hg.directors.GameSession;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
@@ -38,7 +38,7 @@ public class StateUpdate extends Packet {
             }
             case TargetType.Gamemodes -> {
                 // targetID ignored. There's only one gamemode running
-                MatchDirector match = (MatchDirector) manager.getDirector(DirectorTypes.MatchDirector);
+                GameSession match = (GameSession) manager.getDirector(DirectorType.GameSession);
                 Gamemode mode = null;
                 if (match != null) mode = match.getGamemode();
                 if (mode != null) mode.tryApplyState(payload);
