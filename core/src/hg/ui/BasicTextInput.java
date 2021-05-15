@@ -30,7 +30,7 @@ public class BasicTextInput extends UIElement {
     protected int fastDelDelay = 7;
 
     protected boolean hasFocus = false;
-    protected int maxLength = 12345678;
+    protected int maxLength;
 
     protected String emptyText = "Enter something...";
 

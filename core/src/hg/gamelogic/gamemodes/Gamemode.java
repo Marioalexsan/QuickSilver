@@ -4,7 +4,6 @@ import hg.entities.Entity;
 import hg.gamelogic.states.State;
 import hg.interfaces.INetInterface;
 import hg.interfaces.IUpdateable;
-import hg.networking.PlayerView;
 
 /** Gamemodes manage things like round start, progression, end, player managing, etc.
  * In a way, it controls what exactly happens in a GameSession */

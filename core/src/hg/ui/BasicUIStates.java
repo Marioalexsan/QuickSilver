@@ -6,7 +6,6 @@ import hg.game.HgGame;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.IEnable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -46,16 +45,17 @@ public class BasicUIStates extends UIElement {
         states.computeIfAbsent(state, k -> new LinkedList<>());
     }
 
-    /** Bulk adds objects to given state.
+    /** Bulk adds objects to given state. Ignores null objects.
      * If the states does not exist, it will be created. */
     public void addObjects(String state, Object... things) {
         for (var thing: things) addObject(state, thing);
     }
 
-    /** Adds an objects to the given state.
-     * If the states does not exist, it will be created. */
+    /** Adds an objects to the given state. Ignores null objects.
+     * If the states does not exist, it will be created (even if object given is null). */
     public void addObject(String state, Object thing) {
         var targetState = states.computeIfAbsent(state, k -> new LinkedList<>());
+        if (thing == null) return;
         targetState.add(thing);
 
         // IEnable elements need to be disabled at start

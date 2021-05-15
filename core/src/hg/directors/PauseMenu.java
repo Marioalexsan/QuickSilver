@@ -7,13 +7,14 @@ import hg.engine.AssetEngine;
 import hg.engine.InputEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
+import hg.libraries.BuilderLibrary;
 import hg.types.DirectorType;
 import hg.ui.BasicUIStates;
 import hg.enums.HPos;
 import hg.enums.VPos;
-import hg.utils.builders.BasicSpriteMaker;
-import hg.utils.builders.BasicTextMaker;
-import hg.utils.builders.ClickButtonMaker;
+import hg.utils.builders.BasicSpriteBuilder;
+import hg.utils.builders.BasicTextBuilder;
+import hg.utils.builders.ClickButtonBuilder;
 
 public class PauseMenu extends Director {
     private final BasicUIStates menus = new BasicUIStates();
@@ -22,19 +23,15 @@ public class PauseMenu extends Director {
     public PauseMenu() {
         AssetEngine assets = HgGame.Assets();
 
-        Texture bigbox = assets.loadTexture("Assets/GUI/Button.png");
         Texture vignette = assets.loadTexture("Assets/GUI/PauseVignette.png");
-        BitmapFont couriernew36 = assets.loadFont("Assets/Fonts/CourierNew36.fnt");
-        BitmapFont couriernew72 = assets.loadFont("Assets/Fonts/CourierNew72.fnt");
-
-        ClickButtonMaker boxButton = new ClickButtonMaker().display(bigbox).font(couriernew36).clickArea(460, 150);
-        BasicTextMaker labels = new BasicTextMaker().font(couriernew72).textPos(HPos.Center, VPos.Center);
+        ClickButtonBuilder boxButton = BuilderLibrary.ClickButtonBuilders("silverbox");
+        BasicTextBuilder label = BuilderLibrary.BasicTextBuilders("label");
 
         menus.addState("NonActive");
         menus.addObjects("PauseMenu",
-                new BasicTextMaker(labels).position(0, 440).text("In Pause Menu").build(),
-                new BasicSpriteMaker().texture(vignette).position(0, 0).texture(vignette).cameraUse(false).layer(DrawLayer.GUIDefault - 1).centerToRegion(true).build(),
-                new ClickButtonMaker(boxButton).position(0, -200).text("Quit to Menu").onClick(() -> {
+                new BasicSpriteBuilder().texture(vignette).position(0, 0).texture(vignette).cameraUse(false).layer(DrawLayer.GUIDefault - 1).centerToRegion(true).build(),
+                label.copy().position(0, 440).text("In Pause Menu").build(),
+                boxButton.copy().position(0, -200).text("Quit to Menu").onClick(() -> {
                     GameSession match = (GameSession) HgGame.Manager().getDirector(DirectorType.GameSession);
                     if (match != null) match.signalStop();
                     toBeDestroyed = true;

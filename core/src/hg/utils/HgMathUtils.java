@@ -1,7 +1,5 @@
 package hg.utils;
 
-import static java.lang.Math.abs;
-
 /**
  * Provides various utilities for dealing with QuickSilver's insane design choices.
  */

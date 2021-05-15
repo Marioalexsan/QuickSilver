@@ -9,6 +9,8 @@ import hg.drawables.AnimatedSprite;
 
 import java.util.HashMap;
 
+// TODO Make an animation builder
+
 public class AnimationLibrary {
     private static final HashMap<String, AnimationInfo> prototypes = new HashMap<>();
 

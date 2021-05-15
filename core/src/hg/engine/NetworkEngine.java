@@ -6,7 +6,6 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import hg.game.HgGame;
 import hg.networking.*;
-import hg.networking.Packet;
 import hg.networking.packets.ClientInitRequest;
 
 import java.io.IOException;

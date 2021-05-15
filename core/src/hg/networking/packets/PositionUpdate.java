@@ -3,7 +3,6 @@ package hg.networking.packets;
 import hg.entities.Entity;
 import hg.game.HgGame;
 import hg.networking.Packet;
-import hg.utils.Angle;
 
 /** This packet is used for lightweight position updates. */
 public class PositionUpdate extends Packet {

@@ -1,16 +1,12 @@
 package hg.utils.builders;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
-import hg.enums.HPos;
-import hg.enums.VPos;
+import hg.interfaces.ICopy;
 
-public class BasicSpriteMaker {
+public class BasicSpriteBuilder implements ICopy {
     private Texture _tex;
     private int _x;
     private int _y;
@@ -28,28 +24,34 @@ public class BasicSpriteMaker {
     private final Vector2 _position = new Vector2(0, 0);
     private float _angle = 0f;
 
-    public BasicSpriteMaker() {}
+    public BasicSpriteBuilder() {}
 
-    public BasicSpriteMaker(BasicSpriteMaker toCopy) {
-        _tex = toCopy._tex;;
-        _mirrored = toCopy._mirrored;
-        _flipped = toCopy._flipped;
-        _position.set(toCopy._position);
-        _angle = toCopy._angle;
-        _x = toCopy._x;
-        _y = toCopy._y;
-        _width = toCopy._width;
-        _height = toCopy._height;
-        _cameraUse = toCopy._cameraUse;
-        _drawLayer = toCopy._drawLayer;
+    public BasicSpriteBuilder(BasicSpriteBuilder other) {
+        _tex = other._tex;
+        _mirrored = other._mirrored;
+        _flipped = other._flipped;
+        _position.set(other._position);
+        _angle = other._angle;
+        _x = other._x;
+        _y = other._y;
+        _width = other._width;
+        _height = other._height;
+        _cameraUse = other._cameraUse;
+        _drawLayer = other._drawLayer;
+        _centerToRegion = other._centerToRegion;
     }
 
-    public BasicSpriteMaker texture(Texture tex) {
+    @Override
+    public BasicSpriteBuilder copy() {
+        return new BasicSpriteBuilder(this);
+    }
+
+    public BasicSpriteBuilder texture(Texture tex) {
         this._tex = tex;
         return this;
     }
 
-    public BasicSpriteMaker crop(int x, int y, int width, int height) {
+    public BasicSpriteBuilder crop(int x, int y, int width, int height) {
         this._x = x;
         this._y = y;
         this._width = width;
@@ -57,33 +59,33 @@ public class BasicSpriteMaker {
         return this;
     }
 
-    public BasicSpriteMaker position(float x, float y) {
+    public BasicSpriteBuilder position(float x, float y) {
         _position.set(x, y);
         return this;
     }
 
-    public BasicSpriteMaker angle(float angle) {
+    public BasicSpriteBuilder angle(float angle) {
         this._angle = angle;
         return this;
     }
 
-    public BasicSpriteMaker cameraUse(boolean use) {
+    public BasicSpriteBuilder cameraUse(boolean use) {
         this._cameraUse = use;
         return this;
     }
 
-    public BasicSpriteMaker layer(int drawLayer) {
+    public BasicSpriteBuilder layer(int drawLayer) {
         this._drawLayer = drawLayer;
         return this;
     }
 
-    public BasicSpriteMaker makeGUI() {
+    public BasicSpriteBuilder makeGUI() {
         this._drawLayer = DrawLayer.GUIDefault;
         this._cameraUse = false;
         return this;
     }
 
-    public BasicSpriteMaker centerToRegion(boolean center) {
+    public BasicSpriteBuilder centerToRegion(boolean center) {
         this._centerToRegion = center;
         return this;
     }

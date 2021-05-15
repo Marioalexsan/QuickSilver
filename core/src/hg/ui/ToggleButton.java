@@ -6,7 +6,6 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.game.HgGame;
 import hg.interfaces.callbacks.ICallback;
-import hg.networking.Packet;
 import hg.physics.BoxCollider;
 import hg.physics.CollisionAlgorithms;
 
@@ -17,7 +16,7 @@ public class ToggleButton extends UIElement {
     protected Texture inactiveTex;
     protected Texture activeTex;
 
-    protected boolean activated = false;
+    protected boolean activated;
     protected boolean clickEnabled = true;
 
     protected ICallback activateCallback;

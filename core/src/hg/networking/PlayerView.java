@@ -1,6 +1,5 @@
 package hg.networking;
 
-import com.esotericsoftware.kryonet.Connection;
 import hg.entities.PlayerEntity;
 
 public class PlayerView {

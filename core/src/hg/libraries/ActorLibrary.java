@@ -1,10 +1,14 @@
 package hg.libraries;
 
-import hg.engine.NetworkEngine;
-import hg.entities.Entity;
-import hg.entities.GenericBullet;
-import hg.entities.PlayerEntity;
-import hg.game.HgGame;
+import hg.entities.*;
+import hg.entities.pickups.AmmoPackPickup;
+import hg.entities.pickups.ArmorPlatePickup;
+import hg.entities.pickups.AssaultRiflePickup;
+import hg.entities.pickups.MedkitPickup;
+import hg.entities.spawners.AmmoPackSpawner;
+import hg.entities.spawners.ArmorPlateSpawner;
+import hg.entities.spawners.AssaultRifleSpawner;
+import hg.entities.spawners.MedkitSpawner;
 import hg.gamelogic.playerlogic.EmptyAI;
 import hg.types.ActorType;
 
@@ -14,14 +18,19 @@ import hg.types.ActorType;
  */
 public class ActorLibrary {
     public static Entity CreateActor(int type) {
+        Entity which = null;
         switch(type) {
-            case ActorType.PlayerEntity -> {
-                return new PlayerEntity(new EmptyAI());
-            }
-            case ActorType.GenericBullet -> {
-                return new GenericBullet();
-            }
+            case ActorType.PlayerEntity -> which = new PlayerEntity(new EmptyAI());
+            case ActorType.Bullet -> which = new Bullet();
+            case ActorType.AssaultRifleSpawner -> which = new AssaultRifleSpawner();
+            case ActorType.AssaultRiflePickup -> which = new AssaultRiflePickup();
+            case ActorType.AmmoPackSpawner -> which = new AmmoPackSpawner();
+            case ActorType.AmmoPackPickup -> which = new AmmoPackPickup();
+            case ActorType.MedkitSpawner -> which = new MedkitSpawner();
+            case ActorType.MedkitPickup -> which = new MedkitPickup();
+            case ActorType.ArmorPlateSpawner -> which = new ArmorPlateSpawner();
+            case ActorType.ArmorPlatePickup -> which = new ArmorPlatePickup();
         }
-        return null;
+        return which;
     }
 }

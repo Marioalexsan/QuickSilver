@@ -8,7 +8,6 @@ import hg.gamelogic.playerlogic.EmptyAI;
 import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.Packet;
-import hg.networking.PlayerView;
 
 public class PlayerViewUpdate extends Packet {
     public int targetUniqueID;

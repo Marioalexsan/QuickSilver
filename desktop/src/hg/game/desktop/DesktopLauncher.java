@@ -13,6 +13,7 @@ public class DesktopLauncher {
 		config.pauseWhenMinimized = false; // Game updates should not be stopped for any reason
 		config.backgroundFPS = 60;
 		config.foregroundFPS = 60;
+		config.samples = 4;
 
 		new LwjglApplication(new HgGame(), config); // Start game
 	}

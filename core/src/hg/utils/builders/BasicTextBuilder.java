@@ -6,8 +6,9 @@ import hg.drawables.BasicText;
 import hg.drawables.DrawLayer;
 import hg.enums.HPos;
 import hg.enums.VPos;
+import hg.interfaces.ICopy;
 
-public class BasicTextMaker {
+public class BasicTextBuilder implements ICopy {
     private BitmapFont _font;
     private String _text = "";
 
@@ -21,9 +22,9 @@ public class BasicTextMaker {
     private VPos _vpos;
     private float _wrap = 0f;
 
-    public BasicTextMaker() {}
+    public BasicTextBuilder() {}
 
-    public BasicTextMaker(BasicTextMaker toCopy) {
+    public BasicTextBuilder(BasicTextBuilder toCopy) {
         _font = toCopy._font;
         _text = toCopy._text;
         _position.set(toCopy._position);
@@ -32,47 +33,53 @@ public class BasicTextMaker {
         _vpos = toCopy._vpos;
         _wrap = toCopy._wrap;
         _drawLayer = toCopy._drawLayer;
+        _cameraUse = toCopy._cameraUse;
     }
 
-    public BasicTextMaker text(String text) {
+    @Override
+    public BasicTextBuilder copy() {
+        return new BasicTextBuilder(this);
+    }
+
+    public BasicTextBuilder text(String text) {
         this._text = text;
         return this;
     }
 
-    public BasicTextMaker font(BitmapFont font) {
+    public BasicTextBuilder font(BitmapFont font) {
         this._font = font;
         return this;
     }
 
-    public BasicTextMaker position(float x, float y) {
+    public BasicTextBuilder position(float x, float y) {
         _position.set(x, y);
         return this;
     }
 
-    public BasicTextMaker textPos(HPos hpos, VPos vpos) {
+    public BasicTextBuilder textPos(HPos hpos, VPos vpos) {
         this._hpos = hpos;
         this._vpos = vpos;
         return this;
     }
 
-    public BasicTextMaker textPos(HPos hpos, VPos vpos, float wrap) {
+    public BasicTextBuilder textPos(HPos hpos, VPos vpos, float wrap) {
         this._hpos = hpos;
         this._vpos = vpos;
         this._wrap = wrap;
         return this;
     }
 
-    public BasicTextMaker cameraUse(boolean use) {
+    public BasicTextBuilder cameraUse(boolean use) {
         this._cameraUse = use;
         return this;
     }
 
-    public BasicTextMaker layer(int drawLayer) {
+    public BasicTextBuilder layer(int drawLayer) {
         this._drawLayer = drawLayer;
         return this;
     }
 
-    public BasicTextMaker makeGUI() {
+    public BasicTextBuilder makeGUI() {
         this._drawLayer = DrawLayer.GUIDefault;
         this._cameraUse = false;
         return this;

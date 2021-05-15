@@ -4,14 +4,14 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.engine.AssetEngine;
 import hg.game.HgGame;
-import hg.gamelogic.states.GenericBulletState;
+import hg.gamelogic.states.BulletState;
 import hg.gamelogic.states.State;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.physics.*;
 import hg.utils.Angle;
 
-public class GenericBullet extends Entity {
+public class Bullet extends Entity {
     public float speed = 38f;
     public float maxDistance = 1800f;
     public float currentDistance = 0.0f;
@@ -19,7 +19,7 @@ public class GenericBullet extends Entity {
     private final BasicSprite drawable = new BasicSprite();
     private final BoxCollider collider = new BoxCollider(32f, 12f);
 
-    public GenericBullet() {
+    public Bullet() {
         AssetEngine assets = HgGame.Assets(); // Extra dependency
 
         collider.owner = this;
@@ -29,6 +29,7 @@ public class GenericBullet extends Entity {
         }
         collider.groupProperties.put(ColliderGroup.Environment_ShootThrough, ColliderProperty.DoNothing);
         collider.groupProperties.put(ColliderGroup.Player, ColliderProperty.DoNothing);
+        collider.groupProperties.put(ColliderGroup.Pickups, ColliderProperty.DoNothing);
 
         drawable.setTexture(assets.loadTexture("Assets/Sprites/Projectiles/Bullet.png"));
         drawable.setTextureAngle(new Angle(-90f));
@@ -101,10 +102,8 @@ public class GenericBullet extends Entity {
 
     @Override
     public State tryGenerateState() {
-        GenericBulletState stuff = new GenericBulletState();
-        stuff.posX = position.x;
-        stuff.posY = position.y;
-        stuff.angle = angle.getDeg();
+        BulletState stuff = new BulletState();
+        stuff.copyPosition(this);
         stuff.speed = speed;
         stuff.currentDistance = currentDistance;
         stuff.maxDistance = maxDistance;
@@ -113,10 +112,9 @@ public class GenericBullet extends Entity {
 
     @Override
     public void tryApplyState(State state) {
-        if (state instanceof GenericBulletState) {
-            GenericBulletState stuff = (GenericBulletState) state;
-            this.position.set(stuff.posX, stuff.posY);
-            this.angle.set(stuff.angle);
+        if (state instanceof BulletState) {
+            BulletState stuff = (BulletState) state;
+            stuff.applyPosition(this);
             this.speed = stuff.speed;
             this.currentDistance = stuff.currentDistance;
             this.maxDistance = stuff.maxDistance;

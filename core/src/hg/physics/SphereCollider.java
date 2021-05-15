@@ -1,8 +1,5 @@
 package hg.physics;
 
-import com.badlogic.gdx.math.Vector2;
-import hg.interfaces.ICollisionObserver;
-
 /**
  * Collider that represents a circle of given radius.
  * The center of (0,0) corresponds to the circle's center point.

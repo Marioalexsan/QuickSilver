@@ -247,7 +247,7 @@ public class Deathmatch extends Gamemode {
     public void tryApplyState(State state) {
         if (state instanceof DeathmatchState) {
             DeathmatchState stuff = (DeathmatchState) state;
-            timeElapsed = stuff.timeElapsed;;
+            timeElapsed = stuff.timeElapsed;
             roundStart = stuff.roundStart;
             roundTime = stuff.roundTime;
             roundEnd = stuff.roundEnd;

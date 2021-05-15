@@ -1,7 +1,6 @@
 package hg.physics;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.interfaces.ICollisionObserver;
 import hg.interfaces.IPolygon;
 
 /**

@@ -155,6 +155,14 @@ public class EnvironmentLibrary {
 
                 return new Environment(drawableList, colliderList);
             }
+            case EnvType.ConcreteFloorTwo -> {
+                BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "ConcreteFloorTwo.png"));
+                draw1.centerToRegion();
+                draw1.setLayer(DrawLayer.Floor);
+                drawableList.add(draw1);
+
+                return new Environment(drawableList, colliderList);
+            }
             case EnvType.BoxMedium -> {
                 BasicSprite draw1 = new BasicSprite(assets.loadTexture(envPath + "BoxMedium.png"));
                 draw1.centerToRegion();

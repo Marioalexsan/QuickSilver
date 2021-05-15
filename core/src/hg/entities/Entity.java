@@ -37,8 +37,8 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
 
     public BaseStats getStats() { return baseStats; }
 
-    public void onDeath(Entity killer) {};
-    public void onKill(Entity victim) {};
+    public void onDeath(Entity killer) {}
+    public void onKill(Entity victim) {}
 
     public int getID() { return ID; }
     public void setID(int ID) { this.ID = ID; }

@@ -60,6 +60,11 @@ public class LocalPlayerLogic extends PlayerLogic {
             if (input.isButtonHeld(Input.Buttons.LEFT)) actionsThisFrame.add(MappedAction.PrimaryFire);
             if (input.isButtonHeld(Input.Buttons.RIGHT)) actionsThisFrame.add(MappedAction.SecondaryFire);
 
+            if (input.isActionTapped(MappedAction.WeaponOne)) actionsThisFrame.add(MappedAction.WeaponOne);
+            if (input.isActionTapped(MappedAction.WeaponTwo)) actionsThisFrame.add(MappedAction.WeaponTwo);
+            if (input.isActionTapped(MappedAction.WeaponThree)) actionsThisFrame.add(MappedAction.WeaponThree);
+            if (input.isActionTapped(MappedAction.WeaponFour)) actionsThisFrame.add(MappedAction.WeaponFour);
+
             if (input.isActionTapped(MappedAction.QuickSwitchWeapon)) actionsThisFrame.add(MappedAction.QuickSwitchWeapon);
         }
 

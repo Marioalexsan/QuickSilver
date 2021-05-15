@@ -4,9 +4,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import hg.enums.HPos;
 import hg.enums.VPos;
+import hg.interfaces.ICopy;
 import hg.ui.BasicTextInput;
 
-public class TextInputMaker {
+public class TextInputBuilder implements ICopy {
     private BitmapFont _font;
     private String _emptyText = "";
 
@@ -21,9 +22,9 @@ public class TextInputMaker {
     private int _height = 100;
     private int _maxChars = 12345678;
 
-    public TextInputMaker() {}
+    public TextInputBuilder() {}
 
-    public TextInputMaker(TextInputMaker toCopy) {
+    public TextInputBuilder(TextInputBuilder toCopy) {
         _font = toCopy._font;
         _emptyText = toCopy._emptyText;
         _position.set(toCopy._position);
@@ -33,41 +34,47 @@ public class TextInputMaker {
         _wrap = toCopy._wrap;
         _width = toCopy._width;
         _height = toCopy._height;
+        _maxChars = toCopy._maxChars;
     }
 
-    public TextInputMaker clickArea(int width, int height) {
+    @Override
+    public TextInputBuilder copy() {
+        return new TextInputBuilder(this);
+    }
+
+    public TextInputBuilder clickArea(int width, int height) {
         this._width = width;
         this._height = height;
         return this;
     }
 
-    public TextInputMaker font(BitmapFont font) {
+    public TextInputBuilder font(BitmapFont font) {
         this._font = font;
         return this;
     }
 
-    public TextInputMaker emptyText(String emptyText) {
+    public TextInputBuilder emptyText(String emptyText) {
         this._emptyText = emptyText;
         return this;
     }
 
-    public TextInputMaker maxChars(int count) {
+    public TextInputBuilder maxChars(int count) {
         this._maxChars = count;
         return this;
     }
 
-    public TextInputMaker position(float x, float y) {
+    public TextInputBuilder position(float x, float y) {
         _position.set(x, y);
         return this;
     }
 
-    public TextInputMaker textPos(HPos hpos, VPos vpos) {
+    public TextInputBuilder textPos(HPos hpos, VPos vpos) {
         this._hpos = hpos;
         this._vpos = vpos;
         return this;
     }
 
-    public TextInputMaker textPos(HPos hpos, VPos vpos, float wrap) {
+    public TextInputBuilder textPos(HPos hpos, VPos vpos, float wrap) {
         this._hpos = hpos;
         this._vpos = vpos;
         this._wrap = wrap;

@@ -2,7 +2,6 @@ package hg.gamelogic;
 
 import hg.entities.Entity;
 import hg.interfaces.ICollisionObserver;
-import hg.physics.Collider;
 import hg.physics.ColliderGroup;
 
 import java.util.Arrays;

@@ -2,6 +2,7 @@ package hg.directors;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.entities.Entity;
+import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.maps.MapPrototype;
 
@@ -18,8 +19,10 @@ public class Level extends Director {
     public void loadMap(MapPrototype prototype) {
         unloadMap();
 
+        GameManager manager = HgGame.Manager();
+
         for (var envProto : prototype.environments)
-            environments.add(HgGame.Manager().addEnvironment(envProto.type, envProto.position, envProto.angle));
+            environments.add(manager.addEnvironment(envProto.objectType, envProto.position, envProto.angle));
 
         for (var randomPoint: prototype.randomSpawnpoints)
             randomSpawnpoints.add(new Vector2(randomPoint));
@@ -30,12 +33,20 @@ public class Level extends Director {
             for (var point: teamPoints)
                 points.add(new Vector2(point));
         }
+
+        // Instantiate onLoadActors if server
+        if (HgGame.Network().isLocalOrServer()) {
+            for (var actor: prototype.onLoadActors) {
+                manager.addActor(actor.objectType, actor.position, actor.angle);
+            }
+        }
     }
 
     public void unloadMap() {
         environments.forEach(Entity::signalDestroy);
         environments.clear();
         randomSpawnpoints.clear();
+        teamSpawnpoints.clear();
     }
 
     public Vector2 getRandomSpawnpoint() {

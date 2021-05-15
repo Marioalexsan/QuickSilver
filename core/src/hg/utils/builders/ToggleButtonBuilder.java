@@ -2,10 +2,11 @@ package hg.utils.builders;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import hg.interfaces.ICopy;
 import hg.interfaces.callbacks.ICallback;
 import hg.ui.ToggleButton;
 
-public class ToggleButtonMaker {
+public class ToggleButtonBuilder implements ICopy {
     private Texture _inactiveTex;
     private Texture _activeTex;
 
@@ -20,9 +21,9 @@ public class ToggleButtonMaker {
 
     private boolean _startActive = false;
 
-    public ToggleButtonMaker() {}
+    public ToggleButtonBuilder() {}
 
-    public ToggleButtonMaker(ToggleButtonMaker toCopy) {
+    public ToggleButtonBuilder(ToggleButtonBuilder toCopy) {
         _position.set(toCopy._position);
         _angle = toCopy._angle;
         _activate = toCopy._activate;
@@ -34,39 +35,44 @@ public class ToggleButtonMaker {
         _startActive = toCopy._startActive;
     }
 
-    public ToggleButtonMaker startActive(boolean active) {
+    @Override
+    public ToggleButtonBuilder copy() {
+        return new ToggleButtonBuilder(this);
+    }
+
+    public ToggleButtonBuilder startActive(boolean active) {
         this._startActive = active;
         return this;
     }
 
-    public ToggleButtonMaker clickArea(int width, int height) {
+    public ToggleButtonBuilder clickArea(int width, int height) {
         this._width = width;
         this._height = height;
         return this;
     }
 
-    public ToggleButtonMaker display(Texture inactive, Texture active) {
+    public ToggleButtonBuilder display(Texture inactive, Texture active) {
         this._inactiveTex = inactive;
         this._activeTex = active;
         return this;
     }
 
-    public ToggleButtonMaker position(float x, float y) {
+    public ToggleButtonBuilder position(float x, float y) {
         _position.set(x, y);
         return this;
     }
 
-    public ToggleButtonMaker angle(float angle) {
+    public ToggleButtonBuilder angle(float angle) {
         this._angle = angle;
         return this;
     }
 
-    public ToggleButtonMaker whenOn(ICallback onActivation) {
+    public ToggleButtonBuilder whenOn(ICallback onActivation) {
         this._activate = onActivation;
         return this;
     }
 
-    public ToggleButtonMaker whenOff(ICallback onInactivation) {
+    public ToggleButtonBuilder whenOff(ICallback onInactivation) {
         this._inactivate = onInactivation;
         return this;
     }

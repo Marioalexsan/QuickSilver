@@ -12,7 +12,7 @@ public class AnimationInfo {
     public final int finalFrame;
     public final int updatesPerFrame;
     public final AnimatedSprite.PlayMode playMode;
-    public ActInstruction[] actions;
+    public final ActInstruction[] actions;
 
     public final Vector2 cenOffset = new Vector2();
     public final Angle angOffset = new Angle();

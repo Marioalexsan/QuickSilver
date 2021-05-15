@@ -60,6 +60,11 @@ public class InputEngine {
         keyActionMap.put(MappedAction.PrimaryFire, Input.Buttons.LEFT + ButtonMappingOffset);
         keyActionMap.put(MappedAction.SecondaryFire, Input.Buttons.RIGHT + ButtonMappingOffset);
 
+        keyActionMap.put(MappedAction.WeaponOne, Input.Keys.NUM_1);
+        keyActionMap.put(MappedAction.WeaponTwo, Input.Keys.NUM_2);
+        keyActionMap.put(MappedAction.WeaponThree, Input.Keys.NUM_3);
+        keyActionMap.put(MappedAction.WeaponFour, Input.Keys.NUM_4);
+
         keyActionMap.put(MappedAction.ChatSubmit, Input.Keys.ENTER);
     }
 
@@ -227,6 +232,7 @@ public class InputEngine {
      * @param factor - a value in range [0.0, 1.0].
      * @return Two vectors - the mouse world position according to factor, and the camera displacement
      */
+    @Deprecated
     public Vector2[] getWorldMouseAndFOVOffset(float factor) {
         factor = HgMathUtils.ClampValue(factor, 0f, 1f);
         Vector2 camera = HgGame.Graphics().getCameraCenter();

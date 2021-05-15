@@ -3,10 +3,11 @@ package hg.utils.builders;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import hg.interfaces.ICopy;
 import hg.interfaces.callbacks.ICallback;
 import hg.ui.ClickButton;
 
-public class ClickButtonMaker {
+public class ClickButtonBuilder implements ICopy {
     private Texture _texture;
     private BitmapFont _font;
     private String _text = "";
@@ -19,9 +20,9 @@ public class ClickButtonMaker {
 
     private ICallback _callback;
 
-    public ClickButtonMaker() {}
+    public ClickButtonBuilder() {}
 
-    public ClickButtonMaker(ClickButtonMaker toCopy) {
+    public ClickButtonBuilder(ClickButtonBuilder toCopy) {
         _position.set(toCopy._position);
         _angle = toCopy._angle;
         _callback = toCopy._callback;
@@ -32,38 +33,43 @@ public class ClickButtonMaker {
         _height = toCopy._height;
     }
 
-    public ClickButtonMaker clickArea(int width, int height) {
+    @Override
+    public ClickButtonBuilder copy() {
+        return new ClickButtonBuilder(this);
+    }
+
+    public ClickButtonBuilder clickArea(int width, int height) {
         this._width = width;
         this._height = height;
         return this;
     }
 
-    public ClickButtonMaker display(Texture tex) {
+    public ClickButtonBuilder display(Texture tex) {
         this._texture = tex;
         return this;
     }
 
-    public ClickButtonMaker text(String text) {
+    public ClickButtonBuilder text(String text) {
         this._text = text;
         return this;
     }
 
-    public ClickButtonMaker font(BitmapFont font) {
+    public ClickButtonBuilder font(BitmapFont font) {
         this._font = font;
         return this;
     }
 
-    public ClickButtonMaker position(float x, float y) {
+    public ClickButtonBuilder position(float x, float y) {
         _position.set(x, y);
         return this;
     }
 
-    public ClickButtonMaker angle(float angle) {
+    public ClickButtonBuilder angle(float angle) {
         this._angle = angle;
         return this;
     }
 
-    public ClickButtonMaker onClick(ICallback callback) {
+    public ClickButtonBuilder onClick(ICallback callback) {
         this._callback = callback;
         return this;
     }

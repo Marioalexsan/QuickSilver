@@ -16,6 +16,7 @@ public class EnvType {
     public static final int ConcreteFloor = 10;
     public static final int BoxMedium = 11;
     public static final int BoxSmall = 12;
+    public static final int ConcreteFloorTwo = 13;
 
     public static final int PlayerSpawnPoint = 1000;
 

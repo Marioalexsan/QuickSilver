@@ -2,9 +2,6 @@ package hg.networking;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
-import hg.engine.NetworkEngine;
-import hg.game.GameManager;
-import hg.game.HgGame;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.states.*;
 import hg.networking.packets.*;
@@ -44,9 +41,11 @@ public class NetworkHelper {
 
         kryo.register(AssaultRifleState.class);
         kryo.register(DeathmatchState.class);
-        kryo.register(GenericBulletState.class);
+        kryo.register(BulletState.class);
+        kryo.register(PickupState.class);
         kryo.register(PlayerState.class);
         kryo.register(RevolverState.class);
+        kryo.register(SpawnerState.class);
 
         // Other
 

@@ -34,8 +34,8 @@ public class AssaultRifle implements IWeapon {
 
     // Weapon state
 
-    private int currentAmmo = 0;
-    private int reserveAmmo = 90;
+    private int currentAmmo = 30;
+    private int reserveAmmo = 30;
     private int bulletsToFire = 0;
     private int burstShotCooldown = 0;
     private int weaponCooldown = 0;
@@ -58,7 +58,7 @@ public class AssaultRifle implements IWeapon {
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
-        var boolet = HgGame.Manager().addActor(ActorType.GenericBullet, ownerPosition, ownerAngle.getDeg());
+        var boolet = HgGame.Manager().addActor(ActorType.Bullet, ownerPosition, ownerAngle.getDeg());
         boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
     }

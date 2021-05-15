@@ -7,7 +7,6 @@ import hg.entities.PlayerEntity;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
-import hg.networking.NetworkRole;
 import hg.networking.Packet;
 import hg.types.TargetType;
 import hg.utils.DebugLevels;

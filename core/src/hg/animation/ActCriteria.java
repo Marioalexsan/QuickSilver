@@ -1,6 +1,6 @@
 package hg.animation;
 
-/**
+/*
  * Type Documentation:
  *
  * TriggerAtStart
@@ -10,7 +10,6 @@ package hg.animation;
  * TriggerAtEnd
  *      Consumes nothing
  */
-
 
 /** Animation Criteria
  *

@@ -24,7 +24,7 @@ public class MapRWMethods {
             // Write environments
             file.writeInt(proto.environments.size());
             for (var env : proto.environments) {
-                file.writeInt(env.type);
+                file.writeInt(env.objectType);
                 file.writeFloat(env.position.x);
                 file.writeFloat(env.position.y);
                 file.writeFloat(env.angle);
@@ -62,7 +62,7 @@ public class MapRWMethods {
             // Read environments
             int envCount = file.readInt();
             while (envCount-- > 0) {
-                var env = new EnvironmentDescription(file.readInt(), new Vector2(file.readFloat(), file.readFloat()), file.readFloat());
+                var env = new Description(file.readInt(), new Vector2(file.readFloat(), file.readFloat()), file.readFloat());
                 proto.environments.add(env);
             }
 

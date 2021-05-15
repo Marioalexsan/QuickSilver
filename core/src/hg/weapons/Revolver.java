@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import hg.animation.Animation;
 import hg.drawables.Drawable;
 import hg.entities.Entity;
-import hg.entities.GenericBullet;
+import hg.entities.Bullet;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
 import hg.gamelogic.states.RevolverState;
@@ -25,7 +25,7 @@ public class Revolver implements IWeapon {
     // Weapon stats
 
     private final int magazineSize = 6;
-    private final int maxTotalAmmo = 30;
+    private final int maxTotalAmmo = 48;
     private final int shotCooldown = 42;
     private final int timeToReload = 120;
     private final int weaponPickupAmmo = 12;
@@ -33,8 +33,8 @@ public class Revolver implements IWeapon {
 
     // Weapon state
 
-    private int currentAmmo = 0;
-    private int reserveAmmo = 30;
+    private int currentAmmo = 6;
+    private int reserveAmmo = 18;
     private int weaponCooldown = 0;
 
     private int reloadCounter = 0;
@@ -55,9 +55,9 @@ public class Revolver implements IWeapon {
         Angle ownerAngle = owner.getAngle();
         Vector2 ownerPosition = owner.getPosition();
 
-        var boolet = HgGame.Manager().addActor(ActorType.GenericBullet, ownerPosition, ownerAngle.getDeg());
+        var boolet = HgGame.Manager().addActor(ActorType.Bullet, ownerPosition, ownerAngle.getDeg());
         boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
-        ((GenericBullet) boolet).setSpeed(38);
+        ((Bullet) boolet).setSpeed(38);
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 20f, ColliderGroup.Player);
     }
 

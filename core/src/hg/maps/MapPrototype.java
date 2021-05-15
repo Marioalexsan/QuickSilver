@@ -1,14 +1,17 @@
 package hg.maps;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.libraries.EnvironmentLibrary;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
 public class MapPrototype {
-    public final LinkedList<EnvironmentDescription> environments = new LinkedList<>();
+    /** Environments are static and not sent over the network */
+    public final LinkedList<Description> environments = new LinkedList<>();
+
+    /** These actors that are created on map load. Only Server should instantiate them. Clients instead receive EntityAdded messages. */
+    public final LinkedList<Description> onLoadActors = new LinkedList<>();
+
+    /** These points are used for spawning in players. */
     public final LinkedList<Vector2> randomSpawnpoints = new LinkedList<>();
     public final LinkedList<LinkedList<Vector2>> teamSpawnpoints = new LinkedList<>();
 }

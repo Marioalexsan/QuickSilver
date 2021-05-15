@@ -181,7 +181,7 @@ public class CollisionEngine {
     }
 
     public boolean checkAttackPrerequisites(Collider attacker, Collider defender) {
-        /** --- List of prerequisites / exclusions for combat ---
+        /* --- List of prerequisites / exclusions for combat ---
          * Do combat check if:
          * - attacker has attackstats and defender has defenderstats
          * - attacker is not also the defender (you can't hurt yourself), unless hurtsDefenderIfOwner is true

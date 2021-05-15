@@ -1,6 +1,6 @@
 package hg.animation;
 
-/** Type Documentation:
+/* Type Documentation:
  *
  * PlaySound
  *      Consumes sArgs - sound to play.

@@ -5,10 +5,7 @@ import hg.gamelogic.BaseStats;
 import java.util.HashMap;
 
 
-public class PlayerState extends State {
-    public float posX;
-    public float posY;
-    public float angle;
+public class PlayerState extends PositionState {
     public float smoothSpeedX;
     public float smoothSpeedY;
     public BaseStats baseStats; // Does not send Entity

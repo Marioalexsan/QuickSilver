@@ -3,7 +3,6 @@ package hg.gamelogic.playerlogic;
 import com.badlogic.gdx.math.Vector2;
 import hg.engine.MappedAction;
 import hg.entities.PlayerEntity;
-import hg.game.HgGame;
 import hg.utils.Angle;
 
 import java.util.ArrayList;

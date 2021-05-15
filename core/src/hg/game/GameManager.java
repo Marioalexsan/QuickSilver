@@ -4,6 +4,7 @@ package hg.game;
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.*;
 import hg.drawables.BasicText;
+import hg.drawables.DrawLayer;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
@@ -13,6 +14,7 @@ import hg.gamelogic.BaseStats;
 import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.states.State;
 import hg.libraries.ActorLibrary;
+import hg.libraries.BuilderLibrary;
 import hg.libraries.EnvironmentLibrary;
 import hg.networking.NetworkRole;
 import hg.networking.NetworkStatus;
@@ -22,6 +24,7 @@ import hg.types.DirectorType;
 import hg.types.TargetType;
 import hg.utils.*;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /** Holds various stuff relevant to the game, such as entities */
@@ -38,13 +41,14 @@ public class GameManager {
     private final ArrayList<PlayerView> playerViews = new ArrayList<>();
 
     private final ChatSystem chatSystem;
+    private final BasicText debug_mouseWorldPosition;
 
     private final BasicText notice;
     private int noticeTimeLeft;
 
     // Network Update stuff
 
-    private int actorHeavyUpdateInterval = 8;
+    private int actorHeavyUpdateInterval = 12;
     private int actorNextHeavyUpdate = 0;
 
     private int gamemodeHeavyUpdateInterval = 30;
@@ -55,12 +59,17 @@ public class GameManager {
         chatSystem.setEnabled(false);
         chatSystem.getPosition().set(-650, -500);
 
+        debug_mouseWorldPosition = BuilderLibrary.BasicTextBuilders("label").textPos(HPos.Left, VPos.Top).makeGUI().build();
+        debug_mouseWorldPosition.setPositionOffset(new Vector2(80, -80));
+        debug_mouseWorldPosition.setEnabled(false);
+        debug_mouseWorldPosition.registerToEngine();
         // Notice - used for error messages
 
         notice = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "");
         notice.setConstraints(HPos.Center, VPos.Center, 0f);
         notice.setAlpha(0f);
         notice.setCameraUse(false);
+        notice.setLayer(DrawLayer.GUIDefault);
         notice.registerToEngine();
         noticeTimeLeft = 0;
     }
@@ -315,6 +324,13 @@ public class GameManager {
             noticeTimeLeft--;
         }
 
+        DecimalFormat noDigits = new DecimalFormat();
+        noDigits.setMaximumFractionDigits(0);
+
+        debug_mouseWorldPosition.setPosition(HgGame.Input().getMouse());
+        var pos = HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor());
+        debug_mouseWorldPosition.setText(noDigits.format(pos.x) + " " + noDigits.format(pos.y));
+
         for (var director : new ArrayList<>(directors.values()))
             director.update();
 
@@ -366,10 +382,12 @@ public class GameManager {
                 }
             }
             else {
-                for (var actor: actors.entrySet()) {
-                    Vector2 position = actor.getValue().getPosition();
-                    Angle angle = actor.getValue().getAngle();
-                    network.sendToAllClients(new PositionUpdate(actor.getKey(), position.x, position.y, angle.getDeg()), false); // UDP Packet
+                if (actorNextHeavyUpdate % 3 == 0) { // A packet every three frames
+                    for (var actor: actors.entrySet()) {
+                        Vector2 position = actor.getValue().getPosition();
+                        Angle angle = actor.getValue().getAngle();
+                        network.sendToAllClients(new PositionUpdate(actor.getKey(), position.x, position.y, angle.getDeg()), false); // UDP Packet
+                    }
                 }
             }
 
@@ -392,6 +410,7 @@ public class GameManager {
         clearStaticEnvironments();
         clearDirectors();
         notice.unregisterFromEngine();
+        debug_mouseWorldPosition.unregisterFromEngine();
     }
 
     public void onChatMessageEntered(String message) {
@@ -455,6 +474,10 @@ public class GameManager {
                 catch (Exception ignored) {
                     chatSystem.addMessage("Usage: /kickPlayer [uniqueID]");
                 }
+            }
+            case "mousePos" -> {
+                debug_mouseWorldPosition.setEnabled(!debug_mouseWorldPosition.isActive());
+                chatSystem.addMessage("Toggled mouse position view");
             }
             default -> chatSystem.addMessage("[System] Unknown command: " + command);
         }

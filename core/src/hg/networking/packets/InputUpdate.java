@@ -1,7 +1,6 @@
 package hg.networking.packets;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.game.ChatSystem;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;

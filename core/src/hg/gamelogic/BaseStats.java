@@ -1,7 +1,6 @@
 package hg.gamelogic;
 
 import hg.entities.Entity;
-import hg.interfaces.ICollisionObserver;
 import hg.interfaces.IUpdateable;
 
 /**
@@ -17,11 +16,11 @@ public class BaseStats implements IUpdateable {
     public float maxHeavyArmor = 100f;
     public float heavyArmor = 0f;
     public int maxArmorPlates = 10;
-    public int armorPlates = 3;
+    public int armorPlates = 0;
     public boolean hasKevlarVest = false;
     public int invulnerabilityFrames = 0;
 
-    public float baseMoveSpeed = 10f;
+    public float baseMoveSpeed = 9.4f;
 
     public int deathCounter = 0;
 

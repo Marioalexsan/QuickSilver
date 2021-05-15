@@ -6,7 +6,6 @@ import hg.types.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
-import hg.engine.CollisionEngine;
 
 import java.util.Random;
 
@@ -16,6 +15,9 @@ import java.util.Random;
  */
 
 public class HgGame extends ApplicationAdapter {
+
+	// A single access point for the game engine is provided here.
+	// This may be taboo, but it is infinitely better than the alternatives.
 
 	private static HgGame _instance;
 	public static HgGame Game() { return _instance; }

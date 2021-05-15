@@ -49,9 +49,8 @@ public class PlayerEntity extends Entity {
         setLogic(playerLogic);
 
         weapons.put(WeaponType.Revolver, new Revolver(this));
-        weapons.put(WeaponType.AssaultRifle, new AssaultRifle(this));
 
-        lastWeapon = WeaponType.AssaultRifle;
+        lastWeapon = WeaponType.Revolver;
         currentWeapon = WeaponType.Revolver;
 
         baseStats = new BaseStats(this);
@@ -139,14 +138,9 @@ public class PlayerEntity extends Entity {
 
             if (heldWeapon != null) {
                 if (actions != null) {
-                    if (actions.contains(MappedAction.QuickSwitchWeapon) && currentWeapon != lastWeapon) {
-                        heldWeapon.onUnequip();
-                        int swap = currentWeapon;
-                        currentWeapon = lastWeapon;
-                        lastWeapon = swap;
-                        heldWeapon = weapons.get(currentWeapon);
-                        heldWeapon.onEquip();
-                    }
+                    if (actions.contains(MappedAction.QuickSwitchWeapon)) tryWeaponSwitch(lastWeapon);
+                    if (actions.contains(MappedAction.WeaponOne)) tryWeaponSwitch(WeaponType.Revolver);
+                    if (actions.contains(MappedAction.WeaponTwo)) tryWeaponSwitch(WeaponType.AssaultRifle);
                     if (actions.contains(MappedAction.Reload)) heldWeapon.onReload();
                     if (actions.contains(MappedAction.PrimaryFire)) heldWeapon.onPrimaryFire();
                 }
@@ -158,6 +152,14 @@ public class PlayerEntity extends Entity {
         if (playerLogic instanceof LocalPlayerLogic) {
             ((LocalPlayerLogic) playerLogic).sendActions();
         }
+    }
+
+    private void tryWeaponSwitch(int newWeapon) {
+        if (newWeapon == currentWeapon || weapons.get(newWeapon) == null) return;
+        lastWeapon = currentWeapon;
+        currentWeapon = newWeapon;
+        weapons.get(lastWeapon).onUnequip();
+        weapons.get(currentWeapon).onEquip();
     }
 
     @Override
@@ -273,8 +275,41 @@ public class PlayerEntity extends Entity {
                 if (killer != null) onDeath(killer);
             }
             case 2 -> revive();
+            case 3 -> onWeaponPickup(msg.intParams[0]);
+            case 4 -> onAmmoPickup(msg.intParams[0]);
+            case 5 -> heal(msg.floatParams[0]);
+            case 6 -> obtainArmorPlates(msg.intParams[0]);
+            case 7 -> obtainVest();
+            case 8 -> obtainHeavyArmor(msg.floatParams[0]);
             default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + msg.insType, DebugLevels.Warn);
         }
+    }
+
+    public void heal(float amount) {
+        GameManager manager = HgGame.Manager();
+        if (this == manager.localView.playerEntity) manager.setNotice("Healed " + (int) amount + " HP!", 35);
+        baseStats.health = Math.min(baseStats.health + amount, baseStats.maxHealth);
+    }
+
+    public void obtainArmorPlates(int count) {
+        GameManager manager = HgGame.Manager();
+        if (this == manager.localView.playerEntity)
+            manager.setNotice("Obtained " + (count == 1 ? "an" : count) + " Armor Plate" + (count == 1 ? "" : "s") + "!", 35);
+        baseStats.armorPlates = Math.min(baseStats.armorPlates + count, baseStats.maxArmorPlates);
+    }
+
+    public void obtainVest() {
+        GameManager manager = HgGame.Manager();
+        if (this == manager.localView.playerEntity)
+            manager.setNotice("Obtained Kevlar Vest!", 35);
+        baseStats.hasKevlarVest = true;
+    }
+
+    public void obtainHeavyArmor(float amount) {
+        GameManager manager = HgGame.Manager();
+        if (this == manager.localView.playerEntity)
+            manager.setNotice("Obtained Heavy Armor!", 35);
+        baseStats.heavyArmor = Math.min(baseStats.heavyArmor + amount, baseStats.maxHeavyArmor);
     }
 
     @Override
@@ -289,12 +324,49 @@ public class PlayerEntity extends Entity {
         return drawable;
     }
 
+    public void onWeaponPickup(int type) {
+        GameManager manager = HgGame.Manager();
+
+        IWeapon existing = weapons.get(type);
+        boolean doNotice = this == manager.localView.playerEntity;
+
+        if (existing != null) {
+            existing.onWeaponPickup();
+            if (doNotice) manager.setNotice("Took ammo from the Weapon!", 35);
+            return;
+        }
+
+        switch (type) {
+            case WeaponType.Revolver -> {
+                weapons.put(type, new Revolver(this));
+                if (doNotice) manager.setNotice("Picked up a Revolver!", 35);
+            }
+            case WeaponType.AssaultRifle -> {
+                weapons.put(type, new AssaultRifle(this));
+                if (doNotice) manager.setNotice("Picked up a Rifle!", 35);
+            }
+        }
+    }
+
+    public void onAmmoPickup(int type) {
+        GameManager manager = HgGame.Manager();
+        boolean doNotice = this == manager.localView.playerEntity;
+
+        if (type == WeaponType.AllWeapons) {
+            for (var weapon: weapons.values()) weapon.onAmmoPackPickup();
+        }
+
+        IWeapon existing = weapons.get(type);
+        if (existing != null) {
+            existing.onAmmoPackPickup();
+        }
+        if (doNotice) manager.setNotice("Picked up some ammo!", 35);
+    }
+
     @Override
     public State tryGenerateState() {
         PlayerState stuff = new PlayerState();
-        stuff.posX = position.x;
-        stuff.posY = position.y;
-        stuff.angle = angle.getDeg();
+        stuff.copyPosition(this);
         stuff.smoothSpeedX = smoothSpeed.x;
         stuff.smoothSpeedY = smoothSpeed.y;
         stuff.baseStats = baseStats;
@@ -312,8 +384,7 @@ public class PlayerEntity extends Entity {
     public void tryApplyState(State state) {
         if (state instanceof PlayerState) {
             PlayerState stuff = (PlayerState) state;
-            position.set(stuff.posX, stuff.posY);
-            angle.set(stuff.angle);
+            stuff.applyPosition(this);
             smoothSpeed.set(stuff.smoothSpeedX, stuff.smoothSpeedY);
             baseStats.copyFrom(stuff.baseStats);
             currentWeapon = stuff.currentWeapon;

@@ -147,7 +147,7 @@ public class GraphicsEngine {
     public void render() {
         // Prepare drawing field
         Gdx.gl.glClearColor(0.08f, 0.08f, 0.08f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0));
         batch.setProjectionMatrix(camera.combined);
 
         // Prepare sorted drawables
@@ -228,8 +228,6 @@ public class GraphicsEngine {
         Matrix4 old = new Matrix4(batch.getTransformMatrix());
         batch.setTransformMatrix(new Matrix4().set(targetTransform));
 
-        //font.draw(batch, text, 0, 0);
-        //font.draw(batch, text, 0, 0, width, halign, false);
         font.draw(batch, layout, 0, 0);
 
         batch.setTransformMatrix(old);

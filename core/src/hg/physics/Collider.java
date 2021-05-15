@@ -39,6 +39,10 @@ public abstract class Collider implements IEnable {
         for (var value : ColliderGroup.values()) groupProperties.put(value, ColliderProperty.CollideNotify);
     }
 
+    public void clearGroupProperties() {
+        for (var value : ColliderGroup.values()) groupProperties.put(value, ColliderProperty.DoNothing);
+    }
+
     // Getters and Setters
 
     public boolean isHeavy() { return this.mass >= StaticMassThreshold; }

@@ -16,10 +16,10 @@ import java.util.Random;
 public class AudioEngine {
     /** A structure for describing how a Sound should play */
     public static class SoundDescription {
-        public float pitch = 1f;
-        public float randomPitch = 0f;
-        public float minDistance = 0f; // Sound closer than this will play at 1.0 "distance" volume
-        public float maxDistance = 0f; // Sound further than this will play at 0 "distance" volume
+        public float pitch;
+        public float randomPitch;
+        public float minDistance; // Sound closer than this will play at 1.0 "distance" volume
+        public float maxDistance; // Sound further than this will play at 0 "distance" volume
 
         public SoundDescription(float volume, float pitch, float randomPitch, float minDistance, float maxDistance) {
             this.pitch = pitch;
@@ -31,8 +31,8 @@ public class AudioEngine {
 
     /** A structure describing a music's current state. */
     public static class MusicState {
-        public String path = "";
-        public float volume = 100;
+        public String path;
+        public float volume;
         public boolean isStopping = false;
         public float transitionMod = 0f;
         public MusicState(String path, float volume) {
@@ -120,7 +120,7 @@ public class AudioEngine {
         if (musicState.isStopping) {
             // Apply fade out
             musicState.transitionMod -= 0.5f / TRANSITION_TIME_IN_FRAMES;
-            musicState.transitionMod = (float) HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
+            musicState.transitionMod = HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
 
             if (musicState.transitionMod <= 0.05f) {
                 // Stop music, dispose of resources
@@ -151,7 +151,7 @@ public class AudioEngine {
         else {
             // Apply fade in
             musicState.transitionMod += 0.5f / TRANSITION_TIME_IN_FRAMES;
-            musicState.transitionMod = (float) HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
+            musicState.transitionMod = HgMathUtils.ClampValue(musicState.transitionMod, 0, 1);
         }
 
         if (musicState != null && music != null) music.setVolume(musicState.volume * globalMusicVolume * musicState.transitionMod); // Updates volume
