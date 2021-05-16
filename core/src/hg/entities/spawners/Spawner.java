@@ -12,20 +12,21 @@ public abstract class Spawner extends Entity {
     protected int spawnTime;
     protected int currentTime;
     protected int remainingObjects;
+    protected int startingObjectPool;
 
     protected float localOnly_alpha = 0.2f; // Not updated over network
 
     public void updateCycleAlpha() {
         float target = remainingObjects == 0 ? 0.8f : 0.2f;
         float ratio = (float) currentTime / spawnTime;
-        if (ratio > 0.33f) target = 0.4f;
-        if (ratio > 0.66f) target = 0.7f;
-        if (spawnTime - currentTime < 120) target = 1f;
+        if (ratio > 0.5f) target = 0.4f;
+        if (spawnTime - currentTime < 180) target = 1f;
         localOnly_alpha = (1f - 0.07f) * localOnly_alpha + 0.07f * target;
     }
 
     public Spawner(int spawnTime, int startingObjectPool) {
         this.spawnTime = spawnTime;
+        this.startingObjectPool = startingObjectPool;
         this.remainingObjects = Math.max(startingObjectPool, 0);
         this.currentTime = 0;
     }
@@ -52,9 +53,23 @@ public abstract class Spawner extends Entity {
         remainingObjects = Math.max(remainingObjects, 1);
     }
 
+    public void reset() {
+        this.remainingObjects = Math.max(startingObjectPool, 0);
+        this.currentTime = 0;
+    }
+
     public void addSpawns(int count) {
         remainingObjects += count;
     }
+
+    public void advanceFrames(int frames) {
+        currentTime += Math.max(frames, 0);
+    }
+
+    public void advanceRatio(float ratio) {
+        currentTime += Math.max(ratio * spawnTime, 0);
+    }
+
 
     /** This function should be overriden by subclasses to spawn objects.
      * This function is only called by the Spawner if the machine is a server! */
@@ -78,6 +93,7 @@ public abstract class Spawner extends Entity {
             spawnTime = stuff.spawnTime;
             remainingObjects = stuff.remainingObjects;
             currentTime = stuff.currentTime;
+            startingObjectPool = stuff.startingObjectPool;
         }
     }
 

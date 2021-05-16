@@ -6,6 +6,7 @@ import hg.types.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
+import hg.utils.HgMathUtils;
 
 import java.util.Random;
 
@@ -27,18 +28,20 @@ public class HgGame extends ApplicationAdapter {
 	public static CollisionEngine Physics() { return _instance.collisionEngine; }
 	public static GraphicsEngine Graphics() { return _instance.graphicsEngine; }
 	public static InputEngine Input() { return _instance.inputEngine; }
+	public static NetworkEngine Network() { return _instance.networkEngine; }
 
 	public static GameManager Manager() { return _instance.gameManager; }
-	public static NetworkEngine Network() { return _instance.networkEngine; }
+	public static GUIMaster GUI() { return _instance.guiMaster; }
 
 	private AudioEngine audioEngine;
 	private AssetEngine assetEngine;
 	private CollisionEngine collisionEngine;
 	private GraphicsEngine graphicsEngine;
 	private InputEngine inputEngine;
+	private NetworkEngine networkEngine;
 
 	private GameManager gameManager;
-	private NetworkEngine networkEngine;
+	private GUIMaster guiMaster;
 
 	private boolean crashed = false;
 
@@ -64,14 +67,13 @@ public class HgGame extends ApplicationAdapter {
 	}
 
 	public void setFOVFactor(float fov) {
-		factorFOV = fov;
+		factorFOV = HgMathUtils.ClampValue(fov, 0f, 0.8f);
 	}
 
 	public void quitGame() {
 		quitCalled = true;
 	}
 
-	BasicSprite lowhpvignette = new BasicSprite();
 	BasicSprite targetGUI = new BasicSprite();
 	BasicSprite targetWorld = new BasicSprite();
 
@@ -84,16 +86,11 @@ public class HgGame extends ApplicationAdapter {
 		audioEngine = new AudioEngine();
 		inputEngine = new InputEngine();
 		collisionEngine = new CollisionEngine();
-		gameManager = new GameManager();
 		networkEngine = new NetworkEngine();
 
-		collisionEngine.setDebugDraw(false); // This will make colliders visible!
+		gameManager = new GameManager();
+		guiMaster = new GUIMaster();
 
-		lowhpvignette.setTexture(assetEngine.loadTexture("Assets/GUI/LowHP.png"));
-		lowhpvignette.registerToEngine();
-		lowhpvignette.centerToRegion();
-		lowhpvignette.setLayer(DrawLayer.GUIDefault);
-		lowhpvignette.setCameraUse(false);
 		targetGUI.setTexture(assetEngine.loadTexture("Assets/GUI/Target.png"));
 		targetGUI.setCameraUse(false);
 		targetGUI.setLayer(DrawLayer.GUICursor);
@@ -144,6 +141,7 @@ public class HgGame extends ApplicationAdapter {
 			if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
 				playerEntity.getPosition().set(targetWorld.getPosition()); // Debug teleport
 
+			guiMaster.update();
 			graphicsEngine.render();
 			audioEngine.update();
 
@@ -164,6 +162,7 @@ public class HgGame extends ApplicationAdapter {
 			System.out.println("Game crashed due to an unhandled exception! Sorry about that...");
 		}
 
+		guiMaster.cleanup();
 		gameManager.cleanup();
 		graphicsEngine.cleanup();
 		audioEngine.cleanup();

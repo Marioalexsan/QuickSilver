@@ -12,7 +12,7 @@ public class MedkitSpawner extends Spawner {
     private final BasicSprite silhouette;
 
     public MedkitSpawner() {
-        super(1800, 1);
+        super(2400, 1);
         silhouette = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/MedkitSilhouette.png"));
         silhouette.setLayer(DrawLayer.FloorAir - 1);
         silhouette.centerToRegion();

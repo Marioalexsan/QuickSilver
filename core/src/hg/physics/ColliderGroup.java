@@ -4,7 +4,7 @@ public enum ColliderGroup {
     Environment,
     Environment_ShootThrough,
     Player,
-    Player_Projectile,
+    PlayerProjectile,
     Pickups,
     Other
 }

@@ -12,7 +12,7 @@ public class ArmorPlateSpawner extends Spawner {
     private final BasicSprite silhouette;
 
     public ArmorPlateSpawner() {
-        super(1200, 1);
+        super(1800, 1);
         silhouette = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/APlateSilhouette.png"));
         silhouette.setLayer(DrawLayer.FloorAir - 1);
         silhouette.centerToRegion();

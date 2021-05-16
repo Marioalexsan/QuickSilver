@@ -23,13 +23,14 @@ public class Bullet extends Entity {
         AssetEngine assets = HgGame.Assets(); // Extra dependency
 
         collider.owner = this;
-        collider.group = ColliderGroup.Player_Projectile;
+        collider.group = ColliderGroup.PlayerProjectile;
         for (var value : ColliderGroup.values()) {
             collider.groupProperties.put(value, ColliderProperty.Notify);
         }
         collider.groupProperties.put(ColliderGroup.Environment_ShootThrough, ColliderProperty.DoNothing);
         collider.groupProperties.put(ColliderGroup.Player, ColliderProperty.DoNothing);
         collider.groupProperties.put(ColliderGroup.Pickups, ColliderProperty.DoNothing);
+        collider.groupProperties.put(ColliderGroup.PlayerProjectile, ColliderProperty.DoNothing);
 
         drawable.setTexture(assets.loadTexture("Assets/Sprites/Projectiles/Bullet.png"));
         drawable.setTextureAngle(new Angle(-90f));

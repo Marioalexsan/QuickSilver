@@ -12,7 +12,8 @@ import java.util.Random;
 
 /**
  * Luigi wins by doing absolutely nuffin'!
- * (testing AI)
+ * NOTE: This AI is really outdated code which should not be used in its current state.
+ * TODO If you plan on using this, make it multiplayer-ready
  */
 public class LuigiAI extends PlayerLogic {
     private PlayerEntity controlledPlayerEntity;

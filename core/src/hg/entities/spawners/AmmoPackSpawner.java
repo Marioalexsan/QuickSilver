@@ -11,7 +11,7 @@ public class AmmoPackSpawner extends Spawner {
     private final BasicSprite silhouette;
 
     public AmmoPackSpawner() {
-        super(900, 1);
+        super(1200, 1);
         silhouette = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/AmmoPackSilhouette.png"));
         silhouette.setLayer(DrawLayer.FloorAir - 1);
         silhouette.centerToRegion();

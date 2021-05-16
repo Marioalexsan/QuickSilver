@@ -183,6 +183,10 @@ public class GameManager {
         return playerViews.toArray(new PlayerView[0]);
     }
 
+    public ArrayList<Entity> getAllActors() {
+        return new ArrayList<>(actors.values());
+    }
+
     public Entity[] getDeadActors() {
         ArrayList<Entity> deadEntities = new ArrayList<>();
         for (var actor: actors.values()) {

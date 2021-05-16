@@ -76,9 +76,7 @@ public class GameSession extends Director {
         boolean isServer = network.isLocalOrServer();
 
         gamemode = new Deathmatch();
-        gamemode.restart();
         if (isServer) {
-
             for (var view : manager.getPlayerViews()) {
                 if (view.playerEntity != null) throw new BadCoderException("Player Entity already exists lool");
 
@@ -109,6 +107,7 @@ public class GameSession extends Director {
             }
         }
 
+        gamemode.restart();
         matchState = 2;
     }
 

@@ -1,5 +1,7 @@
 package hg.gamelogic.gamemodes;
 
+import hg.entities.pickups.Pickup;
+import hg.entities.spawners.Spawner;
 import hg.types.DirectorType;
 import hg.directors.Level;
 import hg.engine.NetworkEngine;
@@ -192,8 +194,10 @@ public class Deathmatch extends Gamemode {
     @Override
     public void restart() {
         NetworkEngine network = HgGame.Network();
+        GameManager manager = HgGame.Manager();
+        Level level = (Level) manager.getDirector(DirectorType.Level);
 
-        HgGame.Manager().setNotice("Get ready..." , 60);
+        manager.setNotice("Get ready..." , 60);
 
         timeElapsed = 0;
         gameState = 0;
@@ -204,7 +208,30 @@ public class Deathmatch extends Gamemode {
 
         if (network.isLocalOrServer()) {
             NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 2);
-            HgGame.Network().sendToAllClients(msg, true);
+            network.sendToAllClients(msg, true);
+
+            for (var views: manager.getPlayerViews()) {
+                PlayerEntity player = views.playerEntity;
+                if (player == null) continue;
+
+                player.revive();
+                if (level != null) {
+                    player.getPosition().set(level.getRandomSpawnpoint());
+
+                    NetInstruction msg2 = new NetInstruction(TargetType.Gamemodes, -1337, 4);
+                    msg2.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
+
+                    HgGame.Network().sendToAllClients(msg2, true);
+                }
+            }
+
+            for (var entity: manager.getAllActors()) {
+                if (entity instanceof Pickup) entity.signalDestroy();
+                if (entity instanceof Spawner) {
+                    ((Spawner) entity).reset();
+                    ((Spawner) entity).advanceRatio(0.75f);
+                }
+            }
         }
     }
 
@@ -225,6 +252,9 @@ public class Deathmatch extends Gamemode {
                 Entity target = manager.getActor(msg.intParams[0]);
                 if (target != null) {
                     target.getPosition().set(msg.floatParams[0], msg.floatParams[1]);
+                    if (target instanceof PlayerEntity) {
+                        ((PlayerEntity) target).revive();
+                    }
                 }
             }
             default -> manager.getChatSystem().addDebugMessage("Unknown Deathmatch instruction " + msg.insType, DebugLevels.Warn);

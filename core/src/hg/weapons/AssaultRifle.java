@@ -25,7 +25,7 @@ public class AssaultRifle implements IWeapon {
 
     private final int magazineSize = 30;
     private final int maxTotalAmmo = 120;
-    private final int burstCooldown = 35;
+    private final int burstCooldown = 48;
     private final int burstShotInterval = 7;
     private final int burstCount = 3;
     private final int timeToReload = 120;
@@ -48,18 +48,29 @@ public class AssaultRifle implements IWeapon {
 
     public void setOwner(Entity entity) {
         owner = entity;
-        Drawable drawable = owner.getDrawableIfAny();
-        if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
+        if (owner != null) {
+            Drawable drawable = owner.getDrawableIfAny();
+            if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
+        }
+    }
+
+    @Override
+    public String getAmmoDisplay() {
+        return currentAmmo + " / " + magazineSize + " [ " + reserveAmmo + " ]";
+    }
+
+    @Override
+    public String getWeaponDisplay() {
+        return "Assets/Sprites/Pickups/WorldRifle.png";
     }
 
     private void createBullet() {
         if (HgGame.Network().getNetRole() == NetworkRole.Client) return;
 
         Angle ownerAngle = owner.getAngle();
-        Vector2 ownerPosition = owner.getPosition();
+        Vector2 spawnPosition = new Vector2(owner.getPosition()).add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
 
-        var boolet = HgGame.Manager().addActor(ActorType.Bullet, ownerPosition, ownerAngle.getDeg());
-        boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
+        var boolet = HgGame.Manager().addActor(ActorType.Bullet, spawnPosition, ownerAngle.getDeg());
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
     }
 
@@ -112,6 +123,7 @@ public class AssaultRifle implements IWeapon {
     @Override
     public void onEquip() {
         weaponCooldown = 30;
+        if (ownerAnimation == null) return;
         ownerAnimation.setDefaultAnimation("Rifle_Idle");
         ownerAnimation.switchToDefault();
     }

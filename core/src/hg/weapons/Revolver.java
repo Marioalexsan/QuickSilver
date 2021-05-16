@@ -43,20 +43,32 @@ public class Revolver implements IWeapon {
         setOwner(owner);
     }
 
+    @Override
+    public String getAmmoDisplay() {
+        return currentAmmo + " / " + magazineSize + " [ " + reserveAmmo + " ]";
+    }
+
+    @Override
+    public String getWeaponDisplay() {
+        return "Assets/Sprites/Pickups/WorldRevolver.png";
+    }
+
+
     public void setOwner(Entity entity) {
         owner = entity;
-        Drawable drawable = owner.getDrawableIfAny();
-        if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
+        if (owner != null) {
+            Drawable drawable = owner.getDrawableIfAny();
+            if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
+        }
     }
 
     private void createBullet() {
         if (HgGame.Network().getNetRole() == NetworkRole.Client) return;
 
         Angle ownerAngle = owner.getAngle();
-        Vector2 ownerPosition = owner.getPosition();
+        Vector2 spawnPosition = new Vector2(owner.getPosition()).add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
 
-        var boolet = HgGame.Manager().addActor(ActorType.Bullet, ownerPosition, ownerAngle.getDeg());
-        boolet.getPosition().add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
+        var boolet = HgGame.Manager().addActor(ActorType.Bullet, spawnPosition, ownerAngle.getDeg());
         ((Bullet) boolet).setSpeed(38);
         boolet.getColliderIfAny().attackStats = new AttackStats(owner, 20f, ColliderGroup.Player);
     }
@@ -107,9 +119,10 @@ public class Revolver implements IWeapon {
 
     @Override
     public void onEquip() {
+        weaponCooldown = 30;
+        if (ownerAnimation == null) return;
         ownerAnimation.setDefaultAnimation("Revolver_Idle");
         ownerAnimation.switchToDefault();
-        weaponCooldown = 30;
     }
 
     @Override

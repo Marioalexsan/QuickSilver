@@ -3,16 +3,17 @@ package hg.entities.spawners;
 import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
-import hg.entities.pickups.AssaultRiflePickup;
+import hg.entities.pickups.AmmoPackPickup;
+import hg.entities.pickups.KevlarVestPickup;
 import hg.game.HgGame;
 import hg.types.ActorType;
 
-public class AssaultRifleSpawner extends Spawner {
+public class KevlarVestSpawner extends Spawner {
     private final BasicSprite silhouette;
 
-    public AssaultRifleSpawner() {
-        super(2400, 1);
-        silhouette = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/RifleSilhouette.png"));
+    public KevlarVestSpawner() {
+        super(4000, 1);
+        silhouette = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/KevlarVestSilhouette.png"));
         silhouette.setLayer(DrawLayer.FloorAir - 1);
         silhouette.centerToRegion();
         silhouette.registerToEngine();
@@ -23,7 +24,7 @@ public class AssaultRifleSpawner extends Spawner {
 
     @Override
     public void trySpawn() {
-        AssaultRiflePickup pickup = (AssaultRiflePickup) HgGame.Manager().addActor(ActorType.AssaultRiflePickup, position, angle.getDeg());
+        KevlarVestPickup pickup = (KevlarVestPickup) HgGame.Manager().addActor(ActorType.KevlarVestPickup, position, angle.getDeg());
         pickup.setCreator(this);
     }
 

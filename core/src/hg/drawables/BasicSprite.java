@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
+import com.badlogic.gdx.math.Rectangle;
 import hg.engine.GraphicsEngine;
 import hg.utils.Angle;
 import hg.utils.HgGraphicsUtils;
@@ -36,6 +37,10 @@ public class BasicSprite extends Drawable {
 
     public void centerToRegion() {
         if (frame.getTexture() != null) cenOffset.set(frame.getRegionWidth() / 2f, frame.getRegionHeight() / 2f);
+    }
+
+    public Rectangle getRegion() {
+        return new Rectangle(frame.getRegionX(), frame.getRegionY(), frame.getRegionWidth(), frame.getRegionHeight());
     }
 
     @Override

@@ -32,6 +32,7 @@ public class MainMenu extends Director {
     private final BasicText connectStatus;
     private final BasicText resolutionLabel;
     private final BasicText sensitivityLabel;
+    private final BasicText focusLabel;
     private final ToggleButton fullscreenToggle;
 
     private int waitDuration = 0;
@@ -64,6 +65,7 @@ public class MainMenu extends Director {
         menus.addObjects("Settings",
                 resolutionLabel = label.copy().position(-660, 300).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 sensitivityLabel = label.copy().position(-660, 100).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
+                focusLabel = label.copy().position(-660, 0).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 fullscreenToggle = checkButton.copy().position(-860, 200).build(),
                 title.copy().position(0, 440).text("Settings").makeGUI().build(),
                 label.copy().position(-760, 200).text("Fullscreen?").textPos(HPos.Left, VPos.Center).makeGUI().build(),
@@ -72,6 +74,8 @@ public class MainMenu extends Director {
                 arrowButton.copy().position(-760, 300).angle(-90).onClick(this::upResolution).build(),
                 arrowButton.copy().position(-860, 100).angle(90).onClick(this::downSensitivity).build(),
                 arrowButton.copy().position(-760, 100).angle(-90).onClick(this::upSensitivity).build(),
+                arrowButton.copy().position(-860, 0).angle(90).onClick(this::downFOV).build(),
+                arrowButton.copy().position(-760, 0).angle(-90).onClick(this::upFOV).build(),
                 boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build()
         );
         // === Start Server Menu ===
@@ -178,6 +182,16 @@ public class MainMenu extends Director {
         updateSettingsLabels();
     }
 
+    private void upFOV() {
+        HgGame.Game().setFOVFactor(HgGame.Game().getFOVFactor() + 0.05f);
+        updateSettingsLabels();
+    }
+
+    private void downFOV() {
+        HgGame.Game().setFOVFactor(HgGame.Game().getFOVFactor() - 0.05f);
+        updateSettingsLabels();
+    }
+
     private void updateSettingsLabels() {
         var selections = HgGame.Graphics().getSupportedResolutions();
         resSelection = HgMathUtils.ClampValue(resSelection, 0, selections.size() - 1);
@@ -186,6 +200,9 @@ public class MainMenu extends Director {
 
         float sens = HgGame.Input().getMouseSensitivity();
         sensitivityLabel.setText("Mouse Speed: " + format1.format(sens));
+
+        float fov = HgGame.Game().getFOVFactor();
+        focusLabel.setText("FOV Factor: " + format1.format(fov));
     }
 
     private void applySettings() {

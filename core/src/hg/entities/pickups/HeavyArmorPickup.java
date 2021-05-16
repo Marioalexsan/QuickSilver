@@ -10,13 +10,13 @@ import hg.networking.packets.NetInstruction;
 import hg.types.TargetType;
 import hg.types.WeaponType;
 
-public class ArmorPlatePickup extends Pickup {
+public class HeavyArmorPickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;
 
-    public ArmorPlatePickup() {
+    public HeavyArmorPickup() {
         super(50);
-        box = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/APlate.png"));
+        box = new BasicSprite(HgGame.Assets().loadTexture("Assets/Sprites/Pickups/HeavyArmor.png"));
         box.setLayer(DrawLayer.FloorAir);
         box.centerToRegion();
         box.registerToEngine();
@@ -52,12 +52,12 @@ public class ArmorPlatePickup extends Pickup {
         if (creator != null) creator.addSpawns(1);
 
         if (target != null) {
-            target.obtainArmorPlates(1);
+            target.obtainHeavyArmor(100f);
         }
 
-        if (HgGame.Network().isLocalOrServer()) {
-            NetInstruction msg = new NetInstruction(TargetType.Actors, target.getID(), 6).setInts(1);
-            HgGame.Network().sendToAllClients(msg, true);
+        if (network.isLocalOrServer()) {
+            NetInstruction msg = new NetInstruction(TargetType.Actors, target.getID(), 8).setFloats(100f);
+            network.sendToAllClients(msg, true);
         }
     }
 }

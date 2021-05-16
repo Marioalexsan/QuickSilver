@@ -18,13 +18,21 @@ public class MapLibrary {
 
                 var randoms = proto.randomSpawnpoints;
 
-                randoms.add(new Vector2(800, 800));
-                randoms.add(new Vector2(1600, 500));
-                randoms.add(new Vector2(3400, 2400));
-                randoms.add(new Vector2(4700, 2400));
-                randoms.add(new Vector2(800, 1750));
+                randoms.add(new Vector2(1650, 4600));
+                randoms.add(new Vector2(260, 4250));
+                randoms.add(new Vector2(250, 2280));
+                randoms.add(new Vector2(1260, 210));
+                randoms.add(new Vector2(2370, 210));
+                randoms.add(new Vector2(4920, 1890));
+                randoms.add(new Vector2(6340, 200));
+                randoms.add(new Vector2(6370, 2860));
+                randoms.add(new Vector2(4370, 5360));
+                randoms.add(new Vector2(2030, 5350));
 
                 var onLoadActors = proto.onLoadActors;
+
+                // Grind center spawners
+                onLoadActors.add(new Description(ActorType.HeavyArmorSpawner, new Vector2(3300, 3000), 0f));
 
                 // Sniper hallway spawners
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(6200, 1950), 0f));
@@ -33,8 +41,10 @@ public class MapLibrary {
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(5460, 1400), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(3500, 150), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(3600, 150), 0f));
-                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(3750, 150), 0f));
-                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(3850, 150), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(3750, 150), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(3850, 150), 0f));
+
+                onLoadActors.add(new Description(ActorType.KevlarVestSpawner, new Vector2(3500, 900), 0f));
 
 
                 // Backroom spawns

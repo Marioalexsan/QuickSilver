@@ -1,14 +1,8 @@
 package hg.libraries;
 
 import hg.entities.*;
-import hg.entities.pickups.AmmoPackPickup;
-import hg.entities.pickups.ArmorPlatePickup;
-import hg.entities.pickups.AssaultRiflePickup;
-import hg.entities.pickups.MedkitPickup;
-import hg.entities.spawners.AmmoPackSpawner;
-import hg.entities.spawners.ArmorPlateSpawner;
-import hg.entities.spawners.AssaultRifleSpawner;
-import hg.entities.spawners.MedkitSpawner;
+import hg.entities.pickups.*;
+import hg.entities.spawners.*;
 import hg.gamelogic.playerlogic.EmptyAI;
 import hg.types.ActorType;
 
@@ -30,6 +24,10 @@ public class ActorLibrary {
             case ActorType.MedkitPickup -> which = new MedkitPickup();
             case ActorType.ArmorPlateSpawner -> which = new ArmorPlateSpawner();
             case ActorType.ArmorPlatePickup -> which = new ArmorPlatePickup();
+            case ActorType.KevlarVestSpawner -> which = new KevlarVestSpawner();
+            case ActorType.KevlarVestPickup -> which = new KevlarVestPickup();
+            case ActorType.HeavyArmorSpawner -> which = new HeavyArmorSpawner();
+            case ActorType.HeavyArmorPickup -> which = new HeavyArmorPickup();
         }
         return which;
     }

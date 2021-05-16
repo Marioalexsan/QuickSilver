@@ -2,6 +2,7 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
+import hg.libraries.WeaponLibrary;
 import hg.types.DirectorType;
 import hg.directors.GameSession;
 import hg.drawables.DrawLayer;
@@ -28,9 +29,9 @@ import hg.types.TargetType;
 import hg.types.WeaponType;
 import hg.utils.DebugLevels;
 import hg.utils.HgMathUtils;
-import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PlayerEntity extends Entity {
@@ -48,15 +49,12 @@ public class PlayerEntity extends Entity {
     public PlayerEntity(PlayerLogic playerLogic) {
         setLogic(playerLogic);
 
-        weapons.put(WeaponType.Revolver, new Revolver(this));
-
-        lastWeapon = WeaponType.Revolver;
-        currentWeapon = WeaponType.Revolver;
-
         baseStats = new BaseStats(this);
         collider.group = ColliderGroup.Player;
         collider.baseStats = baseStats;
         collider.owner = this;
+
+        revive();
 
         drawable.addKnownAnimation("Death", AnimationLibrary.GetAnimationInfo("Player_Death"));
 
@@ -88,6 +86,14 @@ public class PlayerEntity extends Entity {
 
     public PlayerLogic getLogic() {
         return playerLogic;
+    }
+
+    public HashMap<Integer, IWeapon> viewWeapons() {
+        return new HashMap<>(weapons);
+    }
+
+    public int viewSelectedWeapon() {
+        return currentWeapon;
     }
 
     @Override
@@ -249,7 +255,7 @@ public class PlayerEntity extends Entity {
     public void revive() {
         baseStats.health = baseStats.maxHealth;
         baseStats.armorPlates = 0;
-        baseStats.heavyArmor = 0;
+        baseStats.heavyArmor = 0f;
         baseStats.hasKevlarVest = false;
         baseStats.isDead = false;
 
@@ -258,9 +264,19 @@ public class PlayerEntity extends Entity {
 
         collider.setEnabled(true);
 
-        if (HgGame.Network().isLocalOrServer()) {
+        for (var weapon: new ArrayList<>(weapons.keySet())) removeWeapon(weapon);
+        weapons.put(WeaponType.Revolver, new Revolver(this));
+
+        currentWeapon = WeaponType.Revolver;
+        lastWeapon = WeaponType.Revolver;
+
+        weapons.get(currentWeapon).onEquip();
+
+        NetworkEngine network = HgGame.Network();
+
+        if (network.isLocalOrServer()) {
             NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 2);
-            HgGame.Network().sendToAllClients(msg, true);
+            network.sendToAllClients(msg, true);
         }
     }
 
@@ -312,6 +328,13 @@ public class PlayerEntity extends Entity {
         baseStats.heavyArmor = Math.min(baseStats.heavyArmor + amount, baseStats.maxHeavyArmor);
     }
 
+    public void removeWeapon(int weapon) {
+        weapons.remove(weapon);
+
+        if (weapon == currentWeapon) currentWeapon = WeaponType.Revolver;
+        if (weapon == lastWeapon) lastWeapon = WeaponType.Revolver;
+    }
+
     @Override
     public void destroy() {
         collider.unregisterFromEngine(); // Deallocation!
@@ -336,15 +359,11 @@ public class PlayerEntity extends Entity {
             return;
         }
 
-        switch (type) {
-            case WeaponType.Revolver -> {
-                weapons.put(type, new Revolver(this));
-                if (doNotice) manager.setNotice("Picked up a Revolver!", 35);
-            }
-            case WeaponType.AssaultRifle -> {
-                weapons.put(type, new AssaultRifle(this));
-                if (doNotice) manager.setNotice("Picked up a Rifle!", 35);
-            }
+        IWeapon newWeapon = WeaponLibrary.GetWeapon(type);
+        if (newWeapon != null) {
+            newWeapon.setOwner(this);
+            weapons.put(type, newWeapon);
+            if (doNotice) manager.setNotice(WeaponLibrary.GetWeaponPickupHint(type), 35);
         }
     }
 
@@ -389,9 +408,21 @@ public class PlayerEntity extends Entity {
             baseStats.copyFrom(stuff.baseStats);
             currentWeapon = stuff.currentWeapon;
 
+            // Update state for weapons that server has
             for (var weaponState: stuff.weaponStates.entrySet()) {
                 IWeapon weapon = weapons.get(weaponState.getKey());
-                if (weapon != null) weapon.tryApplyState(weaponState.getValue());
+                if (weapon == null) {
+                    int type = weaponState.getKey();
+                    weapons.put(type, WeaponLibrary.GetWeapon(type));
+                    weapon = weapons.get(type);
+                }
+                weapon.tryApplyState(weaponState.getValue());
+            }
+
+            // Remove any weapons that client has, but server doesn't
+            for (var weapon: new ArrayList<>(weapons.keySet())) {
+                if (!stuff.weaponStates.containsKey(weapon))
+                    removeWeapon(weapon);
             }
         }
     }

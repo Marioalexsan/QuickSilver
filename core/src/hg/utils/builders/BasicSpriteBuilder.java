@@ -20,6 +20,8 @@ public class BasicSpriteBuilder implements ICopy {
 
     private boolean _cameraUse = true;
     private boolean _centerToRegion = false;
+    private boolean _centerToNW = false;
+    private boolean _centerToW = false;
 
     private final Vector2 _position = new Vector2(0, 0);
     private float _angle = 0f;
@@ -39,6 +41,8 @@ public class BasicSpriteBuilder implements ICopy {
         _cameraUse = other._cameraUse;
         _drawLayer = other._drawLayer;
         _centerToRegion = other._centerToRegion;
+        _centerToNW = other._centerToNW;
+        _centerToW = other._centerToW;
     }
 
     @Override
@@ -90,6 +94,16 @@ public class BasicSpriteBuilder implements ICopy {
         return this;
     }
 
+    public BasicSpriteBuilder centerToNW(boolean center) {
+        this._centerToNW = center;
+        return this;
+    }
+
+    public BasicSpriteBuilder centerToW(boolean center) {
+        this._centerToW = center;
+        return this;
+    }
+
     public BasicSprite build() {
         BasicSprite sprite;
         if (_width == 0 && _height == 0) {
@@ -99,6 +113,8 @@ public class BasicSpriteBuilder implements ICopy {
             sprite = new BasicSprite(_tex, _x, _y, _width, _height);
         }
         if (_centerToRegion) sprite.centerToRegion();
+        else if (_centerToNW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight()));
+        else if (_centerToW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight() / 2f));
         sprite.setCameraUse(_cameraUse);
         sprite.getPosition().set(_position);
         sprite.getAngle().set(_angle);
