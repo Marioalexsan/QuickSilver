@@ -1,4 +1,4 @@
-package hg.types;
+package hg.enums.types;
 
 public class DirectorType {
     public static final int GameInit = 0;

@@ -1,11 +1,11 @@
 package hg.libraries;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.types.ActorType;
-import hg.types.EnvType;
+import hg.enums.types.ActorType;
+import hg.enums.types.EnvType;
 import hg.maps.Description;
 import hg.maps.MapPrototype;
-import hg.types.MapType;
+import hg.enums.types.MapType;
 
 // TODO Make a Tiler object to deal with the axis-aligned environments
 // TODO Rename rooms
@@ -13,7 +13,7 @@ import hg.types.MapType;
 public class MapLibrary {
     public static MapPrototype CreatePrototype(int map) {
         switch (map) {
-            case MapType.TestArea01 -> {
+            case MapType.Grinder -> {
                 MapPrototype proto = new MapPrototype();
 
                 var randoms = proto.randomSpawnpoints;
@@ -202,6 +202,36 @@ public class MapLibrary {
                 for (int sectionX = 4950; sectionX <= 6450; sectionX += 100) {
                     if (sectionX >= 5350 && sectionX <= 6050) continue;
                     environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 3050), 0f));
+                }
+
+                return proto;
+            }
+            case MapType.Duel -> {
+                MapPrototype proto = new MapPrototype();
+
+                var randoms = proto.randomSpawnpoints;
+
+                randoms.add(new Vector2(150, 150));
+                randoms.add(new Vector2(150, 850));
+                randoms.add(new Vector2(850, 150));
+                randoms.add(new Vector2(850, 850));
+
+                var environments = proto.environments;
+
+                for (int sectionX = 50; sectionX <= 950; sectionX += 100) {
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 50), 0f));
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 950), 0f));
+                }
+
+                for (int sectionY = 150; sectionY <= 850; sectionY += 100) {
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(50, sectionY), 0f));
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(950, sectionY), 0f));
+                }
+
+                for (int sectionX = 150; sectionX <= 850; sectionX += 100) {
+                    for (int sectionY = 150; sectionY <= 850; sectionY += 100) {
+                        environments.add(new Description(EnvType.ConcreteFloorTwo, new Vector2(sectionX, sectionY), 0f));
+                    }
                 }
 
                 return proto;

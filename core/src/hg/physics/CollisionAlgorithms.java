@@ -2,7 +2,7 @@ package hg.physics;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.interfaces.IPolygon;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 
 import java.util.ArrayList;
 
@@ -209,7 +209,7 @@ public class CollisionAlgorithms {
     // (should be 0, ends up being the exit wound)
     public static RaycastResults RaycastVsPoly(Vector2 start, Vector2 end, Vector2[] vertices) {
 
-        double[] ray = HgMathUtils.SolveRaycastLinearSystem(start.x, start.y, end.x, end.y);
+        double[] ray = MathTools.SolveRaycastLS(start.x, start.y, end.x, end.y);
         if (ray.length == 0) return new RaycastResults();
 
         float min = Float.MAX_VALUE;
@@ -218,10 +218,10 @@ public class CollisionAlgorithms {
             Vector2 first = vertices[i];
             Vector2 second = vertices[(i + 1) % vertices.length];
 
-            double[] edge = HgMathUtils.SolveRaycastLinearSystem(first.x, first.y, second.x, second.y);
+            double[] edge = MathTools.SolveRaycastLS(first.x, first.y, second.x, second.y);
             if (edge.length == 0) continue; // Bad sign, collider may be crappy
 
-            double[] impact = HgMathUtils.SolveRaycastLinearSystem(ray[0], ray[1], edge[0], edge[1]);
+            double[] impact = MathTools.SolveRaycastLS(ray[0], ray[1], edge[0], edge[1]);
             if (impact.length == 0) continue; // No impact
 
             float boxLeft = Math.max(Math.min(start.x, end.x), Math.min(first.x, second.x));
@@ -231,8 +231,8 @@ public class CollisionAlgorithms {
 
             // Impact is valid if inside a valid AABB intersection of both ray and edge's AABBs
             boolean valid = boxLeft <= boxRight && boxBottom <= boxTop &&
-                    HgMathUtils.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
-                    HgMathUtils.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
+                    MathTools.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
+                    MathTools.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
 
             if (valid) {
                 // Good hit! Calculate and save relative distance
@@ -294,17 +294,17 @@ public class CollisionAlgorithms {
 
         ArrayList<Vector2> hits = new ArrayList<>();
 
-        double[] ray = HgMathUtils.SolveRaycastLinearSystem(rayStart.x, rayStart.y, rayEnd.x, rayEnd.y);
+        double[] ray = MathTools.SolveRaycastLS(rayStart.x, rayStart.y, rayEnd.x, rayEnd.y);
         if (ray.length == 0) return false;
 
         for (int i = 0; i < vertices.length; i++) {
             Vector2 first = vertices[i];
             Vector2 second = vertices[(i + 1) % vertices.length];
 
-            double[] edge = HgMathUtils.SolveRaycastLinearSystem(first.x, first.y, second.x, second.y);
+            double[] edge = MathTools.SolveRaycastLS(first.x, first.y, second.x, second.y);
             if (edge.length == 0) continue; // Bad sign, collider may be crappy
 
-            double[] impact = HgMathUtils.SolveRaycastLinearSystem(ray[0], ray[1], edge[0], edge[1]);
+            double[] impact = MathTools.SolveRaycastLS(ray[0], ray[1], edge[0], edge[1]);
             if (impact.length == 0) continue; // No impact
 
             float boxLeft = Math.max(Math.min(rayStart.x, rayEnd.x), Math.min(first.x, second.x));
@@ -314,8 +314,8 @@ public class CollisionAlgorithms {
 
             // Impact is valid if inside a valid AABB intersection of both ray and edge's AABBs
             boolean valid = boxLeft <= boxRight && boxBottom <= boxTop &&
-                    HgMathUtils.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
-                    HgMathUtils.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
+                    MathTools.InRangeEPS(impact[0], boxLeft, boxRight, RaycastEPS) &&
+                    MathTools.InRangeEPS(impact[1], boxBottom, boxTop, RaycastEPS);
 
             if (valid) {
                 // Good hit! Save it
@@ -328,7 +328,7 @@ public class CollisionAlgorithms {
         for (var hit : hits) {
             boolean isUnique = true;
             for (var unique: uniqueHits) {
-                if (HgMathUtils.EqualEPS(unique.x, hit.x, RaycastEPS) && HgMathUtils.EqualEPS(unique.y, hit.y, RaycastEPS)) {
+                if (MathTools.EqualEPS(unique.x, hit.x, RaycastEPS) && MathTools.EqualEPS(unique.y, hit.y, RaycastEPS)) {
                     isUnique = false;
                     break;
                 }

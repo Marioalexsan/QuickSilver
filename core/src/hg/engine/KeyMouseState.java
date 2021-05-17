@@ -3,11 +3,13 @@ package hg.engine;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector2;
 import hg.game.HgGame;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 
 import java.util.HashMap;
 
 public class KeyMouseState extends InputAdapter {
+    private float resFactor = 0.0f;
+
     @Override
     public boolean keyDown (int keycode) {
         if (!HgGame.Game().isFocused()) return false;
@@ -63,8 +65,10 @@ public class KeyMouseState extends InputAdapter {
 
     private void processMouse(int x, int y) {
         Vector2 resolution = HgGame.Graphics().getCurrentResolution();
-        virtualMouseX = (int) HgMathUtils.ClampValue(virtualMouseX + Math.ceil(mouseSensitivity * (x - mouseX) * resolution.x / 1920.0f), 0, 1920);
-        virtualMouseY = (int) HgMathUtils.ClampValue(virtualMouseY + Math.ceil(mouseSensitivity * (y - mouseY) * resolution.y / 1080.0f), 0, 1080);
+        float resVar = resFactor;
+        float resConst = 1f - resFactor;
+        virtualMouseX = (int) MathTools.Clamp(virtualMouseX + Math.ceil(mouseSensitivity * (x - mouseX) * (resConst * 1920f + resVar * resolution.x) / 1920.0f), 0, 1920);
+        virtualMouseY = (int) MathTools.Clamp(virtualMouseY + Math.ceil(mouseSensitivity * (y - mouseY) * (resConst * 1080f + resVar * resolution.y) / 1080.0f), 0, 1080);
         mouseX = x;
         mouseY = y;
     }

@@ -7,8 +7,7 @@ import hg.entities.PlayerEntity;
 import hg.entities.spawners.Spawner;
 import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
-import hg.types.TargetType;
-import hg.types.WeaponType;
+import hg.enums.types.TargetType;
 
 public class HeavyArmorPickup extends Pickup {
     private final BasicSprite box;

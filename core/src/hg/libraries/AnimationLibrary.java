@@ -26,9 +26,9 @@ public class AnimationLibrary {
         prototypes.put("Player_Rifle_Idle", anim1);
 
         AnimationInfo anim2 = new AnimationInfo("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtEnd), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shotMono.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magin.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "17"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/receiverpull.ogg")),
         });
         anim2.cenOffset.set(new Vector2(48, 31));
         anim2.textureAngle.set(-90f);
@@ -39,7 +39,9 @@ public class AnimationLibrary {
         anim3.textureAngle.set(-90f);
         prototypes.put("Player_Death", anim3);
 
-        AnimationInfo anim4 = new AnimationInfo("Assets/Sprites/Player/Rifle_Shoot.png", 96, 106, 4, 4, 2, AnimatedSprite.PlayMode.PlayOnce, null);
+        AnimationInfo anim4 = new AnimationInfo("Assets/Sprites/Player/Rifle_Shoot.png", 96, 106, 4, 4, 2, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg"))
+        });
         anim4.cenOffset.set(new Vector2(48, 31));
         anim4.textureAngle.set(-90f);
         prototypes.put("Player_Rifle_Shoot", anim4);
@@ -49,12 +51,17 @@ public class AnimationLibrary {
         anim5.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Idle", anim5);
 
-        AnimationInfo anim6 = new AnimationInfo("Assets/Sprites/Player/Revolver_Shoot.png", 95, 100, 7, 7, 4, AnimatedSprite.PlayMode.PlayOnce, null);
+        AnimationInfo anim6 = new AnimationInfo("Assets/Sprites/Player/Revolver_Shoot.png", 95, 100, 7, 7, 4, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg"))
+        });
         anim6.cenOffset.set(new Vector2(48, 31));
         anim6.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Shoot", anim6);
 
-        AnimationInfo anim7 = new AnimationInfo("Assets/Sprites/Player/Revolver_Reload.png", 95, 100, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, null);
+        AnimationInfo anim7 = new AnimationInfo("Assets/Sprites/Player/Revolver_Reload.png", 95, 100, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magin.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+        });
         anim7.cenOffset.set(new Vector2(48, 31));
         anim7.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Reload", anim7);

@@ -4,7 +4,7 @@ import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.networking.Packet;
-import hg.types.TargetType;
+import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
 public class EntityDestroyed extends Packet {

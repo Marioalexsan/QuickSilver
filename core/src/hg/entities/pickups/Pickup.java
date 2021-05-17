@@ -36,6 +36,9 @@ public abstract class Pickup extends Entity {
         if (!pickedUp && which instanceof PlayerEntity) {
             pickedUp = true;
             toBeDestroyed = true;
+            if (HgGame.Manager().localView != null && HgGame.Manager().localView.playerEntity == which) {
+                HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f);
+            }
             onPickup((PlayerEntity) which);
         }
     }

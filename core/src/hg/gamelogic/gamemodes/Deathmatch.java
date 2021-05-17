@@ -2,7 +2,7 @@ package hg.gamelogic.gamemodes;
 
 import hg.entities.pickups.Pickup;
 import hg.entities.spawners.Spawner;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.directors.Level;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
@@ -13,8 +13,8 @@ import hg.gamelogic.states.DeathmatchState;
 import hg.gamelogic.states.State;
 import hg.networking.PlayerView;
 import hg.networking.packets.NetInstruction;
-import hg.types.GMType;
-import hg.types.TargetType;
+import hg.enums.types.GMType;
+import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
 import java.util.HashMap;

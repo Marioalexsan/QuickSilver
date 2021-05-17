@@ -2,11 +2,11 @@ package hg.directors;
 
 import hg.drawables.BasicText;
 import hg.engine.NetworkEngine;
-import hg.game.GameManager;
+import hg.game.DataManager;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
 import hg.networking.NetworkStatus;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.ui.BasicTextInput;
 import hg.ui.BasicUIStates;
 import hg.ui.ToggleButton;
@@ -15,7 +15,7 @@ import hg.utils.builders.TextInputBuilder;
 import hg.utils.builders.BasicTextBuilder;
 import hg.utils.builders.ClickButtonBuilder;
 import hg.utils.builders.ToggleButtonBuilder;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 import hg.enums.VPos;
 
 import java.io.IOException;
@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 
 /** MainMenu handles the code relevant to the main menu, settings, etc. */
 public class MainMenu extends Director {
+    private static boolean SettingsInit = false;
     private final BasicUIStates menus = new BasicUIStates();
 
     private final DecimalFormat format1;
@@ -39,9 +40,11 @@ public class MainMenu extends Director {
     private int joinState = 0; // 0 - idle, 1 - connecting, 2 - joining lobby
 
     private int resSelection = 0;
-    private float targetSens = 1.0f;
+    private float sensSelection = 1.0f;
+    private float fovSelection = 0.6f;
 
     public MainMenu() {
+
         format1 = new DecimalFormat();
         format1.setMaximumFractionDigits(2);
         format1.setMinimumFractionDigits(2);
@@ -95,6 +98,12 @@ public class MainMenu extends Director {
         menus.addObjects("ClientConnect", connectStatus = label.copy().text("Connecting...").makeGUI().build());
 
         menus.scheduleStateSwitch("Main"); // Start menu in this state
+
+        if (!SettingsInit) {
+            SettingsInit = true;
+            initSettings();
+            applySettings();
+        }
         updateSettingsLabels();
     }
 
@@ -163,53 +172,92 @@ public class MainMenu extends Director {
     }
 
     private void upResolution() {
-        resSelection--;
+        var selections = HgGame.Graphics().getSupportedResolutions();
+        resSelection = MathTools.Clamp(resSelection - 1, 0, selections.size() - 1);
         updateSettingsLabels();
     }
 
     private void downResolution() {
-        resSelection++;
+        var selections = HgGame.Graphics().getSupportedResolutions();
+        resSelection = MathTools.Clamp(resSelection + 1, 0, selections.size() - 1);
         updateSettingsLabels();
     }
 
     private void upSensitivity() {
-        HgGame.Input().modifySensitivity(0.04f);
+        sensSelection = MathTools.Clamp(sensSelection + 0.04f, 0.6f, 1.6f);
         updateSettingsLabels();
     }
 
     private void downSensitivity() {
-        HgGame.Input().modifySensitivity(-0.04f);
+        sensSelection = MathTools.Clamp(sensSelection - 0.04f, 0.6f, 1.6f);
         updateSettingsLabels();
     }
 
     private void upFOV() {
-        HgGame.Game().setFOVFactor(HgGame.Game().getFOVFactor() + 0.05f);
+        fovSelection = MathTools.Clamp(fovSelection + 0.05f, 0f, 0.9f);
         updateSettingsLabels();
     }
 
     private void downFOV() {
-        HgGame.Game().setFOVFactor(HgGame.Game().getFOVFactor() - 0.05f);
+        fovSelection = MathTools.Clamp(fovSelection - 0.05f, 0f, 0.9f);
         updateSettingsLabels();
     }
 
     private void updateSettingsLabels() {
-        var selections = HgGame.Graphics().getSupportedResolutions();
-        resSelection = HgMathUtils.ClampValue(resSelection, 0, selections.size() - 1);
-        var resolution = selections.get(resSelection);
+        var resolution = HgGame.Graphics().getSupportedResolutions().get(resSelection);
         resolutionLabel.setText((int) resolution.width + " x " + (int) resolution.height);
 
-        float sens = HgGame.Input().getMouseSensitivity();
-        sensitivityLabel.setText("Mouse Speed: " + format1.format(sens));
+        sensitivityLabel.setText("Mouse Speed: " + format1.format(sensSelection));
 
-        float fov = HgGame.Game().getFOVFactor();
-        focusLabel.setText("FOV Factor: " + format1.format(fov));
+        focusLabel.setText("FOV Factor: " + format1.format(fovSelection));
+    }
+
+    private void initSettings() {
+        DataManager data = HgGame.Data();
+
+        // Resolution
+        resSelection = 0;
+        int width = Integer.parseInt(data.getSetting("ResWidth"));
+        int height = Integer.parseInt(data.getSetting("ResHeight"));
+        var selections = HgGame.Graphics().getSupportedResolutions();
+        for (int i = 0; i < selections.size(); i++) {
+            var resolution = selections.get(i);
+            if (resolution.width == width && resolution.height == height) {
+                resSelection = i;
+                break;
+            }
+        }
+
+        // Fullscreen
+        boolean fullscreen = Boolean.parseBoolean(data.getSetting("Fullscreen"));
+        if (fullscreen ^ fullscreenToggle.isActive()) fullscreenToggle.toggle();
+
+        // Sensitivity
+        sensSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("MouseSens")), 0.6f, 1.6f);
+
+        // FOV
+        fovSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("FOVFactor")), 0f, 0.9f);
     }
 
     private void applySettings() {
+        DataManager data = HgGame.Data();
+
+        // Resolution & Fullscreen
         var selections = HgGame.Graphics().getSupportedResolutions();
         var resolution = selections.get(resSelection);
 
         HgGame.Graphics().setVideoMode((int) resolution.width, (int) resolution.height, fullscreenToggle.isActive());
+        data.updateSetting("ResWidth", Integer.toString((int) resolution.width));
+        data.updateSetting("ResHeight", Integer.toString((int) resolution.height));
+        data.updateSetting("Fullscreen", Boolean.toString(fullscreenToggle.isActive()));
+
+        // Sensitivity
+        HgGame.Input().setMouseSensitivity(sensSelection);
+        data.updateSetting("MouseSens", Float.toString(sensSelection));
+
+        // FOV
+        HgGame.Game().setFOVFactor(fovSelection);
+        data.updateSetting("FOVFactor", Float.toString(fovSelection));
     }
 
     private void tryStartServer() {

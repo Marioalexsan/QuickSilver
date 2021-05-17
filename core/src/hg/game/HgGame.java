@@ -2,11 +2,11 @@ package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 
 import java.util.Random;
 
@@ -31,7 +31,8 @@ public class HgGame extends ApplicationAdapter {
 	public static NetworkEngine Network() { return _instance.networkEngine; }
 
 	public static GameManager Manager() { return _instance.gameManager; }
-	public static GUIMaster GUI() { return _instance.guiMaster; }
+	public static HUDManager GUI() { return _instance.hudManager; }
+	public static DataManager Data() { return _instance.dataManager; }
 
 	private AudioEngine audioEngine;
 	private AssetEngine assetEngine;
@@ -41,7 +42,8 @@ public class HgGame extends ApplicationAdapter {
 	private NetworkEngine networkEngine;
 
 	private GameManager gameManager;
-	private GUIMaster guiMaster;
+	private HUDManager hudManager;
+	private DataManager dataManager;
 
 	private boolean crashed = false;
 
@@ -67,7 +69,7 @@ public class HgGame extends ApplicationAdapter {
 	}
 
 	public void setFOVFactor(float fov) {
-		factorFOV = HgMathUtils.ClampValue(fov, 0f, 0.8f);
+		factorFOV = MathTools.Clamp(fov, 0f, 0.8f);
 	}
 
 	public void quitGame() {
@@ -89,7 +91,8 @@ public class HgGame extends ApplicationAdapter {
 		networkEngine = new NetworkEngine();
 
 		gameManager = new GameManager();
-		guiMaster = new GUIMaster();
+		hudManager = new HUDManager();
+		dataManager = new DataManager();
 
 		targetGUI.setTexture(assetEngine.loadTexture("Assets/GUI/Target.png"));
 		targetGUI.setCameraUse(false);
@@ -105,7 +108,7 @@ public class HgGame extends ApplicationAdapter {
 
 		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
 		audioEngine.setGlobalSoundVolume(0.5f);
-		audioEngine.setGlobalMusicVolume(0f);
+		audioEngine.setGlobalMusicVolume(0.5f);
 
 		graphicsEngine.setVideoMode(1280, 720, false);
 		graphicsEngine.setCameraZoom(1.2);
@@ -141,7 +144,7 @@ public class HgGame extends ApplicationAdapter {
 			if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
 				playerEntity.getPosition().set(targetWorld.getPosition()); // Debug teleport
 
-			guiMaster.update();
+			hudManager.update();
 			graphicsEngine.render();
 			audioEngine.update();
 
@@ -162,12 +165,13 @@ public class HgGame extends ApplicationAdapter {
 			System.out.println("Game crashed due to an unhandled exception! Sorry about that...");
 		}
 
-		guiMaster.cleanup();
+		hudManager.cleanup();
 		gameManager.cleanup();
 		graphicsEngine.cleanup();
 		audioEngine.cleanup();
 		assetEngine.unloadAll();
 		networkEngine.cleanup();
+		dataManager.cleanup();
 	}
 
 	/** This is called by LibGDX whenever the application loses focus. */

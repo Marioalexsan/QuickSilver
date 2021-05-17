@@ -2,6 +2,7 @@ package hg.networking;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
+import hg.directors.GameSession;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.states.*;
 import hg.networking.packets.*;
@@ -28,6 +29,7 @@ public class NetworkHelper {
         kryo.register(PlayerViewDisconnected.class);
         kryo.register(PlayerViewUpdate.class);
         kryo.register(PositionUpdate.class);
+        kryo.register(SessionSettingsUpdate.class);
         kryo.register(StateUpdate.class);
 
         // Other things which are sent / used by packets
@@ -49,6 +51,7 @@ public class NetworkHelper {
 
         // Other
 
+        kryo.register(GameSession.SessionOptions.class);
         kryo.register(int[].class);
         kryo.register(float[].class);
         kryo.register(HashMap.class);

@@ -1,7 +1,7 @@
 package hg.libraries;
 
 import hg.interfaces.IWeapon;
-import hg.types.WeaponType;
+import hg.enums.types.WeaponType;
 import hg.weapons.AssaultRifle;
 import hg.weapons.Revolver;
 

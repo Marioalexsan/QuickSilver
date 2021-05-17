@@ -6,7 +6,7 @@ import hg.drawables.Drawable;
 
 import java.util.Comparator;
 
-public class HgGraphicsUtils {
+public class GFXTools {
 
     /** Comparator for sorting drawables by height */
     public static final Comparator<Drawable> DrawableLayerComparator = Comparator.comparingInt(Drawable::getLayer);

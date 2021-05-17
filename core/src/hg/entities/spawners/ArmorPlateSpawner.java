@@ -3,10 +3,9 @@ package hg.entities.spawners;
         import hg.drawables.BasicSprite;
         import hg.drawables.DrawLayer;
         import hg.drawables.Drawable;
-        import hg.entities.pickups.AmmoPackPickup;
         import hg.entities.pickups.ArmorPlatePickup;
         import hg.game.HgGame;
-        import hg.types.ActorType;
+        import hg.enums.types.ActorType;
 
 public class ArmorPlateSpawner extends Spawner {
     private final BasicSprite silhouette;

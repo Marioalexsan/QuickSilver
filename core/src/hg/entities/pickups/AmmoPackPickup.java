@@ -7,8 +7,8 @@ import hg.entities.PlayerEntity;
 import hg.entities.spawners.Spawner;
 import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
-import hg.types.TargetType;
-import hg.types.WeaponType;
+import hg.enums.types.TargetType;
+import hg.enums.types.WeaponType;
 
 public class AmmoPackPickup extends Pickup {
     private final BasicSprite box;

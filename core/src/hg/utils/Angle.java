@@ -23,18 +23,18 @@ public class Angle {
     }
 
     public Angle(float value) {
-        this.value = HgMathUtils.ScrollValue(value, 0f, 360f);
+        this.value = MathTools.Scroll(value, 0f, 360f);
     }
 
     // Instance Methods
 
     public Angle set(Angle other) {
-        this.value = HgMathUtils.ScrollValue(other.value, 0f, 360f);
+        this.value = MathTools.Scroll(other.value, 0f, 360f);
         return this;
     }
 
     public Angle set(float value) {
-        this.value = HgMathUtils.ScrollValue(value, 0f, 360f);
+        this.value = MathTools.Scroll(value, 0f, 360f);
         return this;
     }
 
@@ -47,22 +47,22 @@ public class Angle {
     }
 
     public Angle add(Angle rhs) {
-        value = HgMathUtils.ScrollValue(value + rhs.value, 0f, 360f);
+        value = MathTools.Scroll(value + rhs.value, 0f, 360f);
         return this;
     }
 
     public Angle add(float rhs) {
-        value = HgMathUtils.ScrollValue(value + rhs, 0f, 360f);
+        value = MathTools.Scroll(value + rhs, 0f, 360f);
         return this;
     }
 
     public Angle sub(Angle rhs) {
-        value = HgMathUtils.ScrollValue(value - rhs.value, 0f, 360f);
+        value = MathTools.Scroll(value - rhs.value, 0f, 360f);
         return this;
     }
 
     public Angle sub(float rhs) {
-        value = HgMathUtils.ScrollValue(value - rhs, 0f, 360f);
+        value = MathTools.Scroll(value - rhs, 0f, 360f);
         return this;
     }
 

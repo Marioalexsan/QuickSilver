@@ -4,7 +4,7 @@ import hg.entities.*;
 import hg.entities.pickups.*;
 import hg.entities.spawners.*;
 import hg.gamelogic.playerlogic.EmptyAI;
-import hg.types.ActorType;
+import hg.enums.types.ActorType;
 
 /**
  * Holds descriptions of entities that are related to the gameplay.

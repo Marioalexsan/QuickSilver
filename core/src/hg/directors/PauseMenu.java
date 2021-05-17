@@ -1,17 +1,14 @@
 package hg.directors;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import hg.drawables.DrawLayer;
 import hg.engine.AssetEngine;
 import hg.engine.InputEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.ui.BasicUIStates;
-import hg.enums.HPos;
-import hg.enums.VPos;
 import hg.utils.builders.BasicSpriteBuilder;
 import hg.utils.builders.BasicTextBuilder;
 import hg.utils.builders.ClickButtonBuilder;

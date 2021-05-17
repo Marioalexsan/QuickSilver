@@ -20,8 +20,8 @@ import hg.networking.NetworkRole;
 import hg.networking.NetworkStatus;
 import hg.networking.PlayerView;
 import hg.networking.packets.*;
-import hg.types.DirectorType;
-import hg.types.TargetType;
+import hg.enums.types.DirectorType;
+import hg.enums.types.TargetType;
 import hg.utils.*;
 
 import java.text.DecimalFormat;
@@ -57,7 +57,7 @@ public class GameManager {
     public GameManager() {
         chatSystem = new ChatSystem();
         chatSystem.setEnabled(false);
-        chatSystem.getPosition().set(-650, -500);
+        chatSystem.getPosition().set(-400, -500);
 
         debug_mouseWorldPosition = BuilderLibrary.BasicTextBuilders("label").textPos(HPos.Left, VPos.Top).makeGUI().build();
         debug_mouseWorldPosition.setPositionOffset(new Vector2(80, -80));

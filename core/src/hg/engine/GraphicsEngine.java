@@ -17,8 +17,8 @@ import com.badlogic.gdx.utils.Align;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
 import hg.enums.HPos;
-import hg.utils.HgGraphicsUtils;
-import hg.utils.HgMathUtils;
+import hg.utils.GFXTools;
+import hg.utils.MathTools;
 import hg.enums.VPos;
 
 import java.util.*;
@@ -59,7 +59,7 @@ public class GraphicsEngine {
     }
 
     public void setCameraZoom(double zoom) {
-        camera.zoom = (float) HgMathUtils.ClampValue(zoom, 0.25, 4.0);
+        camera.zoom = (float) MathTools.Clamp(zoom, 0.25, 4.0);
         camera.update();
     }
 
@@ -152,7 +152,7 @@ public class GraphicsEngine {
 
         // Prepare sorted drawables
         ArrayList<Drawable> heightSortedDrawables = new ArrayList<>(drawableLibrary);
-        heightSortedDrawables.sort(HgGraphicsUtils.DrawableLayerComparator);
+        heightSortedDrawables.sort(GFXTools.DrawableLayerComparator);
 
         // Draw everything that is enabled
         batch.begin();

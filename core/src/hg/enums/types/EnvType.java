@@ -1,4 +1,4 @@
-package hg.types;
+package hg.enums.types;
 
 public class EnvType {
     public static final int FIRST_VALUE = 0;

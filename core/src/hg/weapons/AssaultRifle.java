@@ -11,7 +11,7 @@ import hg.gamelogic.states.State;
 import hg.interfaces.IWeapon;
 import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
-import hg.types.ActorType;
+import hg.enums.types.ActorType;
 import hg.utils.Angle;
 
 public class AssaultRifle implements IWeapon {
@@ -24,7 +24,7 @@ public class AssaultRifle implements IWeapon {
     // Weapon stats
 
     private final int magazineSize = 30;
-    private final int maxTotalAmmo = 120;
+    private final int maxTotalAmmo = 90;
     private final int burstCooldown = 48;
     private final int burstShotInterval = 7;
     private final int burstCount = 3;
@@ -42,6 +42,8 @@ public class AssaultRifle implements IWeapon {
 
     private int reloadCounter = 0;
 
+    private int localOnly_clickCooldown;
+
     public AssaultRifle(Entity owner) {
         setOwner(owner);
     }
@@ -56,7 +58,7 @@ public class AssaultRifle implements IWeapon {
 
     @Override
     public String getAmmoDisplay() {
-        return currentAmmo + " / " + magazineSize + " [ " + reserveAmmo + " ]";
+        return currentAmmo + " | " + magazineSize + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? " Max!" : "") + "]";
     }
 
     @Override
@@ -99,6 +101,10 @@ public class AssaultRifle implements IWeapon {
     public boolean onPrimaryFire() {
         if (owner == null || weaponCooldown > 0) return false;
         if (currentAmmo <= 0) {
+            if (reserveAmmo == 0 && localOnly_clickCooldown <= 0) {
+                localOnly_clickCooldown = burstCooldown;
+                HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/gunclick.ogg"), 1f);
+            }
             onReload(); // Automatically attempts reload
             return false;
         }
@@ -137,6 +143,7 @@ public class AssaultRifle implements IWeapon {
     public void onUpdate() {
         tryBurstShot();
 
+        if (localOnly_clickCooldown > 0) localOnly_clickCooldown--;
         if (burstShotCooldown > 0) burstShotCooldown--;
         if (weaponCooldown > 0) weaponCooldown--;
         if (reloadCounter > 0) {

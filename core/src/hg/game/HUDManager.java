@@ -1,7 +1,6 @@
 package hg.game;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import hg.drawables.BasicSprite;
 import hg.drawables.BasicText;
 import hg.drawables.DrawLayer;
@@ -11,20 +10,17 @@ import hg.entities.PlayerEntity;
 import hg.enums.HPos;
 import hg.enums.VPos;
 import hg.gamelogic.BaseStats;
-import hg.gamelogic.states.PlayerState;
 import hg.interfaces.IWeapon;
 import hg.libraries.BuilderLibrary;
-import hg.types.WeaponType;
+import hg.enums.types.WeaponType;
 import hg.utils.builders.BasicSpriteBuilder;
 import hg.utils.builders.BasicTextBuilder;
-import hg.weapons.AssaultRifle;
-import hg.weapons.Revolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class GUIMaster {
+public class HUDManager {
     private static class WeaponInfo {
         public BasicSprite display;
         public BasicText ammo;
@@ -44,7 +40,7 @@ public class GUIMaster {
     private BasicSpriteBuilder weaponBuilder;
     private BasicTextBuilder ammoBuilder;
 
-    public GUIMaster() {
+    public HUDManager() {
         int Width = HgGame.WorldWidth;
         int Height = HgGame.WorldHeight;
 
@@ -103,6 +99,7 @@ public class GUIMaster {
     }
 
     public void updateWeapons() {
+        // TODO Improve this
         GameManager manager = HgGame.Manager();
         PlayerEntity localPlayer = manager.localView != null ? manager.localView.playerEntity : null;
         HashMap<Integer, IWeapon> playerWeapons = localPlayer != null ? localPlayer.viewWeapons() : new HashMap<>();
@@ -141,18 +138,17 @@ public class GUIMaster {
         }
 
         // Update positions
-        float currentY = 100 - HgGame.WorldHeight / 2f;
-        float currentX = 50 - HgGame.WorldWidth / 2f;
+        float currentY = 60 - HgGame.WorldHeight / 2f;
+        float currentX = 35 - HgGame.WorldWidth / 2f;
         int preferredWeapon = localPlayer != null ? localPlayer.viewSelectedWeapon() : WeaponType.Revolver;
         boolean gotPreferred = false;
         for (var displayed: weaponList.entrySet()) {
             if (displayed.getKey() == preferredWeapon) {
                 WeaponInfo info = displayed.getValue();
-                float displacement = info.display.getRegion().height / 2f;
+                float displacement = info.display.getRegion().height / 2f + 10;
 
-                currentY += displacement + 20;
-                updateInfo(info, currentX, currentY);
-                currentY += displacement + 20;
+                updateInfo(info, currentX + 50, currentY);
+                currentY += displacement;
                 gotPreferred = true;
                 break;
             }
@@ -161,11 +157,11 @@ public class GUIMaster {
         for (var displayed: weaponList.entrySet()) {
             WeaponInfo info = displayed.getValue();
             if (gotPreferred && displayed.getKey() == preferredWeapon) continue;
-            float displacement = info.display.getRegion().height / 2f;
+            float displacement = info.display.getRegion().height / 2f + 20;
 
-            currentY += displacement + 20;
+            currentY += displacement;
             updateInfo(info, currentX, currentY);
-            currentY += displacement + 20;
+            currentY += displacement;
         }
     }
 

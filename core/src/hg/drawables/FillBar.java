@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Affine2;
 import hg.engine.GraphicsEngine;
 import hg.utils.Angle;
-import hg.utils.HgGraphicsUtils;
+import hg.utils.GFXTools;
 
 public class FillBar extends Drawable {
     protected TextureRegion vSlice = new TextureRegion();
@@ -46,7 +46,7 @@ public class FillBar extends Drawable {
     public void draw(SpriteBatch batch) {
         if (vSlice.getTexture() == null) return;
 
-        Affine2 transform = HgGraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, new Angle(angOffset).add(textureAngle));
+        Affine2 transform = GFXTools.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, new Angle(angOffset).add(textureAngle));
         transform.scale(maxLength * currentUnits / maxUnits, 1f);
         GraphicsEngine.RenderTextureRegion(batch, transform, color, relativeToCamera, vSlice, false, false);
     }

@@ -8,6 +8,7 @@ import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.gamemodes.Deathmatch;
 import hg.gamelogic.gamemodes.Gamemode;
+import hg.interfaces.ICopy;
 import hg.libraries.MapLibrary;
 import hg.networking.PlayerView;
 import hg.networking.packets.GameSessionStart;
@@ -15,15 +16,35 @@ import hg.networking.packets.PlayerViewUpdate;
 import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.playerlogic.LuigiAI;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
-import hg.types.ActorType;
-import hg.types.DirectorType;
-import hg.types.MapType;
+import hg.networking.packets.SessionSettingsUpdate;
+import hg.enums.types.ActorType;
+import hg.enums.types.DirectorType;
+import hg.enums.types.MapType;
 import hg.utils.BadCoderException;
 import hg.utils.DebugLevels;
 
 /** GameSession is the director that encapsulates the "core" game.
  * GameSession is started once this machine becomes a Server / initialized Client */
 public class GameSession extends Director {
+    public static class SessionOptions implements ICopy {
+        public boolean hardcore = false;
+        public int map = MapType.Grinder;
+
+        public SessionOptions() {}
+
+        public SessionOptions(SessionOptions toCopy) {
+            hardcore = toCopy.hardcore;
+            map = toCopy.map;
+        }
+
+        @Override
+        public SessionOptions copy() {
+            return new SessionOptions(this);
+        }
+    }
+
+    private SessionOptions settings = new SessionOptions();
+
     private int matchState = 0;
     private boolean stopDecided = false;
 
@@ -35,6 +56,24 @@ public class GameSession extends Director {
 
     public Gamemode getGamemode() {
         return gamemode;
+    }
+
+    public boolean updateSettings(SessionOptions newSettings) {
+        if (matchState != 1) {
+            HgGame.Manager().setNotice("Can't change game settings outside of lobby!", 60);
+            return false;
+        }
+        settings = new SessionOptions(newSettings);
+
+        if (HgGame.Network().isLocalOrServer()) {
+            SessionSettingsUpdate msg = new SessionSettingsUpdate(settings);
+            HgGame.Network().sendToAllClients(msg, true);
+        }
+        return true;
+    }
+
+    public SessionOptions getSettings() {
+        return new SessionOptions(settings);
     }
 
     public void startLobby() {
@@ -71,7 +110,7 @@ public class GameSession extends Director {
         manager.tryRetireDirector(DirectorType.LobbyMenu);
 
         Level level = (Level) manager.tryAddDirector(DirectorType.Level);
-        level.loadMap(MapLibrary.CreatePrototype(MapType.TestArea01));
+        level.loadMap(MapLibrary.CreatePrototype(settings.map));
 
         boolean isServer = network.isLocalOrServer();
 
@@ -98,6 +137,9 @@ public class GameSession extends Director {
 
         if (isServer) {
             // Jojo, it's time to gogo
+            SessionSettingsUpdate msg2 = new SessionSettingsUpdate(settings);
+            HgGame.Network().sendToAllClients(msg2, true);
+
             GameSessionStart msg = new GameSessionStart();
             network.sendToAllClients(msg, true);
 
@@ -109,6 +151,7 @@ public class GameSession extends Director {
 
         gamemode.restart();
         matchState = 2;
+        HgGame.Audio().playMusic("Assets/Audio/QuickSilver - Combat Grind.ogg", 1f);
     }
 
     private void stop() {
@@ -133,6 +176,7 @@ public class GameSession extends Director {
         matchState = -1;
 
         toBeDestroyed = true;
+        HgGame.Audio().stopMusic();
     }
 
     public void signalStop() {

@@ -9,7 +9,7 @@ import hg.game.HgGame;
 import hg.physics.Collider;
 import hg.interfaces.IPolygon;
 import hg.physics.SphereCollider;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 
 import java.util.ArrayList;
 
@@ -94,8 +94,8 @@ public class ColliderDrawable extends Drawable {
         switch (phase) {
             case 0 -> {
                 color.r += phaseSpeed;
-                color.g = HgMathUtils.ClampValue(color.g - 2 * phaseSpeed, 0.5f, 1f);
-                color.b = HgMathUtils.ClampValue(color.b - 2 * phaseSpeed, 0.5f, 1f);
+                color.g = MathTools.Clamp(color.g - 2 * phaseSpeed, 0.5f, 1f);
+                color.b = MathTools.Clamp(color.b - 2 * phaseSpeed, 0.5f, 1f);
                 if (color.r > 1f) {
                     color.r = 1f;
                     phase = 1;
@@ -104,8 +104,8 @@ public class ColliderDrawable extends Drawable {
             }
             case 1 -> {
                 color.g += phaseSpeed;
-                color.r = HgMathUtils.ClampValue(color.r - 2 * phaseSpeed, 0.5f, 1f);
-                color.b = HgMathUtils.ClampValue(color.b - 2 * phaseSpeed, 0.5f, 1f);
+                color.r = MathTools.Clamp(color.r - 2 * phaseSpeed, 0.5f, 1f);
+                color.b = MathTools.Clamp(color.b - 2 * phaseSpeed, 0.5f, 1f);
                 if (color.g > 1f) {
                     color.g = 1f;
                     phase = 2;
@@ -114,8 +114,8 @@ public class ColliderDrawable extends Drawable {
             }
             case 2 -> {
                 color.b += phaseSpeed;
-                color.r = HgMathUtils.ClampValue(color.r - 2 * phaseSpeed, 0.5f, 1f);
-                color.g = HgMathUtils.ClampValue(color.g - 2 * phaseSpeed, 0.5f, 1f);
+                color.r = MathTools.Clamp(color.r - 2 * phaseSpeed, 0.5f, 1f);
+                color.g = MathTools.Clamp(color.g - 2 * phaseSpeed, 0.5f, 1f);
                 if (color.b > 1f) {
                     color.b = 1f;
                     phase = 0;

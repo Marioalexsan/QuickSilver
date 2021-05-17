@@ -1,4 +1,4 @@
-package hg.types;
+package hg.enums.types;
 
 public class WeaponType {
     public static final int AllWeapons = -1;

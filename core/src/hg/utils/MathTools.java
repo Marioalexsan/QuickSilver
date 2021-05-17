@@ -3,14 +3,14 @@ package hg.utils;
 /**
  * Provides various utilities for dealing with QuickSilver's insane design choices.
  */
-public class HgMathUtils {
+public class MathTools {
 
     /**
      * Returns a value that is in the range [leftBorder; rightBorder).
      * Values outside this range are mapped to the range using wrapping.
      * @return An value in range [leftBorder; rightBorder], or the original value if leftBorder > rightBorder.
      */
-    public static double ScrollValue(double value, double leftBorder, double rightBorder) {
+    public static double Scroll(double value, double leftBorder, double rightBorder) {
         double delta = rightBorder - leftBorder;
         if (delta <= 0.0) return value;
 
@@ -29,7 +29,7 @@ public class HgMathUtils {
      * Values outside this range are mapped to the range using wrapping.
      * @return An value in range [leftBorder; rightBorder], or the original value if leftBorder > rightBorder.
      */
-    public static float ScrollValue(float value, float leftBorder, float rightBorder) {
+    public static float Scroll(float value, float leftBorder, float rightBorder) {
         float delta = rightBorder - leftBorder;
         if (delta <= 0f) return value;
 
@@ -43,11 +43,11 @@ public class HgMathUtils {
         return value;
     }
 
-    public static double ClampValue(double value, double min, double max) { return Math.max(min, Math.min(value, max)); }
+    public static double Clamp(double value, double min, double max) { return Math.max(min, Math.min(value, max)); }
 
-    public static float ClampValue(float value, float min, float max) { return Math.max(min, Math.min(value, max)); }
+    public static float Clamp(float value, float min, float max) { return Math.max(min, Math.min(value, max)); }
 
-    public static int ClampValue(int value, int min, int max) { return Math.max(min, Math.min(value, max)); }
+    public static int Clamp(int value, int min, int max) { return Math.max(min, Math.min(value, max)); }
 
     public static boolean InRangeEPS(double value, double min, double max, double eps) {
         return min - eps <= value && value <= max + eps;
@@ -66,7 +66,7 @@ public class HgMathUtils {
     }
 
     /** Solves for X in AX = B, where A = [params] as Mat2x2, X = Mat2x1, B = [-1, -1] */
-    public static double[] SolveRaycastLinearSystem(double A, double B, double C, double D) {
+    public static double[] SolveRaycastLS(double A, double B, double C, double D) {
         // Lines as ax + by + 1 = 0
         double determ = A * D - B * C;
         return determ == 0 ? new double[0] : new double[] { (B - D) / determ, (C - A) / determ };

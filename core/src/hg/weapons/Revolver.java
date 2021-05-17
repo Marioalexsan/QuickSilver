@@ -12,7 +12,7 @@ import hg.gamelogic.states.State;
 import hg.interfaces.IWeapon;
 import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
-import hg.types.ActorType;
+import hg.enums.types.ActorType;
 import hg.utils.Angle;
 
 public class Revolver implements IWeapon {
@@ -25,11 +25,11 @@ public class Revolver implements IWeapon {
     // Weapon stats
 
     private final int magazineSize = 6;
-    private final int maxTotalAmmo = 48;
-    private final int shotCooldown = 42;
+    private final int maxTotalAmmo = 36;
+    private final int shotCooldown = 34;
     private final int timeToReload = 120;
-    private final int weaponPickupAmmo = 12;
-    private final int ammoPackAmmo = 6;
+    private final int weaponPickupAmmo = 6;
+    private final int ammoPackAmmo = 3;
 
     // Weapon state
 
@@ -39,13 +39,15 @@ public class Revolver implements IWeapon {
 
     private int reloadCounter = 0;
 
+    private int localOnly_clickCooldown;
+
     public Revolver(Entity owner) {
         setOwner(owner);
     }
 
     @Override
     public String getAmmoDisplay() {
-        return currentAmmo + " / " + magazineSize + " [ " + reserveAmmo + " ]";
+        return currentAmmo + " / " + magazineSize + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? " Max!" : "") + "]";
     }
 
     @Override
@@ -96,6 +98,10 @@ public class Revolver implements IWeapon {
     public boolean onPrimaryFire() {
         if (owner == null || weaponCooldown > 0) return false;
         if (currentAmmo <= 0) {
+            if (reserveAmmo == 0 && localOnly_clickCooldown <= 0) {
+                localOnly_clickCooldown = shotCooldown;
+                HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/gunclick.ogg"), 1f);
+            }
             onReload(); // Automatically attempts reload
             return false;
         }
@@ -132,6 +138,7 @@ public class Revolver implements IWeapon {
 
     @Override
     public void onUpdate() {
+        if (localOnly_clickCooldown > 0) localOnly_clickCooldown--;
         if (weaponCooldown > 0) weaponCooldown--;
         if (reloadCounter > 0) {
             reloadCounter--;

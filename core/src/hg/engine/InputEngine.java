@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import hg.game.HgGame;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 
 import java.util.*;
 
@@ -209,7 +209,7 @@ public class InputEngine {
     // Mouse sensitivity
 
     public void setMouseSensitivity(float sensitivity) {
-        keyMouseState.mouseSensitivity = HgMathUtils.ClampValue(sensitivity, 0.6f, 1.6f);
+        keyMouseState.mouseSensitivity = MathTools.Clamp(sensitivity, 0.6f, 1.6f);
     }
 
     public float getMouseSensitivity() {
@@ -234,7 +234,7 @@ public class InputEngine {
      */
     @Deprecated
     public Vector2[] getWorldMouseAndFOVOffset(float factor) {
-        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
+        factor = MathTools.Clamp(factor, 0f, 1f);
         Vector2 camera = HgGame.Graphics().getCameraCenter();
         Vector2 originalMouse = getMouse();
         Vector2 distance = new Vector2(originalMouse).sub(camera);
@@ -249,13 +249,13 @@ public class InputEngine {
     }
 
     public Vector2 getFOVWorldMouse(float factor) {
-        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
+        factor = MathTools.Clamp(factor, 0f, 1f);
         Vector2 distance = getMouse();
         return new Vector2(distance).scl(factor * HgGame.Graphics().getCameraZoom()).add(getWorldMouse());
     }
 
     public Vector2 getFOVCameraOffset(float factor) {
-        factor = HgMathUtils.ClampValue(factor, 0f, 1f);
+        factor = MathTools.Clamp(factor, 0f, 1f);
         return new Vector2(getMouse()).scl(factor * HgGame.Graphics().getCameraZoom());
     }
 }

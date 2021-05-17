@@ -4,12 +4,10 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.engine.NetworkEngine;
 import hg.entities.PlayerEntity;
-import hg.entities.pickups.Pickup;
 import hg.entities.spawners.Spawner;
 import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
-import hg.types.TargetType;
-import hg.types.WeaponType;
+import hg.enums.types.TargetType;
 
 public class MedkitPickup extends Pickup {
     private final BasicSprite box;

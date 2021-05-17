@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Affine2;
 import hg.engine.GraphicsEngine;
 import hg.enums.HPos;
-import hg.utils.HgGraphicsUtils;
+import hg.utils.GFXTools;
 import hg.enums.VPos;
 
 /** TO DO: Take a look at GlyphLayout / GlyphRun
@@ -48,7 +48,7 @@ public class BasicText extends Drawable {
             return;
         }
 
-        Affine2 transform = HgGraphicsUtils.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
+        Affine2 transform = GFXTools.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
         GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
     }
 }

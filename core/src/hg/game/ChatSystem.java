@@ -10,7 +10,7 @@ import hg.ui.BasicTextInput;
 import hg.ui.UIElement;
 import hg.utils.DebugLevels;
 import hg.enums.HPos;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 import hg.enums.VPos;
 
 import java.util.LinkedList;
@@ -43,7 +43,7 @@ public class ChatSystem extends UIElement {
     }
 
     public void setDebugMessageLevel(int debugLevel) {
-        debugMessageLevel = HgMathUtils.ClampValue(debugLevel, DebugLevels.WORST, DebugLevels.ALL);
+        debugMessageLevel = MathTools.Clamp(debugLevel, DebugLevels.WORST, DebugLevels.ALL);
     }
 
     public void addDebugMessage(String message, int debugLevel) {

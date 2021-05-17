@@ -1,13 +1,13 @@
 package hg.networking.packets;
 
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.directors.GameSession;
 import hg.entities.Entity;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.gamemodes.Gamemode;
 import hg.networking.Packet;
-import hg.types.TargetType;
+import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
 public class NetInstruction extends Packet {

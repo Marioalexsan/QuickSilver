@@ -2,7 +2,7 @@ package hg.directors;
 
 import hg.game.HgGame;
 import hg.libraries.EnvironmentLibrary;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 
 /** InitDirector inititates the game and launches MainMenuDirector, then self-destructs
  * You likely don't need this to exist after it did its job
@@ -39,7 +39,10 @@ public class GameInit extends Director {
         };
 
         String[] soundsToPreload = {
-                "Assets/Audio/gunclick.ogg"
+                "Assets/Audio/gunclick.ogg",
+                "Assets/Audio/magin.ogg",
+                "Assets/Audio/magout.ogg",
+                "Assets/Audio/receiverpull.ogg",
         };
 
         for (var texture: texturesToPreload) HgGame.Assets().loadTexture(texture);

@@ -3,7 +3,7 @@ package hg.entities;
 import com.badlogic.gdx.math.Vector2;
 import hg.animation.*;
 import hg.libraries.WeaponLibrary;
-import hg.types.DirectorType;
+import hg.enums.types.DirectorType;
 import hg.directors.GameSession;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
@@ -25,10 +25,10 @@ import hg.physics.ColliderGroup;
 import hg.physics.SphereCollider;
 import hg.gamelogic.playerlogic.EmptyAI;
 import hg.gamelogic.playerlogic.PlayerLogic;
-import hg.types.TargetType;
-import hg.types.WeaponType;
+import hg.enums.types.TargetType;
+import hg.enums.types.WeaponType;
 import hg.utils.DebugLevels;
-import hg.utils.HgMathUtils;
+import hg.utils.MathTools;
 import hg.weapons.Revolver;
 
 import java.util.ArrayList;
@@ -53,6 +53,17 @@ public class PlayerEntity extends Entity {
         collider.group = ColliderGroup.Player;
         collider.baseStats = baseStats;
         collider.owner = this;
+
+        GameSession director = (GameSession) HgGame.Manager().getDirector(DirectorType.GameSession);
+        if (director != null) {
+            var sets = director.getSettings();
+            if (sets.hardcore) {
+                baseStats.maxHealth = 70f;
+                baseStats.baseMoveSpeed = 15f;
+                baseStats.maxArmorPlates = 6;
+                baseStats.maxHeavyArmor = 70f;
+            }
+        }
 
         revive();
 
@@ -207,14 +218,14 @@ public class PlayerEntity extends Entity {
         // Apply kevlar vest and heavy armor
         float reduction = 0f;
 
-        if (baseStats.hasKevlarVest) reduction += 0.2f;
+        if (baseStats.hasKevlarVest) reduction += 0.3f;
         if (baseStats.heavyArmor > 0) {
             reduction += 0.5f;
-            baseStats.heavyArmor = HgMathUtils.ClampValue(baseStats.heavyArmor - damage * 0.5f, 0f, baseStats.maxHeavyArmor);
+            baseStats.heavyArmor = MathTools.Clamp(baseStats.heavyArmor - damage * 0.25f, 0f, baseStats.maxHeavyArmor);
         }
-        damage *= HgMathUtils.ClampValue(1f - reduction, 0f, 1f);
+        damage *= MathTools.Clamp(1f - reduction, 0f, 1f);
 
-        baseStats.health = HgMathUtils.ClampValue(baseStats.health - damage, 0f, baseStats.maxHealth);
+        baseStats.health = MathTools.Clamp(baseStats.health - damage, 0f, baseStats.maxHealth);
 
         if (baseStats.health >= 0.0)
             HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/PlayerHurt.ogg"), 1f, position);

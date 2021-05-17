@@ -1,4 +1,4 @@
-package hg.types;
+package hg.enums.types;
 
 public class TargetType {
     public static final int Actors = 0;
