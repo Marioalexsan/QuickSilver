@@ -7,6 +7,7 @@ import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.networking.Packet;
 
+/** Server message that tells the game started */
 public class GameSessionStart extends Packet {
     @Override
     public void parseOnClient() {

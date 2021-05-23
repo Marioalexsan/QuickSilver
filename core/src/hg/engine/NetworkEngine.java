@@ -14,8 +14,7 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// networkLock usage in here could be improved
-
+/** NetworkEngine processes network messages, and can create a server or client connection. */
 public class NetworkEngine {
     private class ClientListener extends Listener {
         @Override
@@ -24,7 +23,7 @@ public class NetworkEngine {
                 netRole = NetworkRole.Client;
                 netStatus = NetworkStatus.Ready;
             }
-            ClientInitRequest msg = new ClientInitRequest(HgGame.Game().localName);
+            ClientInitRequest msg = new ClientInitRequest(HgGame.Data().getSetting("UserName"));
             connection.sendTCP(msg);
         }
 

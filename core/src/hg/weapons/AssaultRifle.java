@@ -14,6 +14,7 @@ import hg.physics.ColliderGroup;
 import hg.enums.types.ActorType;
 import hg.utils.Angle;
 
+/** A rifle that shoots in burst of three. Has high DPS, and excels in all situations */
 public class AssaultRifle implements IWeapon {
 
     // Owner related stuff
@@ -23,10 +24,10 @@ public class AssaultRifle implements IWeapon {
 
     // Weapon stats
 
-    private final int magazineSize = 30;
+    private final int magazineSize = 15;
     private final int maxTotalAmmo = 90;
-    private final int burstCooldown = 48;
-    private final int burstShotInterval = 7;
+    private final int burstCooldown = 52;
+    private final int burstShotInterval = 5;
     private final int burstCount = 3;
     private final int timeToReload = 120;
     private final int weaponPickupAmmo = 30;
@@ -34,7 +35,7 @@ public class AssaultRifle implements IWeapon {
 
     // Weapon state
 
-    private int currentAmmo = 30;
+    private int currentAmmo = 15;
     private int reserveAmmo = 30;
     private int bulletsToFire = 0;
     private int burstShotCooldown = 0;
@@ -93,8 +94,9 @@ public class AssaultRifle implements IWeapon {
 
     private void reset() {
         reloadCounter = 0;
-        weaponCooldown = 0;
+        weaponCooldown = 1;
         bulletsToFire = 0;
+        burstShotCooldown = 0;
     }
 
     @Override

@@ -3,9 +3,7 @@ package hg.gamelogic;
 import hg.entities.Entity;
 import hg.interfaces.IUpdateable;
 
-/**
- * Structure that holds information about entities.
- */
+/** Structure that holds information about entities. */
 public class BaseStats implements IUpdateable {
 
     public transient Entity owner;
@@ -20,7 +18,7 @@ public class BaseStats implements IUpdateable {
     public boolean hasKevlarVest = false;
     public int invulnerabilityFrames = 0;
 
-    public float baseMoveSpeed = 9.4f;
+    public float baseMoveSpeed = 12f;
 
     public int deathCounter = 0;
 

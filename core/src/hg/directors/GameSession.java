@@ -26,6 +26,8 @@ import hg.utils.DebugLevels;
 /** GameSession is the director that encapsulates the "core" game.
  * GameSession is started once this machine becomes a Server / initialized Client */
 public class GameSession extends Director {
+
+    /** SessionOptions holds the current game session's settings */
     public static class SessionOptions implements ICopy {
         public boolean hardcore = false;
         public int map = MapType.Grinder;
@@ -51,16 +53,18 @@ public class GameSession extends Director {
     private Gamemode gamemode;
 
     public GameSession() {
-        HgGame.Manager().enableChatSystem();
+        HgGame.GUI().enableChatSystem();
     }
+
+    public int getState() { return matchState; }
 
     public Gamemode getGamemode() {
         return gamemode;
     }
 
     public boolean updateSettings(SessionOptions newSettings) {
-        if (matchState != 1) {
-            HgGame.Manager().setNotice("Can't change game settings outside of lobby!", 60);
+        if (matchState == 2) {
+            HgGame.SetNotice("Can't change game settings while in game!", 60);
             return false;
         }
         settings = new SessionOptions(newSettings);
@@ -81,7 +85,7 @@ public class GameSession extends Director {
         NetworkEngine network = HgGame.Network();
 
         if (matchState == 1) {
-            manager.getChatSystem().addDebugMessage("Tried to enter lobby while already in lobby", DebugLevels.Error);
+            HgGame.Chat().addDebugMessage("Tried to enter lobby while already in lobby", DebugLevels.Error);
             return;
         }
 
@@ -89,7 +93,7 @@ public class GameSession extends Director {
 
         if (isServer) {
             manager.localView = manager.createPlayerView(PlayerView.Type.Host);
-            manager.localView.name = HgGame.Game().localName;
+            manager.localView.name = HgGame.Data().getSetting("UserName");
         }
 
         manager.tryAddDirector(DirectorType.LobbyMenu);
@@ -103,14 +107,14 @@ public class GameSession extends Director {
         InputEngine input = HgGame.Input();
 
         if (matchState == 2) {
-            manager.getChatSystem().addDebugMessage("Tried to start a started match", DebugLevels.Error);
+            HgGame.Chat().addDebugMessage("Tried to start a started match", DebugLevels.Error);
             return;
         }
 
         manager.tryRetireDirector(DirectorType.LobbyMenu);
 
-        Level level = (Level) manager.tryAddDirector(DirectorType.Level);
-        level.loadMap(MapLibrary.CreatePrototype(settings.map));
+        LevelLoader levelLoader = (LevelLoader) manager.tryAddDirector(DirectorType.LevelLoader);
+        levelLoader.loadMap(MapLibrary.CreatePrototype(settings.map));
 
         boolean isServer = network.isLocalOrServer();
 
@@ -142,16 +146,11 @@ public class GameSession extends Director {
 
             GameSessionStart msg = new GameSessionStart();
             network.sendToAllClients(msg, true);
-
-            for (var view: manager.getPlayerViews()) {
-                PlayerViewUpdate viewMsg = new PlayerViewUpdate(view.uniqueID, view.playerEntity.getID());
-                network.sendToAllClients(viewMsg, true);
-            }
         }
 
         gamemode.restart();
         matchState = 2;
-        HgGame.Audio().playMusic("Assets/Audio/QuickSilver - Combat Grind.ogg", 1f);
+        HgGame.Audio().playMusic("Assets/Audio/QuickSilver - Combat Grind.ogg", 0.75f);
     }
 
     private void stop() {
@@ -160,8 +159,8 @@ public class GameSession extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        Level level = (Level) manager.getDirector(DirectorType.Level);
-        if (level != null) level.unloadMap();
+        LevelLoader levelLoader = (LevelLoader) manager.getDirector(DirectorType.LevelLoader);
+        if (levelLoader != null) levelLoader.unloadMap();
 
         manager.clearActors();
         if (manager.localView != null)
@@ -176,7 +175,6 @@ public class GameSession extends Director {
         matchState = -1;
 
         toBeDestroyed = true;
-        HgGame.Audio().stopMusic();
     }
 
     public void signalStop() {
@@ -185,7 +183,13 @@ public class GameSession extends Director {
 
     @Override
     public void update() {
+        GameManager manager = HgGame.Manager();
         boolean hasFocus = HgGame.Input().inputHasFocus(this);
+
+        for (var view: manager.getPlayerViews()) {
+            PlayerViewUpdate viewMsg = new PlayerViewUpdate(view.uniqueID, view.playerEntity != null ? view.playerEntity.getID() : -1);
+            HgGame.Network().sendToAllClients(viewMsg, false);
+        }
 
         if (gamemode != null) gamemode.update();
 
@@ -197,7 +201,9 @@ public class GameSession extends Director {
         GameManager manager = HgGame.Manager();
 
         HgGame.Input().removeFocusInput(this);
-        manager.disableChatSystem();
+        HgGame.GUI().disableChatSystem();
+
+        gamemode.destroy();
 
         LobbyMenu lobby = (LobbyMenu) manager.getDirector(DirectorType.LobbyMenu);
         if (lobby != null) lobby.signalDestroy();

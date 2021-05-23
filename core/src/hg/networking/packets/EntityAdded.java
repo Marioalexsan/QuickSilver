@@ -11,6 +11,7 @@ import hg.networking.Packet;
 import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
+/** Server message that tells clients a new entity was added */
 public class EntityAdded extends Packet {
     public int entityType;
     public int entitySubType;
@@ -40,7 +41,7 @@ public class EntityAdded extends Packet {
                 if (actor instanceof PlayerEntity)
                     ((PlayerEntity) actor).setLogic(new NetworkPlayerLogic());
             }
-            default -> manager.getChatSystem().addDebugMessage("Unknown entity type " + entityType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Unknown entity type " + entityType, DebugLevels.Warn);
         }
     }
 

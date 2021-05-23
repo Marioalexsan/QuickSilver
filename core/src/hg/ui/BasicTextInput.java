@@ -148,6 +148,7 @@ public class BasicTextInput extends UIElement {
 
     public void setText(String text) {
         trueText.delete(0, trueText.length()).append(text);
+        textDisplay.setText(trueText.length() > 0 ? trueText.toString() : emptyText);
     }
 
     public boolean isFocused() {

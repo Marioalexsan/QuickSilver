@@ -9,6 +9,7 @@ import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 
+/** MedkitPickup heals the player. */
 public class MedkitPickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;

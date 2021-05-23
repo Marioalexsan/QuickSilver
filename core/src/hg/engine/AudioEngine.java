@@ -13,6 +13,7 @@ import java.util.Random;
 // Note: GDX has a "fire and forget" type of attitude towards played Sounds
 // There's little point in trying to control sound instance behavior
 
+/** AudioEngine handles audio playback during the game */
 public class AudioEngine {
     /** A structure for describing how a Sound should play */
     public static class SoundDescription {

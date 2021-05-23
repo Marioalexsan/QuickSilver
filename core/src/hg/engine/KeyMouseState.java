@@ -7,6 +7,7 @@ import hg.utils.MathTools;
 
 import java.util.HashMap;
 
+/** KeyMouseState is a helper class for receiving and holding input. */
 public class KeyMouseState extends InputAdapter {
     private float resFactor = 0.0f;
 

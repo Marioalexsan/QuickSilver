@@ -9,6 +9,10 @@ import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 
+/** HeavyArmorPickup gives heavy armor to the player.
+ * "Rip and tear, until it is done"
+ *     - professional demon exterminator
+ */
 public class HeavyArmorPickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;

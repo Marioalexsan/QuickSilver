@@ -7,6 +7,7 @@ import hg.entities.pickups.AssaultRiflePickup;
 import hg.game.HgGame;
 import hg.enums.types.ActorType;
 
+/** Spawns AssaultRiflePickups */
 public class AssaultRifleSpawner extends Spawner {
     private final BasicSprite silhouette;
 

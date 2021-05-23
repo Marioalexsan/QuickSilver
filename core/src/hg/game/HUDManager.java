@@ -1,6 +1,7 @@
 package hg.game;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import hg.drawables.BasicSprite;
 import hg.drawables.BasicText;
 import hg.drawables.DrawLayer;
@@ -16,10 +17,12 @@ import hg.enums.types.WeaponType;
 import hg.utils.builders.BasicSpriteBuilder;
 import hg.utils.builders.BasicTextBuilder;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+/** HUDManager manages the in-game Heads-Up Display */
 public class HUDManager {
     private static class WeaponInfo {
         public BasicSprite display;
@@ -28,9 +31,11 @@ public class HUDManager {
 
     private BasicSprite HPBox;
     private FillBar HPBar;
+    private BasicText HPShow;
 
     private BasicSprite APBox;
     private FillBar APBar;
+    private BasicText APShow;
 
     private BasicSprite KevlarIcon;
     private BasicSpriteBuilder plateBuilder;
@@ -39,6 +44,13 @@ public class HUDManager {
 
     private BasicSpriteBuilder weaponBuilder;
     private BasicTextBuilder ammoBuilder;
+
+    // The following 4 things were in GameManager before
+    private final ChatSystem chatSystem;
+    private final BasicText debug_mouseWorldPosition;
+
+    private final BasicText notice;
+    private int noticeTimeLeft;
 
     public HUDManager() {
         int Width = HgGame.WorldWidth;
@@ -69,12 +81,58 @@ public class HUDManager {
         HPBar.setLayer(DrawLayer.GUIDefault + 1);
         HPBar.registerToEngine();
 
+        HPShow = BuilderLibrary.BasicTextBuilders("smalllabel").textPos(HPos.Left, VPos.Center).position(XOffset + 120 + 10, YOffset + Height - 50 - 29).makeGUI().layer(DrawLayer.GUIDefault + 10).build();
+        APShow = BuilderLibrary.BasicTextBuilders("tinylabel").textPos(HPos.Left, VPos.Center).position(XOffset + 190 + 10, YOffset + Height - 80 - 19).makeGUI().layer(DrawLayer.GUIDefault + 10).build();
+
         APBar = new FillBar(APSlice, 100, 300);
         APBar.getPosition().set(XOffset + 190 + 4, YOffset + Height - 80 - 4);
         APBar.getCenterOffset().set(0, APSlice.getHeight());
         APBar.setCameraUse(false);
         APBar.setLayer(DrawLayer.GUIDefault + 3);
         APBar.registerToEngine();
+
+
+        // Previous GameManager stuff
+
+        chatSystem = new ChatSystem();
+        chatSystem.setEnabled(false);
+        chatSystem.getPosition().set(-400, -500);
+
+        debug_mouseWorldPosition = BuilderLibrary.BasicTextBuilders("label").textPos(HPos.Left, VPos.Top).makeGUI().build();
+        debug_mouseWorldPosition.setPositionOffset(new Vector2(80, -80));
+        debug_mouseWorldPosition.setEnabled(false);
+        debug_mouseWorldPosition.registerToEngine();
+        // Notice - used for error messages
+
+        notice = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "");
+        notice.setConstraints(HPos.Center, VPos.Center, 0f);
+        notice.setAlpha(0f);
+        notice.setCameraUse(false);
+        notice.setLayer(DrawLayer.GUIDefault);
+        notice.registerToEngine();
+        noticeTimeLeft = 0;
+    }
+
+    public void enableChatSystem() {
+        chatSystem.setEnabled(true);
+    }
+
+    public void disableChatSystem() {
+        chatSystem.setEnabled(false);
+        chatSystem.clear();
+    }
+
+    public void toggleMouseDebug() {
+        debug_mouseWorldPosition.setEnabled(!debug_mouseWorldPosition.isActive());
+    }
+
+    public void setNotice(String text, int noticeTime) {
+        notice.setText(text);
+        noticeTimeLeft = noticeTime;
+    }
+
+    public ChatSystem getChatSystem() {
+        return chatSystem;
     }
 
     private void updatePlates() {
@@ -175,31 +233,52 @@ public class HUDManager {
         GameManager manager = HgGame.Manager();
         PlayerEntity localPlayer = manager.localView != null ? manager.localView.playerEntity : null;
 
+
+        DecimalFormat noDigits = new DecimalFormat();
+        noDigits.setMaximumFractionDigits(0);
+
+        chatSystem.onUpdate();
+        if (noticeTimeLeft > -60) {
+            notice.setAlpha(Math.min(noticeTimeLeft + 60, 60) / 60f);
+            noticeTimeLeft--;
+        }
+
+        debug_mouseWorldPosition.setPosition(HgGame.Input().getMouse());
+        var pos = HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor());
+        debug_mouseWorldPosition.setText(noDigits.format(pos.x) + " " + noDigits.format(pos.y));
+
         updatePlates();
 
         if (localPlayer == null) {
             HPBar.setEnabled(false);
             HPBox.setEnabled(false);
+            HPShow.setEnabled(false);
             APBar.setEnabled(false);
             APBox.setEnabled(false);
+            APShow.setEnabled(false);
             KevlarIcon.setEnabled(false);
         }
         else {
             BaseStats stats = localPlayer.getStats();
             HPBox.setEnabled(true);
             HPBar.setEnabled(true);
+            HPShow.setEnabled(true);
             HPBar.setProperties(stats.maxHealth, 400);
             HPBar.updateFill(stats.health);
+            HPShow.setText(noDigits.format(stats.health));
 
             if (stats.heavyArmor > 0f) {
                 APBox.setEnabled(true);
                 APBar.setEnabled(true);
                 APBar.setProperties(stats.maxHeavyArmor, 300);
                 APBar.updateFill(stats.heavyArmor);
+                APShow.setEnabled(true);
+                APShow.setText(noDigits.format(stats.heavyArmor));
             }
             else {
                 APBox.setEnabled(false);
                 APBar.setEnabled(false);
+                APShow.setEnabled(false);
             }
 
             KevlarIcon.setEnabled(stats.hasKevlarVest);
@@ -213,7 +292,11 @@ public class HUDManager {
         HPBox.unregisterFromEngine();
         APBar.unregisterFromEngine();
         APBox.unregisterFromEngine();
+        HPShow.unregisterFromEngine();
+        APShow.unregisterFromEngine();
         KevlarIcon.unregisterFromEngine();
         for (var plate: plates) plate.unregisterFromEngine();
+        notice.unregisterFromEngine();
+        debug_mouseWorldPosition.unregisterFromEngine();
     }
 }

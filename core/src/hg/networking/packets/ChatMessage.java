@@ -19,13 +19,13 @@ public class ChatMessage extends Packet {
 
     @Override
     public void parseOnClient() {
-        HgGame.Manager().getChatSystem().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
+        HgGame.Chat().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
     }
 
     @Override
     public void parseOnServer(int connectionID) {
         GameManager manager = HgGame.Manager();
-        manager.getChatSystem().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
+        HgGame.Chat().addMessageFromView(message, HgGame.Manager().getPlayerViewByUniqueID(senderUniqueID));
 
         PlayerView sender = manager.getPlayerViewByConnectionID(connectionID);
 

@@ -3,18 +3,13 @@ package hg.game;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.*;
-import hg.drawables.BasicText;
-import hg.drawables.DrawLayer;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
-import hg.enums.HPos;
-import hg.enums.VPos;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.states.State;
 import hg.libraries.ActorLibrary;
-import hg.libraries.BuilderLibrary;
 import hg.libraries.EnvironmentLibrary;
 import hg.networking.NetworkRole;
 import hg.networking.NetworkStatus;
@@ -24,10 +19,11 @@ import hg.enums.types.DirectorType;
 import hg.enums.types.TargetType;
 import hg.utils.*;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
-/** Holds various stuff relevant to the game, such as entities */
+/** Holds various stuff relevant to the game, such as entities, directors, player views, etc.
+ * Also does a crapton of network processing.
+ * Could be considered the heart of the game. */
 public class GameManager {
     private static final int StartingID = 1;
     private int nextEntityID = StartingID;
@@ -40,12 +36,6 @@ public class GameManager {
     public PlayerView localView;
     private final ArrayList<PlayerView> playerViews = new ArrayList<>();
 
-    private final ChatSystem chatSystem;
-    private final BasicText debug_mouseWorldPosition;
-
-    private final BasicText notice;
-    private int noticeTimeLeft;
-
     // Network Update stuff
 
     private int actorHeavyUpdateInterval = 12;
@@ -54,49 +44,11 @@ public class GameManager {
     private int gamemodeHeavyUpdateInterval = 30;
     private int gamemodeNextHeavyUpdate = 0;
 
-    public GameManager() {
-        chatSystem = new ChatSystem();
-        chatSystem.setEnabled(false);
-        chatSystem.getPosition().set(-400, -500);
+    public GameManager() { }
 
-        debug_mouseWorldPosition = BuilderLibrary.BasicTextBuilders("label").textPos(HPos.Left, VPos.Top).makeGUI().build();
-        debug_mouseWorldPosition.setPositionOffset(new Vector2(80, -80));
-        debug_mouseWorldPosition.setEnabled(false);
-        debug_mouseWorldPosition.registerToEngine();
-        // Notice - used for error messages
+    // --- Player View related Methods --- //
 
-        notice = new BasicText(HgGame.Assets().loadFont("Assets/Fonts/CourierNew36.fnt"), "");
-        notice.setConstraints(HPos.Center, VPos.Center, 0f);
-        notice.setAlpha(0f);
-        notice.setCameraUse(false);
-        notice.setLayer(DrawLayer.GUIDefault);
-        notice.registerToEngine();
-        noticeTimeLeft = 0;
-    }
-
-    public void enableChatSystem() {
-        chatSystem.setEnabled(true);
-    }
-
-    public void disableChatSystem() {
-        chatSystem.setEnabled(false);
-        chatSystem.clear();
-    }
-
-    public void setNotice(String text, int noticeTime) {
-        notice.setText(text);
-        noticeTimeLeft = noticeTime;
-    }
-
-    public ChatSystem getChatSystem() {
-        return chatSystem;
-    }
-
-    // ---
-    // Player Views
-    // ---
-
-    /** Creates a PlayerView and adds it to the local PlayerView list */
+    /** Creates a PlayerView and adds it to the local list. Used by Servers. */
     public PlayerView createPlayerView(PlayerView.Type type) {
         if (!HgGame.Network().isLocalOrServer()) throw new BadCoderException("Non-server tried to create player views lol");
 
@@ -105,29 +57,36 @@ public class GameManager {
         view.viewType = type;
 
         playerViews.add(view);
+
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
+        if (mode != null) mode.onPlayerViewAdded(view);
+
         return view;
     }
 
-    /** Adds an existing PlayerView to the local PlayerView list */
+    /** Adds an existing PlayerView to the local list. Used by Clients. */
     public void addPlayerView(PlayerView newView) {
-        for (var view : playerViews)
-            if (view.uniqueID == newView.uniqueID) throw new BadCoderException("ID conflict when adding player view!");
+        PlayerView existingView = getPlayerViewByUniqueID(newView.uniqueID);
+        if (existingView != null)
+            throw new BadCoderException("ID conflict when adding player view!");
         playerViews.add(newView);
     }
 
-    /** Removes and returns the PlayerView with that ID from the local PlayerView list. */
+    /** Removes the PlayerView with the given unique ID.
+     * @return The removed PlayerView, if any. */
     public PlayerView removePlayerView(int uniqueID) {
-        PlayerView target = null;
-        for (var view : playerViews) {
-            if (view.uniqueID == uniqueID) {
-                target = view;
-                break;
-            }
-        }
+        PlayerView target = getPlayerViewByUniqueID(uniqueID);
 
         if (target == null) return null;
-        if (target == localView)
-            chatSystem.addDebugMessage("Someone tried to remove localview via uniqueID!", DebugLevels.Error);
+        if (target == localView) {
+            HgGame.Chat().addDebugMessage("Someone tried to remove localview via uniqueID!", DebugLevels.Error);
+            return null;
+        }
+
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
+        if (mode != null) mode.onPlayerViewRemoved(target);
 
         playerViews.remove(target);
         return target;
@@ -135,11 +94,17 @@ public class GameManager {
 
     /** The nuclear option. */
     public void removeAllPlayerViews() {
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
+        if (mode != null) {
+            for (var view: playerViews)
+                mode.onPlayerViewRemoved(view);
+        }
         localView = null;
         playerViews.clear();
     }
 
-    /** Returns an ID that is not in use by any other PlayerView right now. Should be used by Server only. */
+    /** Returns an ID that is not in use by existing PlayerViews. */
     private int generatePlayerViewID() {
         Random rand = new Random();
         boolean isUnique = false;
@@ -159,29 +124,28 @@ public class GameManager {
     }
 
     public PlayerView getPlayerViewByUniqueID(int uniqueID) {
-        for (var view: playerViews) {
+        for (var view: playerViews)
             if (view.uniqueID == uniqueID) return view;
-        }
         return null;
     }
 
     public PlayerView getPlayerViewByConnectionID(int connectionID) {
-        for (var view: playerViews) {
+        for (var view: playerViews)
             if (view.connectionID != -1 && view.connectionID == connectionID) return view;
-        }
         return null;
     }
 
     public PlayerView getPlayerViewByActorID(int actorID) {
-        for (var view: playerViews) {
+        for (var view: playerViews)
             if (view.playerEntity != null && view.playerEntity.getID() == actorID) return view;
-        }
         return null;
     }
 
     public PlayerView[] getPlayerViews() {
         return playerViews.toArray(new PlayerView[0]);
     }
+
+    // --- Actor related methods --- //
 
     public ArrayList<Entity> getAllActors() {
         return new ArrayList<>(actors.values());
@@ -218,10 +182,15 @@ public class GameManager {
             newEntity.getAngle().set(direction);
 
             if (actors.put(ID, newEntity) != null) {
-                chatSystem.addDebugMessage("Trying to add an entity with an existing ID!", DebugLevels.Warn);
+                HgGame.Chat().addDebugMessage("Trying to add an entity with an existing ID!", DebugLevels.Warn);
+                HgGame.Chat().addDebugMessage("Entity ID: " + ID + ", Type: " + entityType, DebugLevels.Warn);
             }
             newEntity.setID(ID);
         }
+
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
+        if (mode != null) mode.onEntityAdded(newEntity);
 
         NetworkEngine network = HgGame.Network();
         if (newEntity != null && network.isLocalOrServer()) {
@@ -236,6 +205,8 @@ public class GameManager {
         return actors.get(ID);
     }
 
+    // --- Environment related methods --- //
+
     public Entity addEnvironment(int envType, Vector2 position, float direction) {
         return addEnvironment(nextStaticEnvID++, envType, position, direction);
     }
@@ -247,12 +218,14 @@ public class GameManager {
         newEntity.getAngle().set(direction);
 
         if (environments.put(ID, newEntity) != null) {
-            chatSystem.addDebugMessage("Trying to add an environment with an existing ID!", DebugLevels.Warn);
+            HgGame.Chat().addDebugMessage("Trying to add an environment with an existing ID!", DebugLevels.Warn);
         }
         newEntity.setID(ID);
 
         return newEntity;
     }
+
+    // --- Generic Director related methods --- //
 
     /** Tries to add a director of the given type, or returns the existing one if applicable. */
     public Director tryAddDirector(int type) {
@@ -264,7 +237,7 @@ public class GameManager {
             case DirectorType.GameQuit -> which = new GameQuit();
             case DirectorType.MainMenu -> which = new MainMenu();
             case DirectorType.GameSession -> which = new GameSession();
-            case DirectorType.Level -> which = new Level();
+            case DirectorType.LevelLoader -> which = new LevelLoader();
             case DirectorType.PauseMenu -> which = new PauseMenu();
             case DirectorType.LobbyMenu -> which = new LobbyMenu();
             default -> throw new RuntimeException("Coudln't retrieve director of type " + type);
@@ -284,6 +257,22 @@ public class GameManager {
         if (existing != null) existing.destroy();
     }
 
+    // Convenience methods for getting vanilla Directors quickly
+
+    public GameSession tryAddGameSession() { return (GameSession) tryAddDirector(DirectorType.GameSession); }
+    public GameSession getGameSession() { return (GameSession) getDirector(DirectorType.GameSession); }
+
+    public LevelLoader tryAddLevelLoader() { return (LevelLoader) tryAddDirector(DirectorType.LevelLoader); }
+    public LevelLoader getLevelLoader() { return (LevelLoader) getDirector(DirectorType.LevelLoader); }
+
+    public LobbyMenu tryAddLobbyMenu() { return (LobbyMenu) tryAddDirector(DirectorType.LobbyMenu); }
+    public LobbyMenu getLobbyMenu() { return (LobbyMenu) getDirector(DirectorType.LobbyMenu); }
+
+    public MainMenu tryAddMainMenu() { return (MainMenu) tryAddDirector(DirectorType.MainMenu); }
+    public MainMenu getMainMenu() { return (MainMenu) getDirector(DirectorType.MainMenu); }
+
+    // --- Clear methods --- //
+
     /** Clears all entities. This also resets the nextEntityID */
     public void clearEntities() {
         clearActors();
@@ -293,7 +282,11 @@ public class GameManager {
     }
 
     public void clearActors() {
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
+
         for (var actor: actors.entrySet()) {
+            if (mode != null) mode.onEntityRemoved(actor.getValue());
             actor.getValue().signalDestroy();
             actor.getValue().destroy();
         }
@@ -316,25 +309,16 @@ public class GameManager {
         directors.clear();
     }
 
+    // --- Other --- //
+
     public void update() {
         // Update all current entities based on network status
         NetworkEngine network = HgGame.Network();
+        GameSession match = (GameSession) getDirector(DirectorType.GameSession);
+        Gamemode mode = match != null ? match.getGamemode() : null;
 
         boolean isServer = network.isLocalOrServer();
-
-        chatSystem.onUpdate();
-        if (noticeTimeLeft > -60) {
-            notice.setAlpha(Math.min(noticeTimeLeft + 60, 60) / 60f);
-            noticeTimeLeft--;
-        }
-
-        DecimalFormat noDigits = new DecimalFormat();
-        noDigits.setMaximumFractionDigits(0);
-
-        debug_mouseWorldPosition.setPosition(HgGame.Input().getMouse());
-        var pos = HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor());
-        debug_mouseWorldPosition.setText(noDigits.format(pos.x) + " " + noDigits.format(pos.y));
-
+        
         for (var director : new ArrayList<>(directors.values()))
             director.update();
 
@@ -357,7 +341,11 @@ public class GameManager {
             if (actor.getValue().isDestroySignalled())
                 actorsToRemove.add(actor.getKey());
 
-        for (var key : actorsToRemove) actors.remove(key).destroy();
+        for (var key : actorsToRemove) {
+            var actor = actors.remove(key);
+            if (mode != null) mode.onEntityRemoved(actor);
+            actor.destroy();
+        }
         if (isServer) {
             for (var key : actorsToRemove) {
                 network.sendToAllClients(new EntityDestroyed(TargetType.Actors, key), true);
@@ -397,10 +385,9 @@ public class GameManager {
 
             if (gamemodeNextHeavyUpdate-- <= 0) {
                 gamemodeNextHeavyUpdate = gamemodeHeavyUpdateInterval;
-                GameSession match = (GameSession) getDirector(DirectorType.GameSession);
-                Gamemode mode = null;
+                match = (GameSession) getDirector(DirectorType.GameSession);
+                mode = match != null ? match.getGamemode() : null;
                 State stuff = null;
-                if (match != null) mode = match.getGamemode();
                 if (mode != null) stuff = mode.tryGenerateState();
                 if (stuff != null)
                     network.sendToAllClients(new StateUpdate(TargetType.Gamemodes, -1337, stuff), false); // UDP Packet
@@ -413,8 +400,6 @@ public class GameManager {
         clearActors();
         clearStaticEnvironments();
         clearDirectors();
-        notice.unregisterFromEngine();
-        debug_mouseWorldPosition.unregisterFromEngine();
     }
 
     public void onChatMessageEntered(String message) {
@@ -449,43 +434,86 @@ public class GameManager {
             case "debugColliders" -> {
                 boolean debugDraw = HgGame.Physics().getDebugDraw();
                 HgGame.Physics().setDebugDraw(!debugDraw);
-                chatSystem.addMessage(casualPrefix + "Debug draw is now " + (debugDraw ? "off" : "on"));
+                HgGame.Chat().addMessage(casualPrefix + "Debug draw is now " + (debugDraw ? "off" : "on"));
             }
             case "listPlayers" -> {
                 for (var view: playerViews) {
-                    chatSystem.addMessage(view.name + "( uID: " + view.uniqueID + " | cID: " + view.connectionID + " )");
+                    HgGame.Chat().addMessage(view.name + "( uID: " + view.uniqueID + " | cID: " + view.connectionID + " )");
                 }
             }
             case "kickPlayer" -> {
                 if (!isServer) {
-                    chatSystem.addMessage("Can't kick players as Client");
+                    HgGame.Chat().addMessage("Can't kick players as Client");
                     return;
                 }
                 try {
                     int uniqueID = Integer.parseInt(args[0]);
                     PlayerView toKick = getPlayerViewByUniqueID(uniqueID);
                     if (toKick == localView) {
-                        chatSystem.addMessage("You can't kick yourself!");
+                        HgGame.Chat().addMessage("You can't kick yourself!");
                         return;
                     }
                     if (toKick == null) {
-                        chatSystem.addMessage("The uniqueID is invalid");
+                        HgGame.Chat().addMessage("The uniqueID is invalid");
                         return;
                     }
-                    chatSystem.addMessage("Kicking " + toKick.name);
+                    HgGame.Chat().addMessage("Kicking " + toKick.name);
                     network.disconnectClient(toKick.connectionID);
                 }
                 catch (Exception ignored) {
-                    chatSystem.addMessage("Usage: /kickPlayer [uniqueID]");
+                    HgGame.Chat().addMessage("Usage: /kickPlayer [uniqueID]");
+                }
+            }
+            case "getLatestGames" -> {
+                try {
+
+                    int count = args.length == 0 ? 5 : Integer.parseInt(args[0]);
+                    if (count <= 0) {
+                        HgGame.Chat().addMessage("Count should be higher than 0!");
+                        return;
+                    }
+                    var results = HgGame.Data().getDeathmatchResults().keySet().toArray(new Long[0]);
+                    HgGame.Chat().addMessage("IDs: ");
+                    for (int i = 0; i < count && i < results.length; i++)
+                        HgGame.Chat().addMessage(results[i].toString());
+                }
+                catch (Exception ignored) {
+                    HgGame.Chat().addMessage("Usage: /getLatestGames [count = 5]");
+                }
+            }
+            case "getGame" -> {
+                try {
+                    long id = Long.parseLong(args[0]);
+                    var result = HgGame.Data().getDeathmatchResults().get(id);
+                    if (result == null) {
+                        HgGame.Chat().addMessage("No such game found!");
+                        return;
+                    }
+                    HgGame.Chat().addMessage("Game " + id + " results: ");
+                    HgGame.Chat().addMessage(" Name | Score |  Winner ");
+                    for (var player: result) {
+                        HgGame.Chat().addMessage(player.playerName + "    " + player.score + "    " + (player.winner ? "Yes" : "No"));
+                    }
+                }
+                catch (Exception ignored) {
+                    HgGame.Chat().addMessage("Usage: /getGame [ID]");
                 }
             }
             case "mousePos" -> {
-                debug_mouseWorldPosition.setEnabled(!debug_mouseWorldPosition.isActive());
-                chatSystem.addMessage("Toggled mouse position view");
+                HgGame.GUI().toggleMouseDebug();
+                HgGame.Chat().addMessage("Toggled mouse position view");
             }
-            default -> chatSystem.addMessage("[System] Unknown command: " + command);
+            default -> HgGame.Chat().addMessage("[System] Unknown command: " + command);
         }
     }
+
+    // --- Network related code --- //
+
+    // Abandon hope,
+    // All ye who enter here.
+
+    // This code could be considered the core of the networking <-> game interaction logic
+    // See hg.networking.packets for further implementation
 
     public void networkUpdate() {
         NetworkEngine network = HgGame.Network();
@@ -518,19 +546,19 @@ public class GameManager {
         }
     }
 
-
     /** Called if this machine sent PlayerViews to a client */
     public void onClientInitialized(int uniqueID) {
         PlayerView newView = getPlayerViewByUniqueID(uniqueID);
         if (newView == null) {
-            chatSystem.addDebugMessage("Null PlayerView after addition!", DebugLevels.Error);
+            HgGame.Chat().addDebugMessage("Null PlayerView after addition!", DebugLevels.Error);
             return;
         }
-        getChatSystem().addMessage(newView.name + " connected.");
+        HgGame.Chat().addMessage(newView.name + " connected.");
     }
 
     /** Called if a client connected to this machine */
     public void onClientConnected(int connectionID) {
+        // Empty for now lololololololo
     }
 
     /** Called if a client disconnected from this machine */
@@ -549,18 +577,18 @@ public class GameManager {
             for (var view: playerViews)
                 if (view != localView) HgGame.Network().sendToClient(msg, true, view.connectionID);
 
-            HgGame.Manager().getChatSystem().addMessage(deadView.name + " disconnected.");
+            HgGame.Chat().addMessage(deadView.name + " disconnected.");
         }
     }
 
     /** Called if this machine obtained PlayerViews from the server */
     public void onInitializedByServer() {
-
+        // Empty for now lololololololo
     }
 
     /** Called if this machine connected to a server */
     public void onConnect() {
-
+        // Unused for now lololololololo
     }
 
     /** Called if this machine disconnected from a server */
@@ -571,6 +599,8 @@ public class GameManager {
         MainMenu main = (MainMenu) getDirector(DirectorType.MainMenu);
         if (main != null) main.onDisconnectFromServer();
 
-        setNotice("Got disconnected from server!", 120);
+        tryRetireDirector(DirectorType.PauseMenu);
+
+        HgGame.SetNotice("Got disconnected from server!", 120);
     }
 }

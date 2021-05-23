@@ -1,5 +1,6 @@
 package hg.physics;
 
+/** Defines the collision type */
 public enum ColliderProperty {
     CollideNotify, // If both A and B have this, perform pushback and notification
     Notify, // If A has this, notify if it collides with B

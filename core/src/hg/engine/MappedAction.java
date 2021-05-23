@@ -1,5 +1,7 @@
 package hg.engine;
 
+/** MappedActions are an abstract form of input.
+ * Keyboard, mouse input, AI logic, and network messages are translated to this, instead of being used directly! */
 public class MappedAction {
     public static final int PrimaryFire = 0;
     public static final int SecondaryFire = 1;

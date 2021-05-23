@@ -6,6 +6,7 @@ import hg.interfaces.ICopy;
 import hg.interfaces.callbacks.ICallback;
 import hg.ui.ToggleButton;
 
+/** Builds ToggleButtons using the given options */
 public class ToggleButtonBuilder implements ICopy {
     private Texture _inactiveTex;
     private Texture _activeTex;

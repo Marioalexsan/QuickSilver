@@ -1,5 +1,6 @@
 package hg.animation;
 
+/** ActCriteria defines an effect and its criteria for triggering */
 public class ActInstruction {
     public final ActCriteria criteria;
     public final ActEffect effect;

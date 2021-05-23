@@ -23,6 +23,7 @@ import hg.enums.VPos;
 
 import java.util.*;
 
+/** GraphicsEngine renders Drawables to the screen each game update cycle, using a global graphics context (camera, etc.) */
 public class GraphicsEngine {
     private final ArrayList<Rectangle> resolutionSelection = new ArrayList<>();
 

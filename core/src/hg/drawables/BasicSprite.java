@@ -9,6 +9,7 @@ import hg.engine.GraphicsEngine;
 import hg.utils.Angle;
 import hg.utils.GFXTools;
 
+/** BasicSprite displays a portion of a texture to the screen. */
 public class BasicSprite extends Drawable {
     protected TextureRegion frame = new TextureRegion();
 

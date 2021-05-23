@@ -3,6 +3,7 @@ package hg.drawables;
 import com.badlogic.gdx.graphics.Texture;
 import hg.utils.MathTools;
 
+/** AnimatedSprite allows playing an animation which is contiguously stored in a texture */
 public class AnimatedSprite extends BasicSprite {
     public enum PlayMode {
         PlayOnce,
@@ -53,7 +54,7 @@ public class AnimatedSprite extends BasicSprite {
         started = true;
 
         accumulatedFrames += frames;
-        int frameAdvance = (int)(accumulatedFrames / updatesPerFrame);
+        int frameAdvance = Math.max((int)(accumulatedFrames / updatesPerFrame), 0);
         accumulatedFrames -= frameAdvance * updatesPerFrame;
         currentFrame += frameAdvance;
 

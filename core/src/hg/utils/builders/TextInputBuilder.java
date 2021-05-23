@@ -7,6 +7,7 @@ import hg.enums.VPos;
 import hg.interfaces.ICopy;
 import hg.ui.BasicTextInput;
 
+/** Builds TextInputs using the given options */
 public class TextInputBuilder implements ICopy {
     private BitmapFont _font;
     private String _emptyText = "";

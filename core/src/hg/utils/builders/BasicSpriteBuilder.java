@@ -6,6 +6,7 @@ import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
 import hg.interfaces.ICopy;
 
+/** Builds BasicSprites using the given options */
 public class BasicSpriteBuilder implements ICopy {
     private Texture _tex;
     private int _x;

@@ -6,6 +6,7 @@ import hg.drawables.Drawable;
 
 import java.util.Comparator;
 
+/** Helper class for graphics methods */
 public class GFXTools {
 
     /** Comparator for sorting drawables by height */

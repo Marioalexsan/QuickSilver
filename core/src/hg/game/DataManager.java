@@ -1,11 +1,27 @@
 package hg.game;
 
+import hg.gamelogic.gamemodes.Deathmatch;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+/** DataManager stores settings and statistics, and manages SQL database connections. */
 public class DataManager {
+    public static class DeathmatchResult {
+        String playerName;
+        int score;
+        boolean winner;
+
+        public DeathmatchResult(String playerName, int score, boolean winner) {
+            this.playerName = playerName;
+            this.score = score;
+            this.winner = winner;
+        }
+    }
+
     static {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -14,11 +30,12 @@ public class DataManager {
         }
     }
 
-    private static final HashMap<String, String> currentSettings = new HashMap<>();
+    private final HashMap<String, String> currentSettings = new HashMap<>();
+    private final HashMap<Long, ArrayList<DeathmatchResult>> dmResultsToSave = new HashMap<>();
 
-    private Connection openSettingsDB() {
+    private Connection openDB(String path) {
         try {
-            var settings = DriverManager.getConnection("jdbc:sqlite:UserData/Settings.db");
+            var settings = DriverManager.getConnection("jdbc:sqlite:" + path);
             settings.setAutoCommit(false);
             return settings;
         }
@@ -26,12 +43,10 @@ public class DataManager {
         return null;
     }
 
-    private void closeSettingsDB(Connection settings) {
+    private void closeDB(Connection conn) {
         try {
-            if (settings != null && !settings.isClosed()) {
-                settings.close();
-                settings = null;
-            }
+            if (conn != null && !conn.isClosed())
+                conn.close();
         }
         catch (Exception ignored) {}
     }
@@ -42,15 +57,80 @@ public class DataManager {
         } catch (Exception ignored) {}
 
         currentSettings.putAll(GameVars.GetAllDefaultSettings());
+        readMatchesFromDB();
         readSettingsFromDB();
     }
 
     public void cleanup() {
         writeSettingsToDB();
+        writeMatchesToDB();
+    }
+
+    public void addDeathmatchResult(ArrayList<DeathmatchResult> result) {
+        dmResultsToSave.put(System.currentTimeMillis(), result);
+    }
+
+    public HashMap<Long, ArrayList<DeathmatchResult>> getDeathmatchResults() {
+        return new HashMap<>(dmResultsToSave);
+    }
+
+    private void readMatchesFromDB() {
+        var matches = openDB("UserData/Matches.db");
+        if (matches == null) return;
+        try {
+            DatabaseMetaData meta = matches.getMetaData();
+            ResultSet results = meta.getTables(null, null, null, new String[] {"TABLE"});
+
+            while (results.next()) {
+                String table = results.getString(3);
+
+                Statement st = matches.createStatement();
+                st.execute("SELECT * FROM " + table);
+
+                ResultSet existing = st.getResultSet();
+                ArrayList<DeathmatchResult> dmResults = new ArrayList<>();
+                dmResultsToSave.put(Long.parseLong(table.substring(5)), dmResults);
+                while (existing.next()) {
+                    dmResults.add(new DeathmatchResult(existing.getString(1), existing.getInt(2), existing.getString(3).equals("Yes")));
+                }
+            }
+        }
+        catch (Exception ignored) {}
+        closeDB(matches);
+    }
+
+    private void writeMatchesToDB() {
+        var matches = openDB("UserData/Matches.db");
+        if (matches == null) return;
+        try {
+            for (var record: dmResultsToSave.entrySet()) {
+                String table = "MATCH" + record.getKey();
+
+                DatabaseMetaData meta = matches.getMetaData();
+                ResultSet results = meta.getTables(null, null, table, new String[] {"TABLE"});
+
+                if (results.next()) continue;
+
+                matches.createStatement().execute("CREATE TABLE " + table + " (NAME VARCHAR(50), SCORE INT(255), WINNER VARCHAR(10));");
+
+                for (var player: record.getValue()) {
+                    PreparedStatement ps = matches.prepareStatement("INSERT INTO " + table + " VALUES (?, ?, ?)");
+                    ps.setString(1, player.playerName);
+                    ps.setInt(2, player.score);
+                    ps.setString(3, player.winner ? "Yes" : "No");
+                    ps.execute();
+                }
+            }
+            matches.commit();
+        }
+        catch (Exception ignored) {
+            matches = null;
+        }
+        closeDB(matches);
     }
 
     private void readSettingsFromDB() {
-        var settings = openSettingsDB();
+        var settings = openDB("UserData/Settings.db");
         if (settings == null) return;
         try {
             for (var id: GameVars.GetAllDefaultSettings().keySet()) {
@@ -64,11 +144,11 @@ public class DataManager {
             }
         }
         catch (Exception ignored) {}
-        closeSettingsDB(settings);
+        closeDB(settings);
     }
 
     private void writeSettingsToDB() {
-        var settings = openSettingsDB();
+        var settings = openDB("UserData/Settings.db");
         if (settings == null) return;
         try {
             DatabaseMetaData meta = settings.getMetaData();
@@ -100,7 +180,7 @@ public class DataManager {
             settings.commit();
         }
         catch (Exception ignored) {}
-        closeSettingsDB(settings);
+        closeDB(settings);
     }
 
     public String getSetting(String id) {

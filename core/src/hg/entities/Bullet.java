@@ -2,6 +2,7 @@ package hg.entities;
 
 import hg.drawables.BasicSprite;
 import hg.drawables.DrawLayer;
+import hg.drawables.Drawable;
 import hg.engine.AssetEngine;
 import hg.game.HgGame;
 import hg.gamelogic.states.BulletState;
@@ -11,13 +12,14 @@ import hg.gamelogic.AttackStats;
 import hg.physics.*;
 import hg.utils.Angle;
 
+/** Bullet is a generic projectile, that hurts an entity on impact. Destroyed on impact based on group properties. */
 public class Bullet extends Entity {
     public float speed = 38f;
     public float maxDistance = 1800f;
     public float currentDistance = 0.0f;
 
     private final BasicSprite drawable = new BasicSprite();
-    private final BoxCollider collider = new BoxCollider(32f, 12f);
+    private final BoxCollider collider = new BoxCollider(36f, 12f);
 
     public Bullet() {
         AssetEngine assets = HgGame.Assets(); // Extra dependency
@@ -94,6 +96,11 @@ public class Bullet extends Entity {
         currentDistance += speed;
 
         if (currentDistance >= maxDistance) toBeDestroyed = true;
+    }
+
+    @Override
+    public Drawable getDrawableIfAny() {
+        return drawable;
     }
 
     @Override

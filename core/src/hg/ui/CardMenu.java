@@ -9,8 +9,8 @@ import hg.interfaces.IEnable;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-/** BasicUIStates is a simple way of creating menus by switching between states (submenus) */
-public class BasicUIStates extends UIElement {
+/** CardMenu is a simple way of creating menus by switching between states (submenus) */
+public class CardMenu extends UIElement {
     private final HashMap<String, LinkedList<Object>> states = new HashMap<>();
 
     private String currentState = "";

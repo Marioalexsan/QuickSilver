@@ -8,6 +8,7 @@ import hg.enums.HPos;
 import hg.enums.VPos;
 import hg.interfaces.ICopy;
 
+/** Builds BasicTexts using the given options */
 public class BasicTextBuilder implements ICopy {
     private BitmapFont _font;
     private String _text = "";

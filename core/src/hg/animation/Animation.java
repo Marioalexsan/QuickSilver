@@ -6,6 +6,7 @@ import hg.game.HgGame;
 
 import java.util.HashMap;
 
+/** Animation can play sprite animations, and switch between them easily. It can also execute animation instructions. */
 public class Animation extends AnimatedSprite {
     protected final HashMap<String, AnimationInfo> knownAnimations = new HashMap<>();
     protected String currentAnimation = "";
@@ -73,6 +74,7 @@ public class Animation extends AnimatedSprite {
 
                 HgGame.Audio().playSound(sound, volume, playPos);
             }
+            case Delay -> accumulatedFrames -= effect.afArgs[0];
         }
     }
 

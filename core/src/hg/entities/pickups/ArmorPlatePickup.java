@@ -9,6 +9,7 @@ import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 
+/** ArmorPlatePickup gives an armor plate to the player. */
 public class ArmorPlatePickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;

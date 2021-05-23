@@ -3,8 +3,7 @@ package hg.directors;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.IUpdateable;
 
-/** Directors contain game logic that can be started and stopped individually.
- */
+/** Directors contain game logic that can be started and stopped individually. */
 public abstract class Director implements IUpdateable, IDestroyable {
     protected boolean toBeDestroyed = false;
 

@@ -5,7 +5,7 @@ import hg.enums.types.MapType;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
 import hg.enums.types.DirectorType;
-import hg.ui.BasicUIStates;
+import hg.ui.CardMenu;
 import hg.enums.HPos;
 import hg.enums.VPos;
 import hg.ui.ToggleButton;
@@ -13,16 +13,20 @@ import hg.utils.builders.BasicTextBuilder;
 import hg.utils.builders.ClickButtonBuilder;
 import hg.utils.builders.ToggleButtonBuilder;
 
+/** LobbyMenu is the menu that appears prior to a game session start. Server can set game session settings here (map, etc.), and wait for clients to join. */
 public class LobbyMenu extends Director {
-    private final BasicUIStates menus = new BasicUIStates();
+    private final CardMenu menus = new CardMenu();
     private final ToggleButton hardcoreSelect;
     private int mapSelection = MapType.Grinder;
     private final BasicText mapLabel;
 
     public LobbyMenu() {
         ClickButtonBuilder boxButton = BuilderLibrary.ClickButtonBuilders("silverbox");
+        ClickButtonBuilder leftArrow = BuilderLibrary.ClickButtonBuilders("leftarrow");
+        ClickButtonBuilder leftArrowClient = BuilderLibrary.ClickButtonBuilders("leftarrowdisabled");
         BasicTextBuilder label = BuilderLibrary.BasicTextBuilders("label");
         ToggleButtonBuilder select = BuilderLibrary.ToggleButtonBuilders("silvercheck");
+        ToggleButtonBuilder selectClient = BuilderLibrary.ToggleButtonBuilders("silverdisabled");
 
         boolean isServer = HgGame.Network().isLocalOrServer();
 
@@ -30,10 +34,10 @@ public class LobbyMenu extends Director {
                 boxButton.copy().position(660, -400).text("Quit Lobby").onClick(this::quitLobby).build(),
                 label.copy().position(0, 480).text("In Lobby - " + (isServer ? "as Server" : "as Client")).makeGUI().build(),
                 isServer ? boxButton.copy().position(660, -200).text("Start Match").onClick(this::tryStartMatch).build() : null, // Not added if client
-                hardcoreSelect = select.copy().position(-880, -200).build(),
-                label.copy().position(-780, -200).text("Hardcore").textPos(HPos.Left, VPos.Center).makeGUI().build(),
-                boxButton.copy().position(-680, -340).text(isServer ? "Cycle Map" : "Ask Host to Cycle").onClick(isServer ? this::cycleMap : null).build(),
-                mapLabel = label.copy().position(-720, -480).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build()
+                hardcoreSelect = (isServer ? select : selectClient).copy().position(-880, -200).build(),
+                label.copy().position(-780, -200).text("Hardcore Mode").textPos(HPos.Left, VPos.Center).makeGUI().build(),
+                (isServer ? leftArrow : leftArrowClient).copy().position(-880, -300).angle(180).onClick(isServer ? this::cycleMap : null).build(),
+                mapLabel = label.copy().position(-780, -300).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build()
         );
 
         if (isServer) {
@@ -95,7 +99,7 @@ public class LobbyMenu extends Director {
             case MapType.Duel -> which = "Duel";
             default -> which = "Unknown";
         }
-        mapLabel.setText(which);
+        mapLabel.setText("Map: " + which);
     }
 
     private void hardcoreToggle() {

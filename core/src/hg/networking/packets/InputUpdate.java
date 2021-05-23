@@ -8,7 +8,7 @@ import hg.gamelogic.playerlogic.PlayerLogic;
 import hg.networking.Packet;
 import hg.networking.PlayerView;
 
-// Holds input from a player
+/** Message that sends client inputs to server, and other player inputs from server to client */
 public class InputUpdate extends Packet {
     public int uniqueID = -1;
     public int[] mappedActions;

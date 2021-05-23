@@ -8,11 +8,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import java.util.HashMap;
 
-/**
- * Offers basic load / unload functionality for various things.
+/** AssetEngine offers basic load / unload functionality for various things.
  * This class requires external synchronization if used from multiple threads.
- * Music files aren't loadable. Refer to AudioEngine for how to play music.
- */
+ * Music files aren't loadable. Refer to AudioEngine for how to play music. */
 public class AssetEngine {
     private final HashMap<String, Texture> textureLibrary = new HashMap<>();
     private final HashMap<String, Sound> soundLibrary = new HashMap<>();

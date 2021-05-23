@@ -10,6 +10,7 @@ import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 import hg.enums.types.WeaponType;
 
+/** AssaultRiflePickup gives an Assault Rifle to the player. */
 public class AssaultRiflePickup extends Pickup {
     private final BasicSprite rifle;
     private Spawner creator;

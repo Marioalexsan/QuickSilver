@@ -15,10 +15,7 @@ import java.util.*;
 // https://www.sitepoint.com/implement-javas-equals-method-correctly/
 
 
-/**
- * Collection of methods used for collision resolution.
- * The generic algorithm used is SAT.
- */
+/** CollisionEngine handles collision between Collider objects. This includes movement and attack collisions. */
 public class CollisionEngine {
     private static final Comparator<RaycastHit> RaycastHitComparator = (o1, o2) -> {
         float delta = o1.distance - o2.distance;

@@ -1,5 +1,6 @@
 package hg.enums.types;
 
+/** MapType holds map type IDs. */
 public class MapType {
     public static final int FIRST_VALUE = 0;
     public static final int Grinder = 1;

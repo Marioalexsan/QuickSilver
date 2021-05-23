@@ -3,6 +3,7 @@ package hg.interfaces;
 import hg.entities.Entity;
 import hg.gamelogic.states.State;
 
+/** IWeapon defines an interface for player weapons. */
 public interface IWeapon {
 
     // "Callbacks"

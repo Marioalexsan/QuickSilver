@@ -8,13 +8,15 @@ import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
 import hg.enums.types.DirectorType;
-import hg.ui.BasicUIStates;
+import hg.ui.CardMenu;
 import hg.utils.builders.BasicSpriteBuilder;
 import hg.utils.builders.BasicTextBuilder;
 import hg.utils.builders.ClickButtonBuilder;
 
+/** PauseMenu is the menu that appears during gameplay if you hit Escape. It is used to quit a game session and go to the main menu.
+ * Quitting will disconnect / close a server! */
 public class PauseMenu extends Director {
-    private final BasicUIStates menus = new BasicUIStates();
+    private final CardMenu menus = new CardMenu();
 
 
     public PauseMenu() {
@@ -27,7 +29,7 @@ public class PauseMenu extends Director {
         menus.addState("NonActive");
         menus.addObjects("PauseMenu",
                 new BasicSpriteBuilder().texture(vignette).position(0, 0).texture(vignette).cameraUse(false).layer(DrawLayer.GUIDefault - 1).centerToRegion(true).build(),
-                label.copy().position(0, 440).text("In Pause Menu").build(),
+                label.copy().position(0, 440).text("In Pause Menu").makeGUI().build(),
                 boxButton.copy().position(0, -200).text("Quit to Menu").onClick(() -> {
                     GameSession match = (GameSession) HgGame.Manager().getDirector(DirectorType.GameSession);
                     if (match != null) match.signalStop();

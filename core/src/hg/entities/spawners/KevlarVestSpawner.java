@@ -7,6 +7,7 @@ import hg.entities.pickups.KevlarVestPickup;
 import hg.game.HgGame;
 import hg.enums.types.ActorType;
 
+/** Spawns KevlarVestPickups */
 public class KevlarVestSpawner extends Spawner {
     private final BasicSprite silhouette;
 

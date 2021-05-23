@@ -7,7 +7,9 @@ import hg.gamelogic.AttackStats;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.states.SpawnerState;
 import hg.gamelogic.states.State;
+import hg.maps.Description;
 
+/** Generic world entity that can spawn stuff, usually pickups. */
 public abstract class Spawner extends Entity {
     protected int spawnTime;
     protected int currentTime;
@@ -29,6 +31,10 @@ public abstract class Spawner extends Entity {
         this.startingObjectPool = startingObjectPool;
         this.remainingObjects = Math.max(startingObjectPool, 0);
         this.currentTime = 0;
+    }
+
+    public void editSpawntime(int spawnTime) {
+        this.spawnTime = spawnTime;
     }
 
     @Override
@@ -95,6 +101,12 @@ public abstract class Spawner extends Entity {
             currentTime = stuff.currentTime;
             startingObjectPool = stuff.startingObjectPool;
         }
+    }
+
+    @Override
+    public void tryApplyDescription(Description desc) {
+        int[] ints = desc.intParams;
+        if (ints != null && ints.length >= 1) spawnTime = ints[0];
     }
 
     @Override

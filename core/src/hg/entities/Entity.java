@@ -8,6 +8,7 @@ import hg.interfaces.IDestroyable;
 import hg.interfaces.INetInterface;
 import hg.interfaces.IUpdateable;
 import hg.interfaces.ICollisionObserver;
+import hg.maps.Description;
 import hg.physics.Collider;
 import hg.utils.Angle;
 
@@ -17,6 +18,7 @@ import hg.utils.Angle;
  */
 public abstract class Entity implements ICollisionObserver, IUpdateable, IDestroyable, INetInterface {
     protected boolean toBeDestroyed = false;
+    protected int type;
     protected int ID;
 
     protected final Vector2 position = new Vector2();
@@ -39,6 +41,10 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
 
     public void onDeath(Entity killer) {}
     public void onKill(Entity victim) {}
+
+    public int getType() { return type; }
+    public void setType(int type) { this.type = type; }
+
 
     public int getID() { return ID; }
     public void setID(int ID) { this.ID = ID; }
@@ -63,9 +69,14 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
         return null;
     }
 
+    /** Generates a state that can be sent over network. Used by Servers. */
     public State tryGenerateState() {
         return null;
     }
 
+    /** Applies a state that was sent over the network. Used by Clients */
     public void tryApplyState(State state) { }
+
+    /** Applies some conditional state changes. Called by Level director during map actor instantiation. */
+    public void tryApplyDescription(Description desc) { }
 }

@@ -8,11 +8,8 @@ import hg.utils.MathTools;
 
 import java.util.*;
 
-/**
- * Records input.
- * Used internally by InputEngine.
- */
-
+/** InputEngine processes keyboard and mouse input. It also holds a list of objects which "request focus".
+ * Such objects can choose to skip their logic if they're not the most important focus holder. */
 public class InputEngine {
     public static class FocusPriorities {
         public static final int Max = 10000;

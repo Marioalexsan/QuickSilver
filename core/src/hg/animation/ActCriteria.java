@@ -11,9 +11,7 @@ package hg.animation;
  *      Consumes nothing
  */
 
-/** Animation Criteria
- *
- */
+/** ActCriteria defines criteria for triggering actions during animations */
 public class ActCriteria {
     public enum Type {
         TriggerAtStart,
@@ -37,13 +35,13 @@ public class ActCriteria {
         this.afArgs = new float[0];
     }
 
-    public ActCriteria(Type type, float[] afArgs) {
+    public ActCriteria(Type type, float... afArgs) {
         this.type = type;
         this.sArgs = "";
         this.afArgs = afArgs.clone();
     }
 
-    public ActCriteria(Type type, String sArgs, float[] afArgs) {
+    public ActCriteria(Type type, String sArgs, float... afArgs) {
         this.type = type;
         this.sArgs = sArgs;
         this.afArgs = afArgs.clone();

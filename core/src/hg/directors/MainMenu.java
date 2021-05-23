@@ -8,7 +8,7 @@ import hg.libraries.BuilderLibrary;
 import hg.networking.NetworkStatus;
 import hg.enums.types.DirectorType;
 import hg.ui.BasicTextInput;
-import hg.ui.BasicUIStates;
+import hg.ui.CardMenu;
 import hg.ui.ToggleButton;
 import hg.enums.HPos;
 import hg.utils.builders.TextInputBuilder;
@@ -21,20 +21,31 @@ import hg.enums.VPos;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
-/** MainMenu handles the code relevant to the main menu, settings, etc. */
+/** MainMenu handles the main menu logic. This includes the start menu, settings, connect, etc. */
 public class MainMenu extends Director {
     private static boolean SettingsInit = false;
-    private final BasicUIStates menus = new BasicUIStates();
+    private final CardMenu menus = new CardMenu();
 
     private final DecimalFormat format1;
+    private final DecimalFormat noDigits;
+
+    private GameSession.SessionOptions optionsToForward;
+    private boolean startNow = false;
+
+    public void receiveOptions(GameSession.SessionOptions options) {
+        optionsToForward = options;
+    }
 
     // Shortcuts
     private final BasicTextInput clientIPAdress;
     private final BasicText connectStatus;
     private final BasicText resolutionLabel;
     private final BasicText sensitivityLabel;
+    private final BasicText soundLabel;
+    private final BasicText musicLabel;
     private final BasicText focusLabel;
     private final ToggleButton fullscreenToggle;
+    private final BasicTextInput userNameInput;
 
     private int waitDuration = 0;
     private int joinState = 0; // 0 - idle, 1 - connecting, 2 - joining lobby
@@ -42,17 +53,25 @@ public class MainMenu extends Director {
     private int resSelection = 0;
     private float sensSelection = 1.0f;
     private float fovSelection = 0.6f;
+    private float soundSelection = 1.0f;
+    private float musicSelection = 0.6f;
 
     public MainMenu() {
+        HgGame.Audio().playMusic("Assets/Audio/QuickSilver - Imbalance.ogg", 1f);
 
         format1 = new DecimalFormat();
         format1.setMaximumFractionDigits(2);
         format1.setMinimumFractionDigits(2);
 
+        noDigits = new DecimalFormat();
+        noDigits.setMaximumFractionDigits(0);
+        noDigits.setMinimumFractionDigits(0);
+
         ClickButtonBuilder boxButton = BuilderLibrary.ClickButtonBuilders("silverbox");
         ClickButtonBuilder arrowButton = BuilderLibrary.ClickButtonBuilders("leftarrow");
         ToggleButtonBuilder checkButton = BuilderLibrary.ToggleButtonBuilders("silvercheck");
-        TextInputBuilder adress = BuilderLibrary.TextInputBuilders("serverip");
+        TextInputBuilder input = BuilderLibrary.TextInputBuilders("default");
+        TextInputBuilder username = BuilderLibrary.TextInputBuilders("username");
         BasicTextBuilder label = BuilderLibrary.BasicTextBuilders("label");
         BasicTextBuilder title = BuilderLibrary.BasicTextBuilders("title");
 
@@ -69,7 +88,11 @@ public class MainMenu extends Director {
                 resolutionLabel = label.copy().position(-660, 300).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 sensitivityLabel = label.copy().position(-660, 100).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 focusLabel = label.copy().position(-660, 0).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
+                soundLabel = label.copy().position(-660, -100).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
+                musicLabel = label.copy().position(-660, -200).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 fullscreenToggle = checkButton.copy().position(-860, 200).build(),
+                label.copy().position(-860, -300).text("User Name: ").textPos(HPos.Left, VPos.Center).build(),
+                userNameInput = username.copy().position(-820, -380).emptyText("(empty!)").textPos(HPos.Left,VPos.Center).build(),
                 title.copy().position(0, 440).text("Settings").makeGUI().build(),
                 label.copy().position(-760, 200).text("Fullscreen?").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 boxButton.copy().position(660, -200).text("Apply").onClick(this::applySettings).build(),
@@ -79,6 +102,10 @@ public class MainMenu extends Director {
                 arrowButton.copy().position(-760, 100).angle(-90).onClick(this::upSensitivity).build(),
                 arrowButton.copy().position(-860, 0).angle(90).onClick(this::downFOV).build(),
                 arrowButton.copy().position(-760, 0).angle(-90).onClick(this::upFOV).build(),
+                arrowButton.copy().position(-860, -100).angle(90).onClick(this::downSound).build(),
+                arrowButton.copy().position(-760, -100).angle(-90).onClick(this::upSound).build(),
+                arrowButton.copy().position(-860, -200).angle(90).onClick(this::downMusic).build(),
+                arrowButton.copy().position(-760, -200).angle(-90).onClick(this::upMusic).build(),
                 boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build()
         );
         // === Start Server Menu ===
@@ -89,7 +116,7 @@ public class MainMenu extends Director {
         );
         // === Start Client Menu ===
         menus.addObjects("StartClient",
-                clientIPAdress = adress.position(-660, 200).build(),
+                clientIPAdress = input.position(-660, 200).build(),
                 boxButton.copy().position(-660, -400).text("Connect").onClick(this::tryConnect).build(),
                 boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build(),
                 title.copy().position(0, 440).text("QuickSilver").makeGUI().build()
@@ -99,11 +126,8 @@ public class MainMenu extends Director {
 
         menus.scheduleStateSwitch("Main"); // Start menu in this state
 
-        if (!SettingsInit) {
-            SettingsInit = true;
-            initSettings();
-            applySettings();
-        }
+        initSettings();
+        applySettings();
         updateSettingsLabels();
     }
 
@@ -127,7 +151,11 @@ public class MainMenu extends Director {
         switch (joinState) {
             case 2 -> {
                 if (waitDuration <= 0) {
-                    ((GameSession) HgGame.Manager().tryAddDirector(DirectorType.GameSession)).startLobby();
+                    GameSession match = (GameSession) HgGame.Manager().tryAddDirector(DirectorType.GameSession);
+                    if (optionsToForward != null) {
+                        match.updateSettings(optionsToForward);
+                    }
+                    match.startLobby();
                     toBeDestroyed = true;
                 }
             }
@@ -143,6 +171,7 @@ public class MainMenu extends Director {
                     connectStatus.setText(status == NetworkStatus.ConnectionFailed ? "Connection failed for some reason!" : "Connection timed out!");
                     waitDuration = 150;
                     network.stopNetwork();
+                    optionsToForward = null;
                 }
             }
             case 0 -> {
@@ -156,13 +185,21 @@ public class MainMenu extends Director {
     }
 
     public void signalEarlyStart() {
-        ((GameSession) HgGame.Manager().tryAddDirector(DirectorType.GameSession)).startMatch();
+        GameSession session = (GameSession) HgGame.Manager().tryAddDirector(DirectorType.GameSession);
+        session.updateSettings(optionsToForward);
+        session.startMatch();
+
         toBeDestroyed = true;
     }
 
     // Callbacks
 
     private void toMenu(String menu) {
+        if (menus.getCurrentState().equals("Settings")) {
+            // If settings weren't applied with the Apply button, this will reset the labels
+            initSettings();
+            updateSettingsLabels();
+        }
         menus.scheduleStateSwitch(menu);
     }
 
@@ -203,6 +240,26 @@ public class MainMenu extends Director {
         updateSettingsLabels();
     }
 
+    private void upSound() {
+        soundSelection = MathTools.Clamp(soundSelection + 0.05f, 0f, 1f);
+        updateSettingsLabels();
+    }
+
+    private void downSound() {
+        soundSelection = MathTools.Clamp(soundSelection - 0.05f, 0f, 1f);
+        updateSettingsLabels();
+    }
+
+    private void upMusic() {
+        musicSelection = MathTools.Clamp(musicSelection + 0.05f, 0f, 1f);
+        updateSettingsLabels();
+    }
+
+    private void downMusic() {
+        musicSelection = MathTools.Clamp(musicSelection - 0.05f, 0f, 1f);
+        updateSettingsLabels();
+    }
+
     private void updateSettingsLabels() {
         var resolution = HgGame.Graphics().getSupportedResolutions().get(resSelection);
         resolutionLabel.setText((int) resolution.width + " x " + (int) resolution.height);
@@ -210,6 +267,9 @@ public class MainMenu extends Director {
         sensitivityLabel.setText("Mouse Speed: " + format1.format(sensSelection));
 
         focusLabel.setText("FOV Factor: " + format1.format(fovSelection));
+
+        soundLabel.setText("Sound Volume: " + noDigits.format(soundSelection * 100));
+        musicLabel.setText("Music Volume: " + noDigits.format(musicSelection * 100));
     }
 
     private void initSettings() {
@@ -237,10 +297,24 @@ public class MainMenu extends Director {
 
         // FOV
         fovSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("FOVFactor")), 0f, 0.9f);
+
+        // User Name
+        userNameInput.setText(data.getSetting("UserName"));
+
+        // Audio
+        soundSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("SoundVol")), 0f, 1f);
+        musicSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("MusicVol")), 0f, 1f);
     }
 
     private void applySettings() {
         DataManager data = HgGame.Data();
+
+        String userName = userNameInput.getText().trim();
+        int userNameLength = userName.length();
+        if (userNameLength < 3 || userNameLength > 32) {
+            HgGame.SetNotice("User name needs to be between 3 and 32 characters!", 300);
+            return;
+        }
 
         // Resolution & Fullscreen
         var selections = HgGame.Graphics().getSupportedResolutions();
@@ -258,6 +332,17 @@ public class MainMenu extends Director {
         // FOV
         HgGame.Game().setFOVFactor(fovSelection);
         data.updateSetting("FOVFactor", Float.toString(fovSelection));
+
+        // User Name
+        data.updateSetting("UserName", userName);
+
+        // Audio
+        data.updateSetting("SoundVol", Float.toString(soundSelection));
+        data.updateSetting("MusicVol", Float.toString(musicSelection));
+        HgGame.Audio().setGlobalMusicVolume(musicSelection);
+        HgGame.Audio().setGlobalSoundVolume(soundSelection);
+
+        updateSettingsLabels();
     }
 
     private void tryStartServer() {
@@ -266,7 +351,7 @@ public class MainMenu extends Director {
             network.startServer();
         }
         catch(IOException ignored) {
-            HgGame.Manager().setNotice("Couldn't open server due to an error!\nCheck if ports " + network.getTCPPort() + " (TCP) and " + network.getUDPPort() + " (UDP) are open and available.", 180);
+            HgGame.SetNotice("Couldn't open server due to an error!\nCheck if ports " + network.getTCPPort() + " (TCP) and " + network.getUDPPort() + " (UDP) are open and available.", 180);
             return;
         }
         ((GameSession) HgGame.Manager().tryAddDirector(DirectorType.GameSession)).startLobby();

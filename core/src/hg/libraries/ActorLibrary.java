@@ -28,7 +28,10 @@ public class ActorLibrary {
             case ActorType.KevlarVestPickup -> which = new KevlarVestPickup();
             case ActorType.HeavyArmorSpawner -> which = new HeavyArmorSpawner();
             case ActorType.HeavyArmorPickup -> which = new HeavyArmorPickup();
+            case ActorType.DBShotgunSpawner -> which = new DBShotgunSpawner();
+            case ActorType.DBShotgunPickup -> which = new DBShotgunPickup();
         }
+        if (which != null) which.setType(type);
         return which;
     }
 }

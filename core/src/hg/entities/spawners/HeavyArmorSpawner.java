@@ -7,6 +7,7 @@ import hg.entities.pickups.HeavyArmorPickup;
 import hg.game.HgGame;
 import hg.enums.types.ActorType;
 
+/** Spawns HeavyArmorPickups */
 public class HeavyArmorSpawner extends Spawner {
     private final BasicSprite silhouette;
 

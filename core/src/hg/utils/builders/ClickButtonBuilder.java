@@ -7,6 +7,7 @@ import hg.interfaces.ICopy;
 import hg.interfaces.callbacks.ICallback;
 import hg.ui.ClickButton;
 
+/** Builds ClickButtons using the given options */
 public class ClickButtonBuilder implements ICopy {
     private Texture _texture;
     private BitmapFont _font;

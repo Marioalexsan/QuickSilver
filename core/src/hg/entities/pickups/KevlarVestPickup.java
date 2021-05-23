@@ -9,6 +9,7 @@ import hg.game.HgGame;
 import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 
+/** KevlarVestPickup gives a kevlar vest to the player. */
 public class KevlarVestPickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;

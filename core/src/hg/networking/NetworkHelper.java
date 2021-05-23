@@ -6,9 +6,11 @@ import hg.directors.GameSession;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.states.*;
 import hg.networking.packets.*;
+import hg.weapons.DBShotgun;
 
 import java.util.HashMap;
 
+/** Helper class for network actions. */
 public class NetworkHelper {
     public static void KryonetRegisterClasses(EndPoint point) {
         Kryo kryo = point.getKryo();
@@ -42,8 +44,9 @@ public class NetworkHelper {
         // States
 
         kryo.register(AssaultRifleState.class);
-        kryo.register(DeathmatchState.class);
         kryo.register(BulletState.class);
+        kryo.register(DBShotgunState.class);
+        kryo.register(DeathmatchState.class);
         kryo.register(PickupState.class);
         kryo.register(PlayerState.class);
         kryo.register(RevolverState.class);
@@ -51,6 +54,7 @@ public class NetworkHelper {
 
         // Other
 
+        kryo.register(EntityAdded[].class);
         kryo.register(GameSession.SessionOptions.class);
         kryo.register(int[].class);
         kryo.register(float[].class);

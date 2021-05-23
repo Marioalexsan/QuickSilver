@@ -9,6 +9,7 @@ import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.Packet;
 
+/** Updates the player view of a client */
 public class PlayerViewUpdate extends Packet {
     public int targetUniqueID;
     public int controlledEntityID;
@@ -24,6 +25,10 @@ public class PlayerViewUpdate extends Packet {
 
         for (var view: manager.getPlayerViews()) {
             if (view.uniqueID == targetUniqueID) {
+                if (controlledEntityID == -1) {
+                    view.playerEntity = null;
+                    return;
+                }
                 Entity player = manager.getActor(controlledEntityID);
                 if (player instanceof PlayerEntity) {
                     view.playerEntity = (PlayerEntity) player;
@@ -35,6 +40,7 @@ public class PlayerViewUpdate extends Packet {
                     else if (view.playerEntity.getLogic() instanceof EmptyAI)
                         view.playerEntity.setLogic(new NetworkPlayerLogic());
                 }
+                return;
             }
         }
     }

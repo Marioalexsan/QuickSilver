@@ -11,6 +11,7 @@ import hg.networking.Packet;
 import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
+/** Message that tells clients the given target needs to have the payload state applied to it. */
 public class StateUpdate extends Packet {
 
     public int targetType; // The ID subset to target . Takes values from StateTargetType
@@ -31,7 +32,7 @@ public class StateUpdate extends Packet {
             case TargetType.Actors -> {
                 Entity target = manager.getActor(targetID);
                 if (target == null) {
-                    manager.getChatSystem().addDebugMessage("Update for unknown actor " + targetID, DebugLevels.Warn);
+                    HgGame.Chat().addDebugMessage("Update for unknown actor " + targetID, DebugLevels.Warn);
                     return;
                 }
                 target.tryApplyState(payload);
@@ -44,7 +45,7 @@ public class StateUpdate extends Packet {
                 if (mode != null) mode.tryApplyState(payload);
 
             }
-            default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + targetType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Update for unallowed type " + targetType, DebugLevels.Warn);
         }
     }
 

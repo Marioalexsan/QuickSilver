@@ -1,12 +1,15 @@
 package hg.gamelogic.gamemodes;
 
+import hg.directors.LevelLoader;
+import hg.drawables.DrawLayer;
+import hg.drawables.scoreboards.DeathmatchScoreboard;
 import hg.entities.pickups.Pickup;
 import hg.entities.spawners.Spawner;
 import hg.enums.types.DirectorType;
-import hg.directors.Level;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
+import hg.game.DataManager;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.states.DeathmatchState;
@@ -17,6 +20,7 @@ import hg.enums.types.GMType;
 import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -36,6 +40,14 @@ public class Deathmatch extends Gamemode {
     private int scoreToWin = 5;
 
     private int gameState; // 0 = starting, 1 = in progress, 2 = ending
+
+    private final DeathmatchScoreboard scoreDrawable = new DeathmatchScoreboard();
+
+    public Deathmatch() {
+        scoreDrawable.getPosition().set(930, 510);
+        scoreDrawable.registerToEngine();
+        scoreDrawable.setLayer(DrawLayer.GUIDefault);
+    }
 
     /** Set Deathmatch settings.
      * Setting roundTime to 0 is equivalent to infinity.
@@ -72,7 +84,7 @@ public class Deathmatch extends Gamemode {
         Integer score = playerViewScores.get(killerView.uniqueID);
 
         if (score == null) {
-            HgGame.Manager().getChatSystem().addDebugMessage("Added missing score entry", DebugLevels.Warn);
+            HgGame.Chat().addDebugMessage("Added missing score entry", DebugLevels.Warn);
             playerViewScores.put(killerView.uniqueID, 0);
             score = 0;
         }
@@ -86,7 +98,7 @@ public class Deathmatch extends Gamemode {
         };
         String troll = trollWords[Math.abs(new Random().nextInt()) % trollWords.length];
 
-        HgGame.Manager().getChatSystem().addMessage(victimView.name + " got " + troll + " by " + killerView.name);
+        HgGame.Chat().addMessage(victimView.name + " got " + troll + " by " + killerView.name);
     }
 
     @Override
@@ -117,6 +129,7 @@ public class Deathmatch extends Gamemode {
                 }
             }
         }
+        scoreDrawable.updateScores(playerViewScores);
     }
 
     private void startRound() {
@@ -124,7 +137,11 @@ public class Deathmatch extends Gamemode {
 
         timeElapsed = 0;
         gameState = 1;
-        HgGame.Manager().setNotice("Match started!", 90);
+        HgGame.SetNotice("Match started!", 90);
+
+        for (var view: HgGame.Manager().getPlayerViews()) {
+            onPlayerViewAdded(view);
+        }
 
         if (network.isLocalOrServer()) {
             NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 3);
@@ -135,14 +152,14 @@ public class Deathmatch extends Gamemode {
     // Only server calls this
     private void tryReviveDeadPlayers() {
         GameManager manager = HgGame.Manager();
-        Level level = (Level) manager.getDirector(DirectorType.Level);
+        LevelLoader levelLoader = (LevelLoader) manager.getDirector(DirectorType.LevelLoader);
         PlayerEntity[] deadPlayers = manager.getDeadPlayerEntities();
 
         for (var player: deadPlayers) {
             if (player.getStats().deathCounter > 180) {
                 player.revive();
-                if (level != null) {
-                    player.getPosition().set(level.getRandomSpawnpoint());
+                if (levelLoader != null) {
+                    player.getPosition().set(levelLoader.getRandomSpawnpoint());
 
                     NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 4);
                     msg.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
@@ -180,7 +197,16 @@ public class Deathmatch extends Gamemode {
 
         PlayerView view = manager.getPlayerViewByUniqueID(maxUniqueID);
 
-        manager.setNotice((view != null ? view.name : "Incognito") + " wins, with a total of " + maxScore + " kills!", 120);
+        HgGame.SetNotice((view != null ? view.name : "Incognito") + " wins, with a total of " + maxScore + " kills!", 120);
+
+        ArrayList<DataManager.DeathmatchResult> results = new ArrayList<>();
+
+        for (var score: playerViewScores.entrySet()) {
+            var scoreView = manager.getPlayerViewByUniqueID(score.getKey());
+            results.add(new DataManager.DeathmatchResult(scoreView.name, score.getValue(), view == scoreView));
+        }
+
+        HgGame.Data().addDeathmatchResult(results);
 
         timeElapsed = 0;
         gameState = 2;
@@ -195,16 +221,13 @@ public class Deathmatch extends Gamemode {
     public void restart() {
         NetworkEngine network = HgGame.Network();
         GameManager manager = HgGame.Manager();
-        Level level = (Level) manager.getDirector(DirectorType.Level);
 
-        manager.setNotice("Get ready..." , 60);
+        HgGame.SetNotice("Get ready..." , 60);
 
         timeElapsed = 0;
         gameState = 0;
 
-        for (var score: playerViewScores.entrySet()) {
-            score.setValue(0);
-        }
+        playerViewScores.clear();
 
         if (network.isLocalOrServer()) {
             NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 2);
@@ -212,17 +235,7 @@ public class Deathmatch extends Gamemode {
 
             for (var views: manager.getPlayerViews()) {
                 PlayerEntity player = views.playerEntity;
-                if (player == null) continue;
-
-                player.revive();
-                if (level != null) {
-                    player.getPosition().set(level.getRandomSpawnpoint());
-
-                    NetInstruction msg2 = new NetInstruction(TargetType.Gamemodes, -1337, 4);
-                    msg2.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
-
-                    HgGame.Network().sendToAllClients(msg2, true);
-                }
+                if (player != null) restartPlayer(player);
             }
 
             for (var entity: manager.getAllActors()) {
@@ -233,6 +246,40 @@ public class Deathmatch extends Gamemode {
                 }
             }
         }
+    }
+
+    private void restartPlayer(PlayerEntity player) {
+        LevelLoader levelLoader = (LevelLoader) HgGame.Manager().getDirector(DirectorType.LevelLoader);
+
+        player.revive();
+        if (levelLoader != null) {
+            player.getPosition().set(levelLoader.getRandomSpawnpoint());
+
+            NetInstruction msg2 = new NetInstruction(TargetType.Gamemodes, -1337, 4);
+            msg2.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
+
+            HgGame.Network().sendToAllClients(msg2, true);
+        }
+    }
+
+    @Override
+    public void onEntityAdded(Entity entity) {
+        if (!HgGame.Network().isLocalOrServer()) return;
+        if (entity instanceof PlayerEntity) {
+            restartPlayer((PlayerEntity) entity);
+        }
+    }
+
+    @Override
+    public void onPlayerViewAdded(PlayerView view) {
+        if (!HgGame.Network().isLocalOrServer()) return;
+        playerViewScores.put(view.uniqueID, 0);
+    }
+
+    @Override
+    public void onPlayerViewRemoved(PlayerView view) {
+        if (!HgGame.Network().isLocalOrServer()) return;
+        playerViewScores.remove(view.uniqueID);
     }
 
     @Override
@@ -257,7 +304,7 @@ public class Deathmatch extends Gamemode {
                     }
                 }
             }
-            default -> manager.getChatSystem().addDebugMessage("Unknown Deathmatch instruction " + msg.insType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Unknown Deathmatch instruction " + msg.insType, DebugLevels.Warn);
         }
     }
 
@@ -287,5 +334,10 @@ public class Deathmatch extends Gamemode {
                 playerViewScores.put(score.getKey(), score.getValue());
             }
         }
+    }
+
+    @Override
+    public void destroy() {
+        scoreDrawable.unregisterFromEngine();
     }
 }

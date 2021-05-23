@@ -2,6 +2,7 @@ package hg.utils;
 
 import com.badlogic.gdx.math.Vector2;
 
+/** Helper class for audio methods */
 public class AudioTools {
 
     /**

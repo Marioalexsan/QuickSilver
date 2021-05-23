@@ -1,5 +1,7 @@
 package hg.utils;
 
+import java.util.Random;
+
 /**
  * Provides various utilities for dealing with QuickSilver's insane design choices.
  */
@@ -72,5 +74,15 @@ public class MathTools {
         return determ == 0 ? new double[0] : new double[] { (B - D) / determ, (C - A) / determ };
     }
 
+    /** Returns a random number between the two bounds.
+     * The returned number may be incl, but never excl */
+    public static float Interp(float ratio, float first, float second) {
+        return first + (second - first) * ratio;
+    }
 
+    /** Returns a random number between the two bounds.
+     * The returned number may be incl, but never excl */
+    public static float RandomInRange(Random machine, float incl, float excl) {
+        return incl + machine.nextFloat() * excl;
+    }
 }

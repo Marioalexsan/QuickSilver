@@ -8,6 +8,7 @@ import hg.engine.GraphicsEngine;
 import hg.utils.Angle;
 import hg.utils.GFXTools;
 
+/** FillBars are drawables that have a 1xN base texture that is stretched to a certain length. This is used for stuff like Health Bars */
 public class FillBar extends Drawable {
     protected TextureRegion vSlice = new TextureRegion();
     protected float currentUnits = 1;

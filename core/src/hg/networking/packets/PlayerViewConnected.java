@@ -5,6 +5,7 @@ import hg.game.HgGame;
 import hg.networking.Packet;
 import hg.networking.PlayerView;
 
+/** Tells clients a new player connected */
 public class PlayerViewConnected extends Packet {
     public PlayerView newView;
 
@@ -17,7 +18,7 @@ public class PlayerViewConnected extends Packet {
         GameManager manager = HgGame.Manager();
 
         manager.addPlayerView(newView);
-        HgGame.Manager().getChatSystem().addMessage(newView.name + " connected.");
+        HgGame.Chat().addMessage(newView.name + " connected.");
     }
 
     public PlayerViewConnected() {} // For Kryonet

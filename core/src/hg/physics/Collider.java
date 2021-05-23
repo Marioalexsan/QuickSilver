@@ -10,6 +10,7 @@ import hg.utils.Angle;
 
 import java.util.HashMap;
 
+/** Collider is the base class for objects that participate in collisions */
 public abstract class Collider implements IEnable {
 
     public static final float StaticMassThreshold = 1000000f; // Colliders which have equal or higher mass than this are Static

@@ -15,6 +15,7 @@ import hg.physics.ColliderGroup;
 import hg.enums.types.ActorType;
 import hg.utils.Angle;
 
+/** A revolver that acts as the starting weapon for players. It doesn't have a lot of power, but it can still help in a pinch. */
 public class Revolver implements IWeapon {
 
     // Owner related stuff
@@ -26,7 +27,7 @@ public class Revolver implements IWeapon {
 
     private final int magazineSize = 6;
     private final int maxTotalAmmo = 36;
-    private final int shotCooldown = 34;
+    private final int shotCooldown = 30;
     private final int timeToReload = 120;
     private final int weaponPickupAmmo = 6;
     private final int ammoPackAmmo = 3;
@@ -71,8 +72,8 @@ public class Revolver implements IWeapon {
         Vector2 spawnPosition = new Vector2(owner.getPosition()).add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(13)));
 
         var boolet = HgGame.Manager().addActor(ActorType.Bullet, spawnPosition, ownerAngle.getDeg());
-        ((Bullet) boolet).setSpeed(38);
-        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 20f, ColliderGroup.Player);
+        ((Bullet) boolet).setSpeed(42);
+        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 24f, ColliderGroup.Player);
     }
 
     private void tryShot() {
@@ -80,7 +81,10 @@ public class Revolver implements IWeapon {
         currentAmmo--;
         weaponCooldown = shotCooldown;
         createBullet();
-        if (ownerAnimation != null) ownerAnimation.switchAnimation("Revolver_Shoot");
+        if (ownerAnimation != null) {
+            //ownerAnimation.switchAnimation("Shotgun_PowerShoot");
+            ownerAnimation.switchAnimation("Revolver_Shoot");
+        }
     }
 
     private void doReload() {
@@ -91,7 +95,7 @@ public class Revolver implements IWeapon {
 
     private void reset() {
         reloadCounter = 0;
-        weaponCooldown = 0;
+        weaponCooldown = 1;
     }
 
     @Override
@@ -128,6 +132,7 @@ public class Revolver implements IWeapon {
         weaponCooldown = 30;
         if (ownerAnimation == null) return;
         ownerAnimation.setDefaultAnimation("Revolver_Idle");
+        //ownerAnimation.setDefaultAnimation("Shotgun_Idle");
         ownerAnimation.switchToDefault();
     }
 

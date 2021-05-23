@@ -34,6 +34,7 @@ import hg.weapons.Revolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/** PlayerEntity is the player character. It can either be controlled by an AI, a human behind a keyboard, or over the network! */
 public class PlayerEntity extends Entity {
     private PlayerLogic playerLogic;
     private final Vector2 smoothSpeed = new Vector2();
@@ -58,8 +59,8 @@ public class PlayerEntity extends Entity {
         if (director != null) {
             var sets = director.getSettings();
             if (sets.hardcore) {
-                baseStats.maxHealth = 70f;
-                baseStats.baseMoveSpeed = 15f;
+                baseStats.maxHealth = 65f;
+                baseStats.baseMoveSpeed = 18f;
                 baseStats.maxArmorPlates = 6;
                 baseStats.maxHeavyArmor = 70f;
             }
@@ -77,6 +78,10 @@ public class PlayerEntity extends Entity {
         drawable.addKnownAnimation("Revolver_Idle", AnimationLibrary.GetAnimationInfo("Player_Revolver_Idle"));
         drawable.addKnownAnimation("Revolver_Reload", AnimationLibrary.GetAnimationInfo("Player_Revolver_Reload"));
         drawable.addKnownAnimation("Revolver_Shoot", AnimationLibrary.GetAnimationInfo("Player_Revolver_Shoot"));
+        drawable.addKnownAnimation("Shotgun_Idle", AnimationLibrary.GetAnimationInfo("Player_Shotgun_Idle"));
+        drawable.addKnownAnimation("Shotgun_Reload", AnimationLibrary.GetAnimationInfo("Player_Shotgun_Reload"));
+        drawable.addKnownAnimation("Shotgun_PowerShoot", AnimationLibrary.GetAnimationInfo("Player_Shotgun_PowerShoot"));
+        drawable.addKnownAnimation("Shotgun_Shoot", AnimationLibrary.GetAnimationInfo("Player_Shotgun_Shoot"));
 
         collider.setPosition(position);
         collider.setAngle(angle);
@@ -156,12 +161,13 @@ public class PlayerEntity extends Entity {
             if (heldWeapon != null) {
                 if (actions != null) {
                     if (actions.contains(MappedAction.QuickSwitchWeapon)) tryWeaponSwitch(lastWeapon);
-                    if (actions.contains(MappedAction.WeaponOne)) tryWeaponSwitch(WeaponType.Revolver);
-                    if (actions.contains(MappedAction.WeaponTwo)) tryWeaponSwitch(WeaponType.AssaultRifle);
-                    if (actions.contains(MappedAction.Reload)) heldWeapon.onReload();
-                    if (actions.contains(MappedAction.PrimaryFire)) heldWeapon.onPrimaryFire();
+                    else if (actions.contains(MappedAction.WeaponOne)) tryWeaponSwitch(WeaponType.Revolver);
+                    else if (actions.contains(MappedAction.WeaponTwo)) tryWeaponSwitch(WeaponType.AssaultRifle);
+                    else if (actions.contains(MappedAction.WeaponThree)) tryWeaponSwitch(WeaponType.DBShotgun);
+                    else if (actions.contains(MappedAction.Reload)) heldWeapon.onReload();
+                    else if (actions.contains(MappedAction.PrimaryFire)) heldWeapon.onPrimaryFire();
+                    else if (actions.contains(MappedAction.SecondaryFire)) heldWeapon.onSecondaryFire();
                 }
-
                 heldWeapon.onUpdate();
             }
         }
@@ -308,34 +314,34 @@ public class PlayerEntity extends Entity {
             case 6 -> obtainArmorPlates(msg.intParams[0]);
             case 7 -> obtainVest();
             case 8 -> obtainHeavyArmor(msg.floatParams[0]);
-            default -> manager.getChatSystem().addDebugMessage("Update for unallowed type " + msg.insType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Update for unallowed type " + msg.insType, DebugLevels.Warn);
         }
     }
 
     public void heal(float amount) {
         GameManager manager = HgGame.Manager();
-        if (this == manager.localView.playerEntity) manager.setNotice("Healed " + (int) amount + " HP!", 35);
+        if (this == manager.localView.playerEntity) HgGame.SetNotice("Healed " + (int) amount + " HP!", 35);
         baseStats.health = Math.min(baseStats.health + amount, baseStats.maxHealth);
     }
 
     public void obtainArmorPlates(int count) {
         GameManager manager = HgGame.Manager();
         if (this == manager.localView.playerEntity)
-            manager.setNotice("Obtained " + (count == 1 ? "an" : count) + " Armor Plate" + (count == 1 ? "" : "s") + "!", 35);
+            HgGame.SetNotice("Obtained " + (count == 1 ? "an" : count) + " Armor Plate" + (count == 1 ? "" : "s") + "!", 35);
         baseStats.armorPlates = Math.min(baseStats.armorPlates + count, baseStats.maxArmorPlates);
     }
 
     public void obtainVest() {
         GameManager manager = HgGame.Manager();
         if (this == manager.localView.playerEntity)
-            manager.setNotice("Obtained Kevlar Vest!", 35);
+            HgGame.SetNotice("Obtained Kevlar Vest!", 35);
         baseStats.hasKevlarVest = true;
     }
 
     public void obtainHeavyArmor(float amount) {
         GameManager manager = HgGame.Manager();
         if (this == manager.localView.playerEntity)
-            manager.setNotice("Obtained Heavy Armor!", 35);
+            HgGame.SetNotice("Obtained Heavy Armor!", 35);
         baseStats.heavyArmor = Math.min(baseStats.heavyArmor + amount, baseStats.maxHeavyArmor);
     }
 
@@ -366,7 +372,7 @@ public class PlayerEntity extends Entity {
 
         if (existing != null) {
             existing.onWeaponPickup();
-            if (doNotice) manager.setNotice("Took ammo from the Weapon!", 35);
+            if (doNotice) HgGame.SetNotice("Took ammo from the Weapon!", 35);
             return;
         }
 
@@ -374,7 +380,7 @@ public class PlayerEntity extends Entity {
         if (newWeapon != null) {
             newWeapon.setOwner(this);
             weapons.put(type, newWeapon);
-            if (doNotice) manager.setNotice(WeaponLibrary.GetWeaponPickupHint(type), 35);
+            if (doNotice) HgGame.SetNotice(WeaponLibrary.GetWeaponPickupHint(type), 35);
         }
     }
 
@@ -390,7 +396,7 @@ public class PlayerEntity extends Entity {
         if (existing != null) {
             existing.onAmmoPackPickup();
         }
-        if (doNotice) manager.setNotice("Picked up some ammo!", 35);
+        if (doNotice) HgGame.SetNotice("Picked up some ammo!", 35);
     }
 
     @Override

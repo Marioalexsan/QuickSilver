@@ -10,6 +10,8 @@ import hg.networking.Packet;
 import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
+/** Message that tells the client the given target needs to do an action.
+ * Used for actions which cannot be triggered via state updates. */
 public class NetInstruction extends Packet {
     public int targetType;
     public int targetID;
@@ -48,7 +50,7 @@ public class NetInstruction extends Packet {
             case TargetType.Actors -> {
                 Entity target = manager.getActor(targetID);
                 if (target == null) {
-                    manager.getChatSystem().addDebugMessage("Instruction " + insType + " for unknown actor " + targetID, DebugLevels.Warn);
+                    HgGame.Chat().addDebugMessage("Instruction " + insType + " for unknown actor " + targetID, DebugLevels.Warn);
                     return;
                 }
                 target.onInstructionFromServer(this);
@@ -58,9 +60,9 @@ public class NetInstruction extends Packet {
                 Gamemode mode = null;
                 if (match != null) mode = match.getGamemode();
                 if (mode != null) mode.onInstructionFromServer(this);
-                if (mode == null) manager.getChatSystem().addDebugMessage("Lmao", DebugLevels.DEFAULT);
+                if (mode == null) HgGame.Chat().addDebugMessage("Mode is null in NetInstruction", DebugLevels.Warn);
             }
-            default -> manager.getChatSystem().addDebugMessage("Instruction for other type " + targetType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Instruction for other type " + targetType, DebugLevels.Warn);
         }
     }
 

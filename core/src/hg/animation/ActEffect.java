@@ -9,13 +9,11 @@ package hg.animation;
  *
  */
 
-
-/** Animation Effects
- *
- */
+/** ActCriteria defines effects that can trigger during animations */
 public class ActEffect {
     public enum Type {
-        PlaySound
+        PlaySound,
+        Delay
     }
 
     public final Type type;
@@ -34,13 +32,13 @@ public class ActEffect {
         this.afArgs = new float[0];
     }
 
-    public ActEffect(Type type, float[] afArgs) {
+    public ActEffect(Type type, float... afArgs) {
         this.type = type;
         this.sArgs = "";
         this.afArgs = afArgs.clone();
     }
 
-    public ActEffect(Type type, String sArgs, float[] afArgs) {
+    public ActEffect(Type type, String sArgs, float... afArgs) {
         this.type = type;
         this.sArgs = sArgs;
         this.afArgs = afArgs.clone();

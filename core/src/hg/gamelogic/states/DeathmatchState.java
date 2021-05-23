@@ -2,6 +2,7 @@ package hg.gamelogic.states;
 
 import java.util.HashMap;
 
+/** Holds the network state of a Deathmatch gamemode */
 public class DeathmatchState extends State {
     public int timeElapsed;
     public int roundStart;

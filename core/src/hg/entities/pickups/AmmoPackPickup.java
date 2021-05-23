@@ -10,6 +10,7 @@ import hg.networking.packets.NetInstruction;
 import hg.enums.types.TargetType;
 import hg.enums.types.WeaponType;
 
+/** AmmoPackPickup gives ammo to the player. */
 public class AmmoPackPickup extends Pickup {
     private final BasicSprite box;
     private Spawner creator;

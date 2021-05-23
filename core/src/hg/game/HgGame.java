@@ -6,15 +6,21 @@ import hg.enums.types.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
+import hg.utils.BadCoderException;
 import hg.utils.MathTools;
 
-import java.util.Random;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 
-/** For TUIASI:
- * Project made by Miron Alexandru, 1208B
- */
+// Project made by Miron Alexandru, 1208B
 
+/** HgGame centralizes the game subsystems and updates each of them 60 times per second. */
 public class HgGame extends ApplicationAdapter {
 
 	// A single access point for the game engine is provided here.
@@ -33,6 +39,8 @@ public class HgGame extends ApplicationAdapter {
 	public static GameManager Manager() { return _instance.gameManager; }
 	public static HUDManager GUI() { return _instance.hudManager; }
 	public static DataManager Data() { return _instance.dataManager; }
+	public static ChatSystem Chat() { return _instance.hudManager.getChatSystem(); }
+	public static void SetNotice(String notice, int timeout) { _instance.hudManager.setNotice(notice, timeout); }
 
 	private AudioEngine audioEngine;
 	private AssetEngine assetEngine;
@@ -46,8 +54,7 @@ public class HgGame extends ApplicationAdapter {
 	private DataManager dataManager;
 
 	private boolean crashed = false;
-
-	public String localName = "Anonymous" + (Math.abs(new Random().nextInt()) % 9999);
+	private Throwable crash = null;
 
 	public static final int WorldWidth = 1920;
 	public static final int WorldHeight = 1080;
@@ -106,7 +113,6 @@ public class HgGame extends ApplicationAdapter {
 		targetWorld.registerToEngine();
 		targetWorld.setEnabled(false);
 
-		audioEngine.playMusic("Assets/Audio/advancing_chaos.ogg", 1f);
 		audioEngine.setGlobalSoundVolume(0.5f);
 		audioEngine.setGlobalMusicVolume(0.5f);
 
@@ -124,7 +130,6 @@ public class HgGame extends ApplicationAdapter {
 			PlayerEntity playerEntity = gameManager.localView != null ? gameManager.localView.playerEntity : null;
 
 			inputEngine.update();
-			networkEngine.update();
 
 			gameManager.networkUpdate();
 
@@ -141,17 +146,19 @@ public class HgGame extends ApplicationAdapter {
 			targetGUI.setPosition(HgGame.Input().getMouse());
 			targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
 
-			if (playerEntity != null && inputEngine.isActionTapped(MappedAction.SecondaryFire))
-				playerEntity.getPosition().set(targetWorld.getPosition()); // Debug teleport
-
 			hudManager.update();
 			graphicsEngine.render();
 			audioEngine.update();
+
+			networkEngine.update();
+
+			if (true) throw new BadCoderException("ur mom LOL");
 
 			frameCounter++;
 		}
 		catch (Throwable crash) {
 			crash.printStackTrace();
+			this.crash = crash;
 			crashed = true;
 		}
 
@@ -162,7 +169,32 @@ public class HgGame extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		if (crashed) {
+			var time = LocalDateTime.now();
 			System.out.println("Game crashed due to an unhandled exception! Sorry about that...");
+			try {
+				try {
+					Files.createDirectory(Path.of("CrashLogs"));
+				} catch (Exception ignored) {}
+
+				var compatTime = time.truncatedTo(ChronoUnit.SECONDS).toString().replace(" ", "-").replace(":", "-").replace("T", " at ");
+				var logPath = Path.of("CrashLogs", "QSCrashLog " + compatTime + ".txt");
+
+				try {
+					Files.delete(logPath);
+				}
+				catch (Throwable ignored) {}
+				Files.createFile(logPath);
+				try (BufferedWriter log = new BufferedWriter(new FileWriter(logPath.toString()))) {
+					log.write("A crash occured at the following time: " + compatTime + "!\n\n");
+					log.write("Exception information:\n");
+					crash.printStackTrace(new PrintWriter(log));
+					log.write("\nGame Settings used:\n");
+					for (var setting: GameVars.GetAllDefaultSettings().keySet()) {
+						log.write("  " + setting + " - " + dataManager.getSetting(setting) + "\n");
+					}
+				}
+			}
+			catch (Throwable ignored) {}
 		}
 
 		hudManager.cleanup();

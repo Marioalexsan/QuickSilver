@@ -1,5 +1,6 @@
 package hg.physics;
 
+/** Holds results of a raycast */
 public class RaycastResults {
     public boolean hit;
 

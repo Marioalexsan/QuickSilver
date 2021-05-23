@@ -2,6 +2,7 @@ package hg.networking;
 
 import hg.entities.PlayerEntity;
 
+/** PlayerView represents a connected and instantiated client */
 public class PlayerView {
     public enum Type {
         HostAI,

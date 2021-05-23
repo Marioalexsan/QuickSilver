@@ -7,6 +7,7 @@ import hg.physics.ColliderGroup;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/** Holds statistics related to an attack */
 public class AttackStats {
 
     public Entity owner;

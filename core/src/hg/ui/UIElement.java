@@ -5,6 +5,7 @@ import hg.interfaces.IDestroyable;
 import hg.interfaces.IEnable;
 import hg.utils.Angle;
 
+/** Base class for UI Elements */
 public abstract class UIElement implements IDestroyable, IEnable {
     protected final Vector2 position = new Vector2();
     protected final Vector2 center = new Vector2();

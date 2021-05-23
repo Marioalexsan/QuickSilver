@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.LinkedList;
 
+/** A structure that defines a level. Can be instantiated using LevelLoader */
 public class MapPrototype {
     /** Environments are static and not sent over the network */
     public final LinkedList<Description> environments = new LinkedList<>();

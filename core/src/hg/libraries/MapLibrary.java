@@ -10,6 +10,7 @@ import hg.enums.types.MapType;
 // TODO Make a Tiler object to deal with the axis-aligned environments
 // TODO Rename rooms
 
+/** Holds maps used in the game. */
 public class MapLibrary {
     public static MapPrototype CreatePrototype(int map) {
         switch (map) {
@@ -31,10 +32,57 @@ public class MapLibrary {
 
                 var onLoadActors = proto.onLoadActors;
 
-                // Grind center spawners
-                onLoadActors.add(new Description(ActorType.HeavyArmorSpawner, new Vector2(3300, 3000), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1270, 2300), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1170, 2300), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1070, 2300), 0f));
 
-                // Sniper hallway spawners
+
+                onLoadActors.add(new Description(ActorType.AssaultRifleSpawner, new Vector2(5000, 1250), 0f));
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(3940, 3750), 90f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(4030, 3750), 90f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(4120, 3750), 90f));
+
+                onLoadActors.add(new Description(ActorType.KevlarVestSpawner, new Vector2(3910, 4640), 90f));
+
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(5860, 400), 90f));
+
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(185, 2220), 90f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(185, 2050), 90f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(185, 1900), 90f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(185, 1750), 90f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(185, 1600), 90f));
+
+                // Center spawners
+                onLoadActors.add(new Description(ActorType.HeavyArmorSpawner, new Vector2(3300, 3000), 0f));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(3100, 2700), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(3535, 2555), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(3640, 2740), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(3300, 2510), 0f));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(3100, 2700), 0f));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(3100, 2700), 0f));
+
+
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(4250, 1150), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(4350, 1150), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(3600, 1150), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(3500, 1150), 0f));
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1310, 2600), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1410, 2600), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1360, 2670), 0f));
+
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1460, 4350), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1560, 4350), 0f));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1660, 4350), 0f));
+
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(6320, 2780), 0f));
+
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(4320, 5360), 90f));
+
+
+                // Sniper Hallway spawners
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(6200, 1950), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(6350, 1950), 0f));
 
@@ -46,15 +94,19 @@ public class MapLibrary {
 
                 onLoadActors.add(new Description(ActorType.KevlarVestSpawner, new Vector2(3500, 900), 0f));
 
-
-                // Backroom spawns
+                // Backroom spawners
                 onLoadActors.add(new Description(ActorType.AssaultRifleSpawner, new Vector2(250, 5450), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(450, 5450), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(600, 5450), 0f));
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(750, 5450), 0f));
 
+                onLoadActors.add(new Description(ActorType.KevlarVestSpawner, new Vector2(1650, 5400), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1340, 4550), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1440, 4550), 0f));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1540, 4550), 0f));
+                onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(200, 4550), 0f));
 
-                // Storage spawns
+                // Storage spawners
                 onLoadActors.add(new Description(ActorType.AssaultRifleSpawner, new Vector2(4700, 4050), 0f));
 
                 onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(6300, 4050), 0f));
@@ -64,8 +116,7 @@ public class MapLibrary {
                 onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(5450, 4650), 0f));
                 onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(5400, 4720), 0f));
 
-
-                // Bottom room spawns, dunno
+                // Peekers spawners
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(2000, 950), 0f));
                 onLoadActors.add(new Description(ActorType.AssaultRifleSpawner, new Vector2(1800, 950), 0f));
                 onLoadActors.add(new Description(ActorType.MedkitSpawner, new Vector2(1600, 950), 0f));
@@ -74,9 +125,74 @@ public class MapLibrary {
                 onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1890, 150), 0f));
                 onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1980, 150), 0f));
 
-                var environments = proto.environments;
 
                 // === Level Boundary Walls and Flooring ===
+
+
+
+                var environments = proto.environments;
+
+                // Center envs
+
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(2350, 1900), 0f));
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(3400, 2730), 0f));
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(2360, 3600), 0f));
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(3760, 3760), 0f));
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(3900, 1770), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3920, 3600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(4020, 3600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(4120, 3600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(4220, 3600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(4170, 3500), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(4170, 3400), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3580, 3900), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3590, 4000), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3600, 4100), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5100, 2600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5200, 2600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5150, 2690), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6200, 2600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6300, 2600), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6130, 2690), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6400, 3790), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6400, 3690), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(6310, 3810), 0f));
+
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5890, 550), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5800, 540), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(5710, 520), 0f));
+
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3700, 4590), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3715, 4685), -15f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(3735, 4780), -30f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 3770), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 3680), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 3590), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 3500), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(620, 3200), 0f));
+
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(950, 5010), -42f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(750, 4920), -67f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(850, 5200), -116f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2020, 2830), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2090, 2900), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2160, 2970), 45f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2580, 1900), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2680, 1840), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(2740, 1720), 90f));
+
+
+                // Outside walls
 
                 for (int sectionY = 50; sectionY <= 5550; sectionY += 100)
                     environments.add(new Description(EnvType.BrickDefault, new Vector2(50, sectionY), 0f));
@@ -93,7 +209,7 @@ public class MapLibrary {
 
                 for (int sectionX = 150; sectionX <= 6450; sectionX += 100) {
                     for (int sectionY = 150; sectionY <= 5450; sectionY += 100) {
-                        environments.add(new Description(EnvType.ConcreteFloor, new Vector2(sectionX, sectionY), 0f));
+                        environments.add(new Description(EnvType.ConcreteFloorTwo, new Vector2(sectionX, sectionY), 0f));
                     }
                 }
 
@@ -212,24 +328,84 @@ public class MapLibrary {
                 var randoms = proto.randomSpawnpoints;
 
                 randoms.add(new Vector2(150, 150));
-                randoms.add(new Vector2(150, 850));
-                randoms.add(new Vector2(850, 150));
-                randoms.add(new Vector2(850, 850));
+                randoms.add(new Vector2(150, 1850));
+                randoms.add(new Vector2(1850, 150));
+                randoms.add(new Vector2(1850, 1850));
+
+                var onLoadActors = proto.onLoadActors;
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(150, 250), 0).setInts(180));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(250, 150), 0).setInts(180));
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1850, 1750), 0).setInts(180));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1750, 1850), 0).setInts(180));
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1850, 250), 0).setInts(180));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(1750, 150), 0).setInts(180));
+
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(150, 1750), 0).setInts(180));
+                onLoadActors.add(new Description(ActorType.AmmoPackSpawner, new Vector2(250, 1850), 0).setInts(180));
+
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(750, 1000), 0).setInts(120));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1250, 1000), 0).setInts(120));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1000, 750), 0).setInts(120));
+                onLoadActors.add(new Description(ActorType.ArmorPlateSpawner, new Vector2(1000, 1250), 0).setInts(120));
+
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(350, 350), -45).setInts(300));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(350, 1650), -135).setInts(300));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(1650, 1650), 135).setInts(300));
+                onLoadActors.add(new Description(ActorType.DBShotgunSpawner, new Vector2(1650, 350), 45).setInts(300));
 
                 var environments = proto.environments;
 
-                for (int sectionX = 50; sectionX <= 950; sectionX += 100) {
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(400, 400), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(490, 350), -22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(350, 490), 22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 330), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(330, 590), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1600, 1600), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1510, 1650), -22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1650, 1510), 22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1410, 1670), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1670, 1410), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(400, 1600), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(490, 1650), 22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(350, 1510), -22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(590, 1670), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(330, 1410), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1600, 400), 45f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1510, 350), 22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1650, 490), -22.5f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1410, 330), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1670, 590), 0f));
+
+                environments.add(new Description(EnvType.BrickPillarBig, new Vector2(1000, 1000), 0f));
+
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1550, 1050), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1450, 1000), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1050, 1550), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1000, 1450), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(550, 1050), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(450, 1000), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1050, 550), 0f));
+                environments.add(new Description(EnvType.BoxMedium, new Vector2(1000, 450), 0f));
+
+
+                for (int sectionX = 50; sectionX <= 1950; sectionX += 100) {
                     environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 50), 0f));
-                    environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 950), 0f));
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(sectionX, 1950), 0f));
                 }
 
-                for (int sectionY = 150; sectionY <= 850; sectionY += 100) {
+                for (int sectionY = 150; sectionY <= 1850; sectionY += 100) {
                     environments.add(new Description(EnvType.BrickDefault, new Vector2(50, sectionY), 0f));
-                    environments.add(new Description(EnvType.BrickDefault, new Vector2(950, sectionY), 0f));
+                    environments.add(new Description(EnvType.BrickDefault, new Vector2(1950, sectionY), 0f));
                 }
 
-                for (int sectionX = 150; sectionX <= 850; sectionX += 100) {
-                    for (int sectionY = 150; sectionY <= 850; sectionY += 100) {
+                for (int sectionX = 150; sectionX <= 1850; sectionX += 100) {
+                    for (int sectionY = 150; sectionY <= 1850; sectionY += 100) {
                         environments.add(new Description(EnvType.ConcreteFloorTwo, new Vector2(sectionX, sectionY), 0f));
                     }
                 }

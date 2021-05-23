@@ -12,6 +12,7 @@ import hg.networking.packets.InputUpdate;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Player Logic that converts keyboard and mouse input to actions */
 public class LocalPlayerLogic extends PlayerLogic {
     private PlayerEntity controlledPlayerEntity;
 

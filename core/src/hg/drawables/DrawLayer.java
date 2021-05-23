@@ -1,5 +1,6 @@
 package hg.drawables;
 
+/** DrawLayer defines layers for Drawables. A higher layer is drawn on top of lower layers. */
 public class DrawLayer {
     public static final int Background = -10000;
     public static final int Bedrock = -9000;

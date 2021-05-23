@@ -15,6 +15,8 @@ import hg.enums.VPos;
 
 import java.util.LinkedList;
 
+/** ChatSystem manages the in-game chat structure.
+ * It is also used as a form of primitive logging for non-crashing inconsistencies. */
 public class ChatSystem extends UIElement {
 
     private final String font = "Assets/Fonts/CourierNew24.fnt";
@@ -68,7 +70,7 @@ public class ChatSystem extends UIElement {
         msg.drawable.setEnabled(true);
         messages.addFirst(msg);
 
-        int maxMessagesToKeep = 8;
+        int maxMessagesToKeep = 14;
         if (messages.size() > maxMessagesToKeep) removeLastMessage();
 
         updateElements();

@@ -7,6 +7,7 @@ import hg.entities.pickups.AmmoPackPickup;
 import hg.game.HgGame;
 import hg.enums.types.ActorType;
 
+/** Spawns AmmoPackPickups */
 public class AmmoPackSpawner extends Spawner {
     private final BasicSprite silhouette;
 

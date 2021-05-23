@@ -9,6 +9,7 @@ import hg.interfaces.callbacks.ICallback;
 import hg.physics.BoxCollider;
 import hg.physics.CollisionAlgorithms;
 
+/** ToggleButton is a button that has an on / off state, with no label. */
 public class ToggleButton extends UIElement {
     protected final BasicSprite drawable;
     protected final BoxCollider collider;

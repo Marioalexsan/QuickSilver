@@ -2,6 +2,7 @@ package hg.directors;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.entities.Entity;
+import hg.entities.spawners.Spawner;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.maps.MapPrototype;
@@ -10,7 +11,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class Level extends Director {
+/** LevelLoader can load a level from a given MapPrototype. It is also responsible for cleaning up environments created from MapPrototypes.
+ * Actors instantiated from loads are handled by GameManager instead. */
+public class LevelLoader extends Director {
 
     private final LinkedList<Entity> environments = new LinkedList<>();
     private final ArrayList<Vector2> randomSpawnpoints = new ArrayList<>();
@@ -36,8 +39,11 @@ public class Level extends Director {
 
         // Instantiate onLoadActors if server
         if (HgGame.Network().isLocalOrServer()) {
-            for (var actor: prototype.onLoadActors) {
-                manager.addActor(actor.objectType, actor.position, actor.angle);
+            for (var actorDesc: prototype.onLoadActors) {
+                var actor = manager.addActor(actorDesc.objectType, actorDesc.position, actorDesc.angle);
+
+                // A hacky way of instantiating actors with different starting properties
+                actor.tryApplyDescription(actorDesc);
             }
         }
     }

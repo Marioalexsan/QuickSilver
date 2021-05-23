@@ -1,8 +1,6 @@
 package hg.interfaces;
 
-/**
- * IUpdate defines an interface for updating objects each frame.
- */
+/** IUpdate defines an interface for updating objects each frame. */
 public interface IUpdateable {
     default void update() { }
 }

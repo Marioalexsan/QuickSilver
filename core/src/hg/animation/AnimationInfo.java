@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import hg.drawables.AnimatedSprite;
 import hg.utils.Angle;
 
+/** AnimationInfo is a structure defining an animation's information */
 public class AnimationInfo {
     public final String texture;
     public final int width;

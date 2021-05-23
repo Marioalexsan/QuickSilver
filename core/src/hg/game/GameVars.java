@@ -1,8 +1,9 @@
 package hg.game;
 
 import java.util.HashMap;
+import java.util.Random;
 
-// Under construction / existential crisis / etc.
+/** GameVars holds constants and default values. */
 public class GameVars {
     private static final HashMap<String, String> defaultSettings = new HashMap<>();
     private static final HashMap<String, String> folderPaths = new HashMap<>();
@@ -13,6 +14,9 @@ public class GameVars {
         defaultSettings.put("Fullscreen", Boolean.toString(false));
         defaultSettings.put("MouseSens", Float.toString(1.0f));
         defaultSettings.put("FOVFactor", Float.toString(0.6f));
+        defaultSettings.put("UserName", "Anonymous" + (Math.abs(new Random().nextInt()) % 9999));
+        defaultSettings.put("SoundVol", Float.toString(0.5f));
+        defaultSettings.put("MusicVol", Float.toString(0.5f));
     }
 
     static {

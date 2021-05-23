@@ -5,8 +5,7 @@ import hg.libraries.EnvironmentLibrary;
 import hg.enums.types.DirectorType;
 
 /** InitDirector inititates the game and launches MainMenuDirector, then self-destructs
- * You likely don't need this to exist after it did its job
- */
+ * You likely don't need this to exist after it did its job */
 public class GameInit extends Director {
     @Override
     public void destroy() { }

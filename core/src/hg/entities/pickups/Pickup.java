@@ -13,6 +13,7 @@ import hg.physics.ColliderGroup;
 import hg.physics.ColliderProperty;
 import hg.physics.SphereCollider;
 
+/** Pickup is a base class for world objects which can be "picked up", triggering actions upon doing so. */
 public abstract class Pickup extends Entity {
     protected final SphereCollider pickupZone;
     protected boolean pickedUp = false;

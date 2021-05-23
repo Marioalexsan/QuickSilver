@@ -1,5 +1,6 @@
 package hg.enums.types;
 
+/** ActorType holds environment type IDs. */
 public class EnvType {
     public static final int FIRST_VALUE = 0;
 

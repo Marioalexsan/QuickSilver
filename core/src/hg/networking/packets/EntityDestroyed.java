@@ -7,6 +7,7 @@ import hg.networking.Packet;
 import hg.enums.types.TargetType;
 import hg.utils.DebugLevels;
 
+/** Server message that tells clients an existing entity was removed */
 public class EntityDestroyed extends Packet {
     public int entityType;
     public int entityID;
@@ -25,10 +26,10 @@ public class EntityDestroyed extends Packet {
                 Entity which = manager.getActor(entityID);
 
                 if (which == null)
-                    manager.getChatSystem().addDebugMessage("Tried to remove missing actor " + entityID, DebugLevels.Warn);
+                    HgGame.Chat().addDebugMessage("Tried to remove missing actor " + entityID, DebugLevels.Warn);
                 else which.signalDestroy();
             }
-            default -> manager.getChatSystem().addDebugMessage("Unknown entity type to remove: " + entityType, DebugLevels.Warn);
+            default -> HgGame.Chat().addDebugMessage("Unknown entity type to remove: " + entityType, DebugLevels.Warn);
         }
     }
 

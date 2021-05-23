@@ -1,5 +1,6 @@
 package hg.enums.types;
 
+/** ActorType holds actor type IDs. */
 public class ActorType {
     public static final int FIRST_VALUE = 0;
     public static final int PlayerEntity = 1;
@@ -16,5 +17,7 @@ public class ActorType {
     public static final int KevlarVestPickup = 12;
     public static final int HeavyArmorSpawner = 13;
     public static final int HeavyArmorPickup = 14;
+    public static final int DBShotgunSpawner = 15;
+    public static final int DBShotgunPickup = 16;
     public static final int LAST_VALUE = 32767;
 }

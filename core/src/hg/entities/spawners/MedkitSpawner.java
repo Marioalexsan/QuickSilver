@@ -7,6 +7,7 @@ import hg.entities.pickups.MedkitPickup;
 import hg.game.HgGame;
 import hg.enums.types.ActorType;
 
+/** Spawns MedkitPickups */
 public class MedkitSpawner extends Spawner {
     private final BasicSprite silhouette;
 

@@ -7,9 +7,7 @@ import hg.game.HgGame;
 import hg.interfaces.IEnable;
 import hg.utils.Angle;
 
-/**
- * Abstract class that can draw to the screen.
- */
+/** Drawable is the base class for graphical components. Drawables have to be registered to GraphicsEngine to be used. */
 public abstract class Drawable implements IEnable {
     protected Vector2 position = new Vector2();
     protected Vector2 center = new Vector2();

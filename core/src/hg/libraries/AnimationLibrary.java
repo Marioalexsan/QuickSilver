@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 // TODO Make an animation builder
 
+/** Holds animations used in the game. */
 public class AnimationLibrary {
     private static final HashMap<String, AnimationInfo> prototypes = new HashMap<>();
 
@@ -65,5 +66,42 @@ public class AnimationLibrary {
         anim7.cenOffset.set(new Vector2(48, 31));
         anim7.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Reload", anim7);
+
+        AnimationInfo anim8 = new AnimationInfo("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "2"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.Delay, 16f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "4"), new ActEffect(ActEffect.Type.Delay, 3f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "5"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "6"), new ActEffect(ActEffect.Type.Delay, 1f)),
+        });
+        anim8.cenOffset.set(new Vector2(75, 68));
+        anim8.textureAngle.set(-90f);
+        prototypes.put("Player_Shotgun_PowerShoot", anim8);
+
+        AnimationInfo anim9 = new AnimationInfo("Assets/Sprites/Player/Shotgun_Reload.png", 150, 200, 16, 16, 5, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "13"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "12"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "12"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+        });
+        anim9.cenOffset.set(new Vector2(75, 68));
+        anim9.textureAngle.set(-90f);
+        prototypes.put("Player_Shotgun_Reload", anim9);
+
+        AnimationInfo anim10 = new AnimationInfo("Assets/Sprites/Player/Shotgun_Idle.png", 150, 200, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        anim10.cenOffset.set(new Vector2(75, 68));
+        anim10.textureAngle.set(-90f);
+        prototypes.put("Player_Shotgun_Idle", anim10);
+
+        AnimationInfo anim11 = new AnimationInfo("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg")),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "2"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.Delay, 6f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "4"), new ActEffect(ActEffect.Type.Delay, 2f)),
+                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "5"), new ActEffect(ActEffect.Type.Delay, 1f)),
+        });
+        anim11.cenOffset.set(new Vector2(75, 68));
+        anim11.textureAngle.set(-90f);
+        prototypes.put("Player_Shotgun_Shoot", anim11);
     }
 }
