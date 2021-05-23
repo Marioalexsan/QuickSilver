@@ -152,8 +152,6 @@ public class HgGame extends ApplicationAdapter {
 
 			networkEngine.update();
 
-			if (true) throw new BadCoderException("ur mom LOL");
-
 			frameCounter++;
 		}
 		catch (Throwable crash) {
