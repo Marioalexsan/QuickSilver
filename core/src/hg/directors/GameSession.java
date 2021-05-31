@@ -203,7 +203,8 @@ public class GameSession extends Director {
         HgGame.Input().removeFocusInput(this);
         HgGame.GUI().disableChatSystem();
 
-        gamemode.destroy();
+        if (gamemode != null)
+            gamemode.destroy();
 
         LobbyMenu lobby = (LobbyMenu) manager.getDirector(DirectorType.LobbyMenu);
         if (lobby != null) lobby.signalDestroy();

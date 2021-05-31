@@ -117,7 +117,7 @@ public class HgGame extends ApplicationAdapter {
 		audioEngine.setGlobalMusicVolume(0.5f);
 
 		graphicsEngine.setVideoMode(1280, 720, false);
-		graphicsEngine.setCameraZoom(1.2);
+		graphicsEngine.setCameraZoom(1.25);
 
 		gameManager.tryAddDirector(DirectorType.GameInit);
 	}

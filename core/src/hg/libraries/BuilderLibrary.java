@@ -25,7 +25,9 @@ public class BuilderLibrary {
         AssetEngine assets = HgGame.Assets();
         ClickButtonBuilder builder;
         switch (which) {
-            case "silverbox" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/Button.png")).font(assets.loadFont("Assets/Fonts/CourierNew36.fnt")).clickArea(460, 150);
+            case "silverbox" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/Button.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(460, 150);
+            case "silverboxsmall" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmall.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(460, 100);
+            case "silverboxsmallshort" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmallShort.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(330, 100);
             case "leftarrow" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ArrowButtonLeft.png")).clickArea(80, 80);
             case "leftarrowdisabled" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ArrowButtonLeftUnclickable.png")).clickArea(80, 80);
             default -> builder = new ClickButtonBuilder(); // Failsafe case

@@ -1,5 +1,6 @@
 package hg.directors;
 
+import com.badlogic.gdx.graphics.Texture;
 import hg.drawables.BasicText;
 import hg.engine.NetworkEngine;
 import hg.game.DataManager;
@@ -26,6 +27,10 @@ public class MainMenu extends Director {
     private static boolean SettingsInit = false;
     private final CardMenu menus = new CardMenu();
 
+    private final float NO_FOV = 0f;
+    private final float REDUCED_FOV = 0.25f;
+    private final float FULL_FOV = 0.42f;
+
     private final DecimalFormat format1;
     private final DecimalFormat noDigits;
 
@@ -43,7 +48,7 @@ public class MainMenu extends Director {
     private final BasicText sensitivityLabel;
     private final BasicText soundLabel;
     private final BasicText musicLabel;
-    private final BasicText focusLabel;
+    private final BasicText fovLabel;
     private final ToggleButton fullscreenToggle;
     private final BasicTextInput userNameInput;
 
@@ -67,7 +72,8 @@ public class MainMenu extends Director {
         noDigits.setMaximumFractionDigits(0);
         noDigits.setMinimumFractionDigits(0);
 
-        ClickButtonBuilder boxButton = BuilderLibrary.ClickButtonBuilders("silverbox");
+        ClickButtonBuilder smallBox = BuilderLibrary.ClickButtonBuilders("silverboxsmall");
+        ClickButtonBuilder smallShortBox = BuilderLibrary.ClickButtonBuilders("silverboxsmallshort");
         ClickButtonBuilder arrowButton = BuilderLibrary.ClickButtonBuilders("leftarrow");
         ToggleButtonBuilder checkButton = BuilderLibrary.ToggleButtonBuilders("silvercheck");
         TextInputBuilder input = BuilderLibrary.TextInputBuilders("default");
@@ -75,19 +81,21 @@ public class MainMenu extends Director {
         BasicTextBuilder label = BuilderLibrary.BasicTextBuilders("label");
         BasicTextBuilder title = BuilderLibrary.BasicTextBuilders("title");
 
+        Texture upDown = HgGame.Assets().loadTexture("Assets/GUI/UpDownButton.png");
+
         // === Main Menu ===
         menus.addObjects("Main",
-                boxButton.copy().position(-660, -200).text("Start Server").onClick(() -> toMenu("StartServer")).build(),
-                boxButton.copy().position(-660, -400).text("Start Client").onClick(() -> toMenu("StartClient")).build(),
-                boxButton.copy().position(660, -200).text("Settings").onClick(() -> toMenu("Settings")).build(),
-                boxButton.copy().position(660, -400).text("Quit").onClick(this::quitGame).build(),
+                smallBox.copy().position(-660, -280).text("Start Server").onClick(() -> toMenu("StartServer")).build(),
+                smallBox.copy().position(-660, -400).text("Start Client").onClick(() -> toMenu("StartClient")).build(),
+                smallBox.copy().position(660, -280).text("Settings").onClick(() -> toMenu("Settings")).build(),
+                smallBox.copy().position(660, -400).text("Quit").onClick(this::quitGame).build(),
                 title.copy().position(0, 440).text("QuickSilver").makeGUI().build()
         );
         // === Settings Menu ===
         menus.addObjects("Settings",
                 resolutionLabel = label.copy().position(-660, 300).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 sensitivityLabel = label.copy().position(-660, 100).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
-                focusLabel = label.copy().position(-660, 0).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
+                fovLabel = label.copy().position(-760, 0).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 soundLabel = label.copy().position(-660, -100).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 musicLabel = label.copy().position(-660, -200).text("<not_init>").textPos(HPos.Left, VPos.Center).makeGUI().build(),
                 fullscreenToggle = checkButton.copy().position(-860, 200).build(),
@@ -95,30 +103,29 @@ public class MainMenu extends Director {
                 userNameInput = username.copy().position(-820, -380).emptyText("(empty!)").textPos(HPos.Left,VPos.Center).build(),
                 title.copy().position(0, 440).text("Settings").makeGUI().build(),
                 label.copy().position(-760, 200).text("Fullscreen?").textPos(HPos.Left, VPos.Center).makeGUI().build(),
-                boxButton.copy().position(660, -200).text("Apply").onClick(this::applySettings).build(),
+                smallBox.copy().position(660, -200).text("Apply").onClick(this::applySettings).build(),
                 arrowButton.copy().position(-860, 300).angle(90).onClick(this::downResolution).build(),
                 arrowButton.copy().position(-760, 300).angle(-90).onClick(this::upResolution).build(),
                 arrowButton.copy().position(-860, 100).angle(90).onClick(this::downSensitivity).build(),
                 arrowButton.copy().position(-760, 100).angle(-90).onClick(this::upSensitivity).build(),
-                arrowButton.copy().position(-860, 0).angle(90).onClick(this::downFOV).build(),
-                arrowButton.copy().position(-760, 0).angle(-90).onClick(this::upFOV).build(),
+                arrowButton.copy().display(upDown).copy().position(-860, 0).onClick(this::downFOV).build(),
                 arrowButton.copy().position(-860, -100).angle(90).onClick(this::downSound).build(),
                 arrowButton.copy().position(-760, -100).angle(-90).onClick(this::upSound).build(),
                 arrowButton.copy().position(-860, -200).angle(90).onClick(this::downMusic).build(),
                 arrowButton.copy().position(-760, -200).angle(-90).onClick(this::upMusic).build(),
-                boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build()
+                smallBox.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build()
         );
         // === Start Server Menu ===
         menus.addObjects("StartServer",
-                boxButton.copy().position(-660, -400).text("Create Server").onClick(this::tryStartServer).build(),
-                boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build(),
+                smallBox.copy().position(-660, -400).text("Create Server").onClick(this::tryStartServer).build(),
+                smallBox.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build(),
                 title.copy().position(0, 440).text("QuickSilver").makeGUI().build()
         );
         // === Start Client Menu ===
         menus.addObjects("StartClient",
                 clientIPAdress = input.position(-660, 200).build(),
-                boxButton.copy().position(-660, -400).text("Connect").onClick(this::tryConnect).build(),
-                boxButton.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build(),
+                smallBox.copy().position(-660, -400).text("Connect").onClick(this::tryConnect).build(),
+                smallBox.copy().position(660, -400).text("Go Back").onClick(() -> toMenu("Main")).build(),
                 title.copy().position(0, 440).text("QuickSilver").makeGUI().build()
         );
         // === Client Connect screen
@@ -231,12 +238,12 @@ public class MainMenu extends Director {
     }
 
     private void upFOV() {
-        fovSelection = MathTools.Clamp(fovSelection + 0.05f, 0f, 0.9f);
+        fovSelection = (fovSelection == NO_FOV) ? REDUCED_FOV : (fovSelection == REDUCED_FOV ? FULL_FOV : NO_FOV);
         updateSettingsLabels();
     }
 
     private void downFOV() {
-        fovSelection = MathTools.Clamp(fovSelection - 0.05f, 0f, 0.9f);
+        fovSelection = (fovSelection == FULL_FOV) ? REDUCED_FOV : (fovSelection == REDUCED_FOV ? NO_FOV : FULL_FOV);
         updateSettingsLabels();
     }
 
@@ -266,7 +273,10 @@ public class MainMenu extends Director {
 
         sensitivityLabel.setText("Mouse Speed: " + format1.format(sensSelection));
 
-        focusLabel.setText("FOV Factor: " + format1.format(fovSelection));
+        String text = "None";
+        if (fovSelection == REDUCED_FOV) text = "Reduced";
+        if (fovSelection == FULL_FOV) text = "Full";
+        fovLabel.setText("Look ahead: " + text);
 
         soundLabel.setText("Sound Volume: " + noDigits.format(soundSelection * 100));
         musicLabel.setText("Music Volume: " + noDigits.format(musicSelection * 100));
@@ -296,7 +306,9 @@ public class MainMenu extends Director {
         sensSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("MouseSens")), 0.6f, 1.6f);
 
         // FOV
-        fovSelection = MathTools.Clamp(Float.parseFloat(data.getSetting("FOVFactor")), 0f, 0.9f);
+        fovSelection = Float.parseFloat(data.getSetting("FOVFactor"));
+        if (fovSelection != NO_FOV && fovSelection != REDUCED_FOV && fovSelection != FULL_FOV)
+            fovSelection = NO_FOV;
 
         // User Name
         userNameInput.setText(data.getSetting("UserName"));

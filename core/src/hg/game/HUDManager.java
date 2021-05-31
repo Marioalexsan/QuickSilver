@@ -242,6 +242,7 @@ public class HUDManager {
             notice.setAlpha(Math.min(noticeTimeLeft + 60, 60) / 60f);
             noticeTimeLeft--;
         }
+        else notice.setAlpha(0f);
 
         debug_mouseWorldPosition.setPosition(HgGame.Input().getMouse());
         var pos = HgGame.Input().getFOVWorldMouse(HgGame.Game().getFOVFactor());

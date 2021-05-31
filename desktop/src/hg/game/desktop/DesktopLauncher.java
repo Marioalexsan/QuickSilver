@@ -14,6 +14,7 @@ public class DesktopLauncher {
 		config.backgroundFPS = 60;
 		config.foregroundFPS = 60;
 		config.samples = 4;
+		config.vSyncEnabled = true;
 
 		new LwjglApplication(new HgGame(), config); // Start game
 	}

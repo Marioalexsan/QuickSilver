@@ -84,6 +84,11 @@ public class AudioEngine {
     /** Plays the provided music, with looping on, using the loop interval specified.
      * If a music is currently playing, a simple sequential fade out / fade in transition will be applied. */
     public void playMusic(String filePath, float volume) {
+        if (musicState != null && musicState.path.equals(filePath)) {
+            musicState.volume = volume;
+            return;
+        }
+
         if (transitionState != null) {
             transitionState = new MusicState(filePath, volume); // Swap the transition music for this one
         }
