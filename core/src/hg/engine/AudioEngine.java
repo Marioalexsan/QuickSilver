@@ -103,7 +103,7 @@ public class AudioEngine {
                 Music targetMusic;
                 try {
                     targetMusic = Gdx.audio.newMusic(new FileHandle(filePath));
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                     return; // Couldn't load it for whatever reason!
                 }
 

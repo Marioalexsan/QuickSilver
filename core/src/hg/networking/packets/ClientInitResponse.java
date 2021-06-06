@@ -2,8 +2,8 @@ package hg.networking.packets;
 
 import hg.directors.GameSession;
 import hg.directors.MainMenu;
-import hg.enums.types.DirectorType;
-import hg.enums.types.TargetType;
+import hg.enums.DirectorType;
+import hg.enums.TargetType;
 import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.networking.Packet;

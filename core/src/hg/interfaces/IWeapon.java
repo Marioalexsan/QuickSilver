@@ -1,10 +1,14 @@
 package hg.interfaces;
 
 import hg.entities.Entity;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 
 /** IWeapon defines an interface for player weapons. */
 public interface IWeapon {
+
+    static String getGenericAmmoDisplay(int currentAmmo, int magazineSize, int reserveAmmo, int maxTotalAmmo) {
+        return currentAmmo + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? "!" : "") + "]";
+    }
 
     // "Callbacks"
     // PF, SF, Reload, Equip, Unequip, Update, BackpackUpdate
@@ -53,10 +57,10 @@ public interface IWeapon {
     void onWeaponPickup();
 
     /** Gets weapon state */
-    default State tryGetState() {
+    default ObjectState tryGetState() {
         return null;
     }
 
     /** Applies weapon state */
-    default void tryApplyState(State state) {}
+    default void tryApplyState(ObjectState state) {}
 }

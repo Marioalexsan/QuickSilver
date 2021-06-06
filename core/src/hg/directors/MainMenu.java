@@ -7,7 +7,7 @@ import hg.game.DataManager;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
 import hg.networking.NetworkStatus;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.ui.BasicTextInput;
 import hg.ui.CardMenu;
 import hg.ui.ToggleButton;
@@ -211,7 +211,7 @@ public class MainMenu extends Director {
     }
 
     private void quitGame() {
-        HgGame.Manager().tryAddDirector(DirectorType.GameQuit);
+        HgGame.Manager().tryAddDirector(DirectorType.Janitor);
         toBeDestroyed = true;
     }
 

@@ -4,7 +4,7 @@ import hg.directors.GameSession;
 import hg.directors.MainMenu;
 import hg.game.HgGame;
 import hg.networking.Packet;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 
 /** Tells the client the current game session options. Usually sent by server when clients join, or when said options change. */
 public class SessionSettingsUpdate extends Packet {

@@ -8,7 +8,7 @@ import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.Packet;
-import hg.enums.types.TargetType;
+import hg.enums.TargetType;
 import hg.utils.DebugLevels;
 
 /** Server message that tells clients a new entity was added */

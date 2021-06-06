@@ -18,9 +18,6 @@ import java.util.LinkedList;
 /** ChatSystem manages the in-game chat structure.
  * It is also used as a form of primitive logging for non-crashing inconsistencies. */
 public class ChatSystem extends UIElement {
-
-    private final String font = "Assets/Fonts/CourierNew24.fnt";
-
     private static class Message {
         public int displayTimeLeft;
         public BasicText drawable;
@@ -40,7 +37,7 @@ public class ChatSystem extends UIElement {
     private int debugMessageLevel = DebugLevels.DEFAULT;
 
     public ChatSystem() {
-        chatInput = new BasicTextInput(HgGame.Assets().loadFont(font), 250, 500, 36);
+        chatInput = new BasicTextInput(HgGame.Assets().getFont("Text24"), 250, 500, 36);
         chatInput.setEmptyText("--- Chat ---");
     }
 
@@ -66,7 +63,7 @@ public class ChatSystem extends UIElement {
 
     public void addMessage(String message) {
         int messageLifetime = 360;
-        Message msg = new Message(HgGame.Assets().loadFont(font), message, messageLifetime);
+        Message msg = new Message(HgGame.Assets().getFont("Text24"), message, messageLifetime);
         msg.drawable.setEnabled(true);
         messages.addFirst(msg);
 

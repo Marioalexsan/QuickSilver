@@ -3,20 +3,22 @@ package hg.game;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.directors.*;
+import hg.drawables.Animation;
+import hg.drawables.gfxeffects.GFXEffect;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.gamemodes.Gamemode;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.libraries.ActorLibrary;
 import hg.libraries.EnvironmentLibrary;
 import hg.networking.NetworkRole;
 import hg.networking.NetworkStatus;
 import hg.networking.PlayerView;
 import hg.networking.packets.*;
-import hg.enums.types.DirectorType;
-import hg.enums.types.TargetType;
+import hg.enums.DirectorType;
+import hg.enums.TargetType;
 import hg.utils.*;
 
 import java.util.*;
@@ -33,6 +35,8 @@ public class GameManager {
     private final HashMap<Integer, Entity> environments = new HashMap<>();
     private final HashMap<Integer, Director> directors = new HashMap<>();
 
+    private final HashSet<GFXEffect> updateableGFXEffects = new HashSet<>();
+
     public PlayerView localView;
     private final ArrayList<PlayerView> playerViews = new ArrayList<>();
 
@@ -45,6 +49,24 @@ public class GameManager {
     private int gamemodeNextHeavyUpdate = 0;
 
     public GameManager() { }
+
+    // --- GFX Effects --- //
+
+    // These are technically not really vital
+
+    /** Adds the GFXEffect to the list of effects managed by GameManager.
+     * GameManager updates effects each frame, until they expire. */
+    public void addGFXEffectToManage(GFXEffect effect) {
+        if (effect == null) return;
+        updateableGFXEffects.add(effect);
+        effect.registerToEngine();
+    }
+
+    public void dropGFXEffect(GFXEffect effect) {
+        if (effect == null) return;
+        updateableGFXEffects.remove(effect);
+        effect.unregisterFromEngine();
+    }
 
     // --- Player View related Methods --- //
 
@@ -233,11 +255,11 @@ public class GameManager {
         if (which != null) return which;
 
         switch (type) { // TODO Replace switch with dictionary
-            case DirectorType.GameInit -> which = new GameInit();
-            case DirectorType.GameQuit -> which = new GameQuit();
+            case DirectorType.Starter -> which = new Starter();
+            case DirectorType.Janitor -> which = new Janitor();
             case DirectorType.MainMenu -> which = new MainMenu();
             case DirectorType.GameSession -> which = new GameSession();
-            case DirectorType.LevelLoader -> which = new LevelLoader();
+            case DirectorType.Level -> which = new Level();
             case DirectorType.PauseMenu -> which = new PauseMenu();
             case DirectorType.LobbyMenu -> which = new LobbyMenu();
             default -> throw new RuntimeException("Coudln't retrieve director of type " + type);
@@ -256,20 +278,6 @@ public class GameManager {
         Director existing = directors.remove(type);
         if (existing != null) existing.destroy();
     }
-
-    // Convenience methods for getting vanilla Directors quickly
-
-    public GameSession tryAddGameSession() { return (GameSession) tryAddDirector(DirectorType.GameSession); }
-    public GameSession getGameSession() { return (GameSession) getDirector(DirectorType.GameSession); }
-
-    public LevelLoader tryAddLevelLoader() { return (LevelLoader) tryAddDirector(DirectorType.LevelLoader); }
-    public LevelLoader getLevelLoader() { return (LevelLoader) getDirector(DirectorType.LevelLoader); }
-
-    public LobbyMenu tryAddLobbyMenu() { return (LobbyMenu) tryAddDirector(DirectorType.LobbyMenu); }
-    public LobbyMenu getLobbyMenu() { return (LobbyMenu) getDirector(DirectorType.LobbyMenu); }
-
-    public MainMenu tryAddMainMenu() { return (MainMenu) tryAddDirector(DirectorType.MainMenu); }
-    public MainMenu getMainMenu() { return (MainMenu) getDirector(DirectorType.MainMenu); }
 
     // --- Clear methods --- //
 
@@ -325,6 +333,21 @@ public class GameManager {
         for (var actor : new ArrayList<>(actors.values()))
             actor.update();
 
+        for (var effect: updateableGFXEffects)
+            effect.update();
+
+        // GFXEffects
+
+        LinkedList<GFXEffect> effectsToRemove = new LinkedList<>();
+        for (GFXEffect effect : updateableGFXEffects)
+            if (effect.isExpired())
+                effectsToRemove.add(effect);
+
+        for (GFXEffect effect : effectsToRemove) {
+            updateableGFXEffects.remove(effect);
+            effect.unregisterFromEngine();
+        }
+
         // Directors
 
         LinkedList<Integer> directorsToRemove = new LinkedList<>();
@@ -368,7 +391,7 @@ public class GameManager {
             if (actorNextHeavyUpdate-- <= 0) {
                 actorNextHeavyUpdate = actorHeavyUpdateInterval;
                 for (var actor: actors.entrySet()) {
-                    State stuff = actor.getValue().tryGenerateState();
+                    ObjectState stuff = actor.getValue().tryGenerateState();
                     if (stuff != null)
                         network.sendToAllClients(new StateUpdate(TargetType.Actors, actor.getKey(), stuff), false); // UDP Packet
                 }
@@ -387,7 +410,7 @@ public class GameManager {
                 gamemodeNextHeavyUpdate = gamemodeHeavyUpdateInterval;
                 match = (GameSession) getDirector(DirectorType.GameSession);
                 mode = match != null ? match.getGamemode() : null;
-                State stuff = null;
+                ObjectState stuff = null;
                 if (mode != null) stuff = mode.tryGenerateState();
                 if (stuff != null)
                     network.sendToAllClients(new StateUpdate(TargetType.Gamemodes, -1337, stuff), false); // UDP Packet
@@ -502,6 +525,10 @@ public class GameManager {
             case "mousePos" -> {
                 HgGame.GUI().toggleMouseDebug();
                 HgGame.Chat().addMessage("Toggled mouse position view");
+            }
+            case "FPS" -> {
+                HgGame.GUI().toggleFPS();
+                HgGame.Chat().addMessage("Toggled FPS");
             }
             default -> HgGame.Chat().addMessage("[System] Unknown command: " + command);
         }

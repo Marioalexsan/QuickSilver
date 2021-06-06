@@ -12,10 +12,10 @@ public class BuilderLibrary {
         AssetEngine assets = HgGame.Assets();
         BasicTextBuilder builder;
         switch (which) {
-            case "tinylabel" -> builder = new BasicTextBuilder().font(assets.loadFont("Assets/Fonts/CourierNew24.fnt")).textPos(HPos.Center, VPos.Center);
-            case "smalllabel" -> builder = new BasicTextBuilder().font(assets.loadFont("Assets/Fonts/CourierNew36.fnt")).textPos(HPos.Center, VPos.Center);
-            case "label" -> builder = new BasicTextBuilder().font(assets.loadFont("Assets/Fonts/CourierNew72.fnt")).textPos(HPos.Center, VPos.Center);
-            case "title" -> builder = new BasicTextBuilder().font(assets.loadFont("Assets/Fonts/CourierNew144.fnt")).textPos(HPos.Center, VPos.Center);
+            case "tinylabel" -> builder = new BasicTextBuilder().font(assets.getFont("Text24")).textPos(HPos.Center, VPos.Center);
+            case "smalllabel" -> builder = new BasicTextBuilder().font(assets.getFont("Text36")).textPos(HPos.Center, VPos.Center);
+            case "label" -> builder = new BasicTextBuilder().font(assets.getFont("Text72")).textPos(HPos.Center, VPos.Center);
+            case "title" -> builder = new BasicTextBuilder().font(assets.getFont("Text144")).textPos(HPos.Center, VPos.Center);
             default -> builder = new BasicTextBuilder(); // Failsafe case
         }
         return builder;
@@ -25,9 +25,9 @@ public class BuilderLibrary {
         AssetEngine assets = HgGame.Assets();
         ClickButtonBuilder builder;
         switch (which) {
-            case "silverbox" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/Button.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(460, 150);
-            case "silverboxsmall" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmall.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(460, 100);
-            case "silverboxsmallshort" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmallShort.png")).font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).clickArea(330, 100);
+            case "silverbox" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/Button.png")).font(assets.getFont("Text48")).clickArea(460, 150);
+            case "silverboxsmall" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmall.png")).font(assets.getFont("Text48")).clickArea(460, 100);
+            case "silverboxsmallshort" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ButtonSmallShort.png")).font(assets.getFont("Text48")).clickArea(330, 100);
             case "leftarrow" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ArrowButtonLeft.png")).clickArea(80, 80);
             case "leftarrowdisabled" -> builder = new ClickButtonBuilder().display(assets.loadTexture("Assets/GUI/ArrowButtonLeftUnclickable.png")).clickArea(80, 80);
             default -> builder = new ClickButtonBuilder(); // Failsafe case
@@ -50,8 +50,8 @@ public class BuilderLibrary {
         AssetEngine assets = HgGame.Assets();
         TextInputBuilder builder;
         switch (which) {
-            case "default" -> builder = new TextInputBuilder().font(assets.loadFont("Assets/Fonts/CourierNew48.fnt")).emptyText("Enter IP...").maxChars(32).clickArea(350, 48);
-            case "username" -> builder = new TextInputBuilder().font(assets.loadFont("Assets/Fonts/CourierNew72.fnt")).emptyText("Enter IP...").maxChars(32).clickArea(400, 72);
+            case "default" -> builder = new TextInputBuilder().font(assets.getFont("Text48")).emptyText("Enter IP...").maxChars(32).clickArea(350, 48);
+            case "username" -> builder = new TextInputBuilder().font(assets.getFont("Text72")).emptyText("...").maxChars(32).clickArea(400, 72);
             default -> builder = new TextInputBuilder(); // Failsafe case
         }
         return builder;

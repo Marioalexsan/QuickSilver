@@ -1,10 +1,10 @@
 package hg.directors;
 
 import hg.drawables.BasicText;
-import hg.enums.types.MapType;
+import hg.enums.MapType;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.ui.CardMenu;
 import hg.enums.HPos;
 import hg.enums.VPos;

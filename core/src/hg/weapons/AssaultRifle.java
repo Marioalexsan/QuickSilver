@@ -1,21 +1,27 @@
 package hg.weapons;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.animation.Animation;
+import hg.drawables.Animation;
 import hg.drawables.Drawable;
 import hg.entities.Entity;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
-import hg.gamelogic.states.AssaultRifleState;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.interfaces.IWeapon;
 import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
-import hg.enums.types.ActorType;
+import hg.enums.ActorType;
 import hg.utils.Angle;
 
 /** A rifle that shoots in burst of three. Has high DPS, and excels in all situations */
 public class AssaultRifle implements IWeapon {
+    public static class State extends ObjectState {
+        public int currentAmmo;
+        public int reserveAmmo;
+        public int bulletsToFire;
+        public int burstShotCooldown;
+        public int reloadCounter;
+    }
 
     // Owner related stuff
 
@@ -25,18 +31,18 @@ public class AssaultRifle implements IWeapon {
     // Weapon stats
 
     private final int magazineSize = 15;
-    private final int maxTotalAmmo = 90;
+    private final int maxTotalAmmo = 60;
     private final int burstCooldown = 52;
     private final int burstShotInterval = 5;
     private final int burstCount = 3;
     private final int timeToReload = 120;
-    private final int weaponPickupAmmo = 30;
-    private final int ammoPackAmmo = 6;
+    private final int weaponPickupAmmo = 15;
+    private final int ammoPackAmmo = 9;
 
     // Weapon state
 
     private int currentAmmo = 15;
-    private int reserveAmmo = 30;
+    private int reserveAmmo = 15;
     private int bulletsToFire = 0;
     private int burstShotCooldown = 0;
     private int weaponCooldown = 0;
@@ -52,14 +58,14 @@ public class AssaultRifle implements IWeapon {
     public void setOwner(Entity entity) {
         owner = entity;
         if (owner != null) {
-            Drawable drawable = owner.getDrawableIfAny();
+            Drawable drawable = owner.getDrawable();
             if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
         }
     }
 
     @Override
     public String getAmmoDisplay() {
-        return currentAmmo + " | " + magazineSize + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? " Max!" : "") + "]";
+        return IWeapon.getGenericAmmoDisplay(currentAmmo, magazineSize, reserveAmmo, maxTotalAmmo);
     }
 
     @Override
@@ -74,7 +80,7 @@ public class AssaultRifle implements IWeapon {
         Vector2 spawnPosition = new Vector2(owner.getPosition()).add(ownerAngle.normalVector().scl(75).add(ownerAngle.normalVector().rotate90(-1).scl(25)));
 
         var boolet = HgGame.Manager().addActor(ActorType.Bullet, spawnPosition, ownerAngle.getDeg());
-        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
+        boolet.getColliderArray()[0].attackStats = new AttackStats(owner, 17f, ColliderGroup.Player);
     }
 
     private void tryBurstShot() {
@@ -175,8 +181,8 @@ public class AssaultRifle implements IWeapon {
     }
 
     @Override
-    public State tryGetState() {
-        AssaultRifleState stuff = new AssaultRifleState();
+    public ObjectState tryGetState() {
+        AssaultRifle.State stuff = new AssaultRifle.State();
         stuff.currentAmmo = currentAmmo;
         stuff.reserveAmmo = reserveAmmo;
         stuff.bulletsToFire = bulletsToFire;
@@ -186,9 +192,9 @@ public class AssaultRifle implements IWeapon {
     }
 
     @Override
-    public void tryApplyState(State state) {
-        if (state instanceof AssaultRifleState) {
-            AssaultRifleState stuff = (AssaultRifleState) state;
+    public void tryApplyState(ObjectState state) {
+        if (state instanceof AssaultRifle.State) {
+            AssaultRifle.State stuff = (AssaultRifle.State) state;
             currentAmmo = stuff.currentAmmo;
             reserveAmmo = stuff.reserveAmmo;
             bulletsToFire = stuff.bulletsToFire;

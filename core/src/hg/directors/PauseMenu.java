@@ -7,7 +7,7 @@ import hg.engine.InputEngine;
 import hg.engine.MappedAction;
 import hg.game.HgGame;
 import hg.libraries.BuilderLibrary;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.ui.CardMenu;
 import hg.utils.builders.BasicSpriteBuilder;
 import hg.utils.builders.BasicTextBuilder;

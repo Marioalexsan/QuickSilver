@@ -2,19 +2,16 @@ package hg.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.drawables.*;
 import hg.engine.*;
 import hg.entities.PlayerEntity;
-import hg.utils.BadCoderException;
 import hg.utils.MathTools;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 
@@ -119,7 +116,7 @@ public class HgGame extends ApplicationAdapter {
 		graphicsEngine.setVideoMode(1280, 720, false);
 		graphicsEngine.setCameraZoom(1.25);
 
-		gameManager.tryAddDirector(DirectorType.GameInit);
+		gameManager.tryAddDirector(DirectorType.Starter);
 	}
 
 	// Certain things (such as dragging the window) will cause the game to stop updating
@@ -142,7 +139,7 @@ public class HgGame extends ApplicationAdapter {
 				graphicsEngine.setCameraOffset(HgGame.Input().getFOVCameraOffset(factorFOV));
 			}
 
-			targetGUI.getAngle().add(1.5f);
+			targetGUI.getAngle().add(1f);
 			targetGUI.setPosition(HgGame.Input().getMouse());
 			targetWorld.setPosition(HgGame.Input().getFOVWorldMouse(factorFOV));
 

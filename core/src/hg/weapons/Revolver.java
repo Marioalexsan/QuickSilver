@@ -1,23 +1,27 @@
 package hg.weapons;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.animation.Animation;
+import hg.drawables.Animation;
 import hg.drawables.Drawable;
 import hg.entities.Entity;
 import hg.entities.Bullet;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
-import hg.gamelogic.states.RevolverState;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.interfaces.IWeapon;
 import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
-import hg.enums.types.ActorType;
+import hg.enums.ActorType;
 import hg.utils.Angle;
 
 /** A revolver that acts as the starting weapon for players. It doesn't have a lot of power, but it can still help in a pinch. */
 public class Revolver implements IWeapon {
-
+    public static class State extends ObjectState {
+        public int currentAmmo = 0;
+        public int reserveAmmo = 30;
+        public int weaponCooldown = 0;
+        public int reloadCounter = 0;
+    }
     // Owner related stuff
 
     private Entity owner = null;
@@ -26,7 +30,7 @@ public class Revolver implements IWeapon {
     // Weapon stats
 
     private final int magazineSize = 6;
-    private final int maxTotalAmmo = 36;
+    private final int maxTotalAmmo = 30;
     private final int shotCooldown = 30;
     private final int timeToReload = 120;
     private final int weaponPickupAmmo = 6;
@@ -48,7 +52,7 @@ public class Revolver implements IWeapon {
 
     @Override
     public String getAmmoDisplay() {
-        return currentAmmo + " / " + magazineSize + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? " Max!" : "") + "]";
+        return IWeapon.getGenericAmmoDisplay(currentAmmo, magazineSize, reserveAmmo, maxTotalAmmo);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class Revolver implements IWeapon {
     public void setOwner(Entity entity) {
         owner = entity;
         if (owner != null) {
-            Drawable drawable = owner.getDrawableIfAny();
+            Drawable drawable = owner.getDrawable();
             if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
         }
     }
@@ -73,7 +77,7 @@ public class Revolver implements IWeapon {
 
         var boolet = HgGame.Manager().addActor(ActorType.Bullet, spawnPosition, ownerAngle.getDeg());
         ((Bullet) boolet).setSpeed(42);
-        boolet.getColliderIfAny().attackStats = new AttackStats(owner, 24f, ColliderGroup.Player);
+        boolet.getColliderArray()[0].attackStats = new AttackStats(owner, 24f, ColliderGroup.Player);
     }
 
     private void tryShot() {
@@ -172,8 +176,8 @@ public class Revolver implements IWeapon {
     }
 
     @Override
-    public State tryGetState() {
-        RevolverState stuff = new RevolverState();
+    public ObjectState tryGetState() {
+        State stuff = new State();
         stuff.currentAmmo = currentAmmo;
         stuff.reserveAmmo = reserveAmmo;
         stuff.weaponCooldown = weaponCooldown;
@@ -182,9 +186,9 @@ public class Revolver implements IWeapon {
     }
 
     @Override
-    public void tryApplyState(State state) {
-        if (state instanceof RevolverState) {
-            RevolverState stuff = (RevolverState) state;
+    public void tryApplyState(ObjectState state) {
+        if (state instanceof State) {
+            State stuff = (State) state;
             currentAmmo = stuff.currentAmmo;
             reserveAmmo = stuff.reserveAmmo;
             weaponCooldown = stuff.weaponCooldown;

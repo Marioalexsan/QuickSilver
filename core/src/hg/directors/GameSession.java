@@ -17,9 +17,9 @@ import hg.gamelogic.playerlogic.LocalPlayerLogic;
 import hg.gamelogic.playerlogic.LuigiAI;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.packets.SessionSettingsUpdate;
-import hg.enums.types.ActorType;
-import hg.enums.types.DirectorType;
-import hg.enums.types.MapType;
+import hg.enums.ActorType;
+import hg.enums.DirectorType;
+import hg.enums.MapType;
 import hg.utils.BadCoderException;
 import hg.utils.DebugLevels;
 
@@ -113,8 +113,8 @@ public class GameSession extends Director {
 
         manager.tryRetireDirector(DirectorType.LobbyMenu);
 
-        LevelLoader levelLoader = (LevelLoader) manager.tryAddDirector(DirectorType.LevelLoader);
-        levelLoader.loadMap(MapLibrary.CreatePrototype(settings.map));
+        Level level = (Level) manager.tryAddDirector(DirectorType.Level);
+        level.loadMap(MapLibrary.CreatePrototype(settings.map));
 
         boolean isServer = network.isLocalOrServer();
 
@@ -159,8 +159,8 @@ public class GameSession extends Director {
         GameManager manager = HgGame.Manager();
         NetworkEngine network = HgGame.Network();
 
-        LevelLoader levelLoader = (LevelLoader) manager.getDirector(DirectorType.LevelLoader);
-        if (levelLoader != null) levelLoader.unloadMap();
+        Level level = (Level) manager.getDirector(DirectorType.Level);
+        if (level != null) level.unloadMap();
 
         manager.clearActors();
         if (manager.localView != null)

@@ -113,9 +113,11 @@ public class BasicSpriteBuilder implements ICopy {
         else {
             sprite = new BasicSprite(_tex, _x, _y, _width, _height);
         }
-        if (_centerToRegion) sprite.centerToRegion();
-        else if (_centerToNW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight()));
-        else if (_centerToW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight() / 2f));
+        if (_tex != null) {
+            if (_centerToRegion) sprite.centerToRegion();
+            else if (_centerToNW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight()));
+            else if (_centerToW) sprite.setCenterOffset(new Vector2(0, _tex.getHeight() / 2f));
+        }
         sprite.setCameraUse(_cameraUse);
         sprite.getPosition().set(_position);
         sprite.getAngle().set(_angle);

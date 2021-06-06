@@ -8,7 +8,7 @@ import hg.engine.AssetEngine;
 import hg.entities.Entity;
 import hg.entities.Environment;
 import hg.game.HgGame;
-import hg.enums.types.EnvType;
+import hg.enums.EnvType;
 import hg.physics.*;
 import hg.utils.Angle;
 

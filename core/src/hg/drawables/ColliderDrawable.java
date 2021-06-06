@@ -9,6 +9,7 @@ import hg.game.HgGame;
 import hg.physics.Collider;
 import hg.interfaces.IPolygon;
 import hg.physics.SphereCollider;
+import hg.utils.GraphicsContext;
 import hg.utils.MathTools;
 
 import java.util.ArrayList;
@@ -47,14 +48,14 @@ public class ColliderDrawable extends Drawable {
     }
 
     @Override
-    public void draw(SpriteBatch batch) {
+    public void draw(GraphicsContext env) {
         Vector2 cameraOffset = HgGame.Graphics().getCameraOffset().scl(-1f); // Extra dependency
 
-        batch.end(); // End current batch
+        env.batch.end(); // End current batch
 
         // Copy / set batch properties
-        renderer.setProjectionMatrix(new Matrix4(batch.getProjectionMatrix()));
-        renderer.setTransformMatrix(new Matrix4(batch.getTransformMatrix()));
+        renderer.setProjectionMatrix(new Matrix4(env.batch.getProjectionMatrix()));
+        renderer.setTransformMatrix(new Matrix4(env.batch.getTransformMatrix()));
 
         renderer.setColor(color);
 
@@ -84,7 +85,7 @@ public class ColliderDrawable extends Drawable {
 
         renderer.end();
 
-        batch.begin(); // Resume current batch
+        env.batch.begin(); // Resume current batch
 
         if (phaseRetain >= 0f) {
             phaseRetain -= phaseSpeed;

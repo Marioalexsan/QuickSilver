@@ -1,8 +1,7 @@
 package hg.weapons;
 
-import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Vector2;
-import hg.animation.Animation;
+import hg.drawables.Animation;
 import hg.drawables.BasicSprite;
 import hg.drawables.Drawable;
 import hg.entities.Entity;
@@ -10,22 +9,26 @@ import hg.entities.Bullet;
 import hg.entities.PlayerEntity;
 import hg.game.HgGame;
 import hg.gamelogic.AttackStats;
-import hg.gamelogic.states.DBShotgunState;
-import hg.gamelogic.states.RevolverState;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.interfaces.IWeapon;
 import hg.networking.NetworkRole;
 import hg.physics.ColliderGroup;
-import hg.enums.types.ActorType;
+import hg.enums.ActorType;
 import hg.utils.Angle;
 import hg.utils.MathTools;
-
-import java.util.Random;
 
 /** A shotgun that shoots multiple pellets upon firing. Can do a Power Shot using secondary fire, where you fire both shells at the same time.
  * Knocks back the user upon shooting. Has high damage which falls off with distance due to spread.
  * Well placed Power Shots are likely to kill a player in one attack. */
 public class DBShotgun implements IWeapon {
+    public static class State extends ObjectState {
+        public int currentAmmo = 0;
+        public int reserveAmmo = 30;
+        public int weaponCooldown = 0;
+        public int reloadCounter = 0;
+        public float pushbackDirection = 0f;
+        public float pushbackPower = 0f;
+    }
 
     // Owner related stuff
 
@@ -34,14 +37,12 @@ public class DBShotgun implements IWeapon {
 
     // Weapon stats
 
-    private static final int ShotRandomSeed = 133742069;
-    private static final int ShotPelletCount = 12;
     private final int magazineSize = 2;
-    private final int maxTotalAmmo = 28;
+    private final int maxTotalAmmo = 16;
     private final int shotCooldown = 40;
     private final int timeToReload = 95;
-    private final int weaponPickupAmmo = 8;
-    private final int ammoPackAmmo = 4;
+    private final int weaponPickupAmmo = 6;
+    private final int ammoPackAmmo = 2;
 
     private float pushbackDirection = 0;
     private float pushbackPower = 0f;
@@ -62,7 +63,7 @@ public class DBShotgun implements IWeapon {
 
     @Override
     public String getAmmoDisplay() {
-        return currentAmmo + " / " + magazineSize + " [" + reserveAmmo + (currentAmmo + reserveAmmo == maxTotalAmmo ? " Max!" : "") + "]";
+        return IWeapon.getGenericAmmoDisplay(currentAmmo, magazineSize, reserveAmmo, maxTotalAmmo);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class DBShotgun implements IWeapon {
     public void setOwner(Entity entity) {
         owner = entity;
         if (owner != null) {
-            Drawable drawable = owner.getDrawableIfAny();
+            Drawable drawable = owner.getDrawable();
             if (drawable instanceof Animation) ownerAnimation = (Animation) drawable;
         }
     }
@@ -90,8 +91,8 @@ public class DBShotgun implements IWeapon {
             Vector2 moddedPos = new Vector2(spawnPosition).add(ownerAngle.normalVector().rotate90(-1).scl(MathTools.Interp((float) pellet / (count - 1), -4, 4)));
             var boolet = HgGame.Manager().addActor(ActorType.Bullet, moddedPos, moddedAngle.getDeg());
             ((Bullet) boolet).setSpeed(30);
-            boolet.getColliderIfAny().attackStats = new AttackStats(owner, 8f, ColliderGroup.Player);
-            ((BasicSprite) boolet.getDrawableIfAny()).setTexture(HgGame.Assets().loadTexture("Assets/Sprites/Projectiles/Pellet.png"));
+            boolet.getColliderArray()[0].attackStats = new AttackStats(owner, 8f, ColliderGroup.Player);
+            ((BasicSprite) boolet.getDrawableArray()[0]).setTexture(HgGame.Assets().loadTexture("Assets/Sprites/Projectiles/Pellet.png"));
         }
     }
 
@@ -207,8 +208,8 @@ public class DBShotgun implements IWeapon {
     }
 
     @Override
-    public State tryGetState() {
-        DBShotgunState stuff = new DBShotgunState();
+    public ObjectState tryGetState() {
+        State stuff = new State();
         stuff.currentAmmo = currentAmmo;
         stuff.reserveAmmo = reserveAmmo;
         stuff.weaponCooldown = weaponCooldown;
@@ -219,9 +220,9 @@ public class DBShotgun implements IWeapon {
     }
 
     @Override
-    public void tryApplyState(State state) {
-        if (state instanceof DBShotgunState) {
-            DBShotgunState stuff = (DBShotgunState) state;
+    public void tryApplyState(ObjectState state) {
+        if (state instanceof State) {
+            State stuff = (State) state;
             currentAmmo = stuff.currentAmmo;
             reserveAmmo = stuff.reserveAmmo;
             weaponCooldown = stuff.weaponCooldown;

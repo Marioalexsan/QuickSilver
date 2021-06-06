@@ -1,11 +1,10 @@
 package hg.libraries;
 
 import hg.interfaces.IWeapon;
-import hg.enums.types.WeaponType;
+import hg.enums.WeaponType;
 import hg.weapons.AssaultRifle;
 import hg.weapons.DBShotgun;
 import hg.weapons.Revolver;
-import org.sqlite.core.DB;
 
 /** Holds weapons used in the game. */
 public class WeaponLibrary {

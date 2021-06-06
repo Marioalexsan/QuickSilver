@@ -1,6 +1,6 @@
 package hg.networking.packets;
 
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.directors.MainMenu;
 import hg.directors.GameSession;
 import hg.game.GameManager;

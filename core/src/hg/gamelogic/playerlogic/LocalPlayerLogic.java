@@ -67,6 +67,8 @@ public class LocalPlayerLogic extends PlayerLogic {
             if (input.isActionTapped(MappedAction.WeaponFour)) actionsThisFrame.add(MappedAction.WeaponFour);
 
             if (input.isActionTapped(MappedAction.QuickSwitchWeapon)) actionsThisFrame.add(MappedAction.QuickSwitchWeapon);
+
+            if (input.isActionHeld(MappedAction.Boost)) actionsThisFrame.add(MappedAction.Boost);
         }
 
         return actionsThisFrame;

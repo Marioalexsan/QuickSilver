@@ -1,23 +1,22 @@
 package hg.gamelogic.gamemodes;
 
-import hg.directors.LevelLoader;
+import hg.directors.Level;
 import hg.drawables.DrawLayer;
-import hg.drawables.scoreboards.DeathmatchScoreboard;
-import hg.entities.pickups.Pickup;
-import hg.entities.spawners.Spawner;
-import hg.enums.types.DirectorType;
+import hg.drawables.DeathmatchScoreboard;
+import hg.entities.Pickup;
+import hg.entities.Spawner;
+import hg.enums.DirectorType;
 import hg.engine.NetworkEngine;
 import hg.entities.Entity;
 import hg.entities.PlayerEntity;
 import hg.game.DataManager;
 import hg.game.GameManager;
 import hg.game.HgGame;
-import hg.gamelogic.states.DeathmatchState;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.networking.PlayerView;
 import hg.networking.packets.NetInstruction;
-import hg.enums.types.GMType;
-import hg.enums.types.TargetType;
+import hg.enums.GMType;
+import hg.enums.TargetType;
 import hg.utils.DebugLevels;
 
 import java.util.ArrayList;
@@ -31,6 +30,25 @@ import java.util.Random;
  * - Spawns are randomized in the level
  */
 public class Deathmatch extends Gamemode {
+    public static class State extends ObjectState {
+        public int timeElapsed;
+        public int roundStart;
+        public int roundTime;
+        public int roundEnd;
+
+        public final HashMap<Integer, Integer> playerViewScores = new HashMap<>();
+        public int scoreToWin;
+
+        public void copyScores(HashMap<Integer, Integer> scores) {
+            playerViewScores.clear();
+            for (var score: scores.entrySet()) {
+                playerViewScores.put(score.getKey(), score.getValue());
+            }
+        }
+
+        public State() {} // For Kryonet
+    }
+
     private int timeElapsed = 0;
     private int roundStart = 180;
     private int roundTime = 18000;
@@ -130,6 +148,7 @@ public class Deathmatch extends Gamemode {
             }
         }
         scoreDrawable.updateScores(playerViewScores);
+        scoreDrawable.updateStatus(gameState, roundTime - timeElapsed);
     }
 
     private void startRound() {
@@ -152,14 +171,14 @@ public class Deathmatch extends Gamemode {
     // Only server calls this
     private void tryReviveDeadPlayers() {
         GameManager manager = HgGame.Manager();
-        LevelLoader levelLoader = (LevelLoader) manager.getDirector(DirectorType.LevelLoader);
+        Level level = (Level) manager.getDirector(DirectorType.Level);
         PlayerEntity[] deadPlayers = manager.getDeadPlayerEntities();
 
         for (var player: deadPlayers) {
             if (player.getStats().deathCounter > 180) {
                 player.revive();
-                if (levelLoader != null) {
-                    player.getPosition().set(levelLoader.getRandomSpawnpoint());
+                if (level != null) {
+                    player.getPosition().set(level.getRandomSpawnpoint());
 
                     NetInstruction msg = new NetInstruction(TargetType.Gamemodes, -1337, 4);
                     msg.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
@@ -249,11 +268,11 @@ public class Deathmatch extends Gamemode {
     }
 
     private void restartPlayer(PlayerEntity player) {
-        LevelLoader levelLoader = (LevelLoader) HgGame.Manager().getDirector(DirectorType.LevelLoader);
+        Level level = (Level) HgGame.Manager().getDirector(DirectorType.Level);
 
         player.revive();
-        if (levelLoader != null) {
-            player.getPosition().set(levelLoader.getRandomSpawnpoint());
+        if (level != null) {
+            player.getPosition().set(level.getRandomSpawnpoint());
 
             NetInstruction msg2 = new NetInstruction(TargetType.Gamemodes, -1337, 4);
             msg2.setInts(player.getID()).setFloats(player.getPosition().x, player.getPosition().y);
@@ -309,8 +328,8 @@ public class Deathmatch extends Gamemode {
     }
 
     @Override
-    public State tryGenerateState() {
-        DeathmatchState stuff = new DeathmatchState();
+    public ObjectState tryGenerateState() {
+        State stuff = new State();
         stuff.timeElapsed = timeElapsed;
         stuff.roundStart = roundStart;
         stuff.roundTime = roundTime;
@@ -321,9 +340,9 @@ public class Deathmatch extends Gamemode {
     }
 
     @Override
-    public void tryApplyState(State state) {
-        if (state instanceof DeathmatchState) {
-            DeathmatchState stuff = (DeathmatchState) state;
+    public void tryApplyState(ObjectState state) {
+        if (state instanceof State) {
+            State stuff = (State) state;
             timeElapsed = stuff.timeElapsed;
             roundStart = stuff.roundStart;
             roundTime = stuff.roundTime;

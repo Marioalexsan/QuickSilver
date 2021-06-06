@@ -1,20 +1,16 @@
 package hg.networking.packets;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.directors.Director;
 import hg.directors.GameSession;
 import hg.engine.NetworkEngine;
 import hg.entities.PlayerEntity;
-import hg.enums.types.ActorType;
-import hg.enums.types.DirectorType;
+import hg.enums.ActorType;
+import hg.enums.DirectorType;
 import hg.game.GameManager;
 import hg.game.HgGame;
-import hg.gamelogic.playerlogic.LocalPlayerLogic;
-import hg.gamelogic.playerlogic.LuigiAI;
 import hg.gamelogic.playerlogic.NetworkPlayerLogic;
 import hg.networking.Packet;
 import hg.networking.PlayerView;
-import hg.utils.BadCoderException;
 
 /** ClientInitRequest is sent by clients to tell the server some basic info, such as their name.
  * Servers parse this by creating a new player view, sending the connecting client the full playerview list, then telling

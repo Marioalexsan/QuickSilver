@@ -2,10 +2,10 @@ package hg.drawables;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import hg.game.HgGame;
 import hg.interfaces.IEnable;
 import hg.utils.Angle;
+import hg.utils.GraphicsContext;
 
 /** Drawable is the base class for graphical components. Drawables have to be registered to GraphicsEngine to be used. */
 public abstract class Drawable implements IEnable {
@@ -27,7 +27,7 @@ public abstract class Drawable implements IEnable {
 
     public Drawable() {}
 
-    public abstract void draw(SpriteBatch batch);
+    public abstract void draw(GraphicsContext env);
 
     public void registerToEngine() {
         HgGame.Graphics().registerDrawable(this);

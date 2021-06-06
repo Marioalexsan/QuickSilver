@@ -1,7 +1,7 @@
 package hg.gamelogic.gamemodes;
 
 import hg.entities.Entity;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.INetInterface;
 import hg.interfaces.IUpdateable;
@@ -28,11 +28,11 @@ public abstract class Gamemode implements IUpdateable, INetInterface, IDestroyab
 
     abstract public void restart();
 
-    public State tryGenerateState() {
+    public ObjectState tryGenerateState() {
         return null;
     }
 
-    public void tryApplyState(State state) { }
+    public void tryApplyState(ObjectState state) { }
 
     // Some generic callbacks
 

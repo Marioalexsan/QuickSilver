@@ -2,7 +2,7 @@ package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import hg.drawables.Drawable;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.gamelogic.BaseStats;
 import hg.interfaces.IDestroyable;
 import hg.interfaces.INetInterface;
@@ -61,21 +61,29 @@ public abstract class Entity implements ICollisionObserver, IUpdateable, IDestro
         return toBeDestroyed;
     }
 
-    public Drawable getDrawableIfAny() {
+    public Drawable getDrawable() {
         return null;
     }
 
-    public Collider getColliderIfAny() {
+    public Collider getCollider() {
+        return null;
+    }
+
+    public Drawable[] getDrawableArray() {
+        return null;
+    }
+
+    public Collider[] getColliderArray() {
         return null;
     }
 
     /** Generates a state that can be sent over network. Used by Servers. */
-    public State tryGenerateState() {
+    public ObjectState tryGenerateState() {
         return null;
     }
 
     /** Applies a state that was sent over the network. Used by Clients */
-    public void tryApplyState(State state) { }
+    public void tryApplyState(ObjectState state) { }
 
     /** Applies some conditional state changes. Called by Level director during map actor instantiation. */
     public void tryApplyDescription(Description desc) { }

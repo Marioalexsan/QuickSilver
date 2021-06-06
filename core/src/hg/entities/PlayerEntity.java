@@ -1,9 +1,10 @@
 package hg.entities;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.animation.*;
+import hg.drawables.Animation;
+import hg.drawables.gfxeffects.AfterImage;
 import hg.libraries.WeaponLibrary;
-import hg.enums.types.DirectorType;
+import hg.enums.DirectorType;
 import hg.directors.GameSession;
 import hg.drawables.DrawLayer;
 import hg.drawables.Drawable;
@@ -13,8 +14,7 @@ import hg.game.GameManager;
 import hg.game.HgGame;
 import hg.gamelogic.gamemodes.Gamemode;
 import hg.gamelogic.playerlogic.LocalPlayerLogic;
-import hg.gamelogic.states.PlayerState;
-import hg.gamelogic.states.State;
+import hg.gamelogic.ObjectState;
 import hg.gamelogic.BaseStats;
 import hg.gamelogic.AttackStats;
 import hg.interfaces.IWeapon;
@@ -25,8 +25,8 @@ import hg.physics.ColliderGroup;
 import hg.physics.SphereCollider;
 import hg.gamelogic.playerlogic.EmptyAI;
 import hg.gamelogic.playerlogic.PlayerLogic;
-import hg.enums.types.TargetType;
-import hg.enums.types.WeaponType;
+import hg.enums.TargetType;
+import hg.enums.WeaponType;
 import hg.utils.DebugLevels;
 import hg.utils.MathTools;
 import hg.weapons.Revolver;
@@ -36,16 +36,38 @@ import java.util.HashMap;
 
 /** PlayerEntity is the player character. It can either be controlled by an AI, a human behind a keyboard, or over the network! */
 public class PlayerEntity extends Entity {
+    public static class State extends ObjectState.PositionState {
+        public float smoothSpeedX;
+        public float smoothSpeedY;
+        public float boostSpeedX;
+        public float boostSpeedY;
+        public int boostCooldown;
+        public BaseStats baseStats; // Does not send Entity
+
+        public int currentWeapon;
+        public HashMap<Integer, ObjectState> weaponStates;
+    }
+
     private PlayerLogic playerLogic;
-    private final Vector2 smoothSpeed = new Vector2();
 
     protected Animation drawable = new Animation();
     protected SphereCollider collider = new SphereCollider(50);
+
+    protected final Vector2 smoothSpeed = new Vector2();
+    protected final Vector2 boostSpeed = new Vector2();
+    protected int boostCooldown = 0;
 
     protected HashMap<Integer, IWeapon> weapons = new HashMap<>();
 
     protected int lastWeapon;
     protected int currentWeapon;
+
+    protected int localOnly_boostImageCycle = 0;
+
+    private static final float BoostStaminaCost = 45f;
+    private static final int BoostCooldownToSet = 30;
+    private static final float BoostStrength = 30f;
+    private static final int BoostInvulnerability = 16;
 
     public PlayerEntity(PlayerLogic playerLogic) {
         setLogic(playerLogic);
@@ -118,9 +140,7 @@ public class PlayerEntity extends Entity {
 
         drawable.update();
 
-        if (isServer) {
-            baseStats.update();
-        }
+        baseStats.update();
 
         playerLogic.update();
         var actions = playerLogic.obtainActions();
@@ -144,11 +164,29 @@ public class PlayerEntity extends Entity {
         }
 
         float decayFactor = baseStats.isDead ? 0.07f : 0.22f;
-        float totalMoveSpeed = baseStats.baseMoveSpeed * (baseStats.heavyArmor > 0 ? 0.83f : 1f);
+        float totalMoveSpeed = baseStats.baseMoveSpeed * (baseStats.heavyArmor > 0 ? 0.9f : 1f);
 
         Vector2 targetSpeed = new Vector2(moveDirection).nor().scl(totalMoveSpeed);
         smoothSpeed.add(targetSpeed.sub(smoothSpeed).scl(decayFactor));
         move(smoothSpeed);
+
+        if (!boostSpeed.isZero()) {
+            localOnly_boostImageCycle = (localOnly_boostImageCycle + 1) % 2;
+            if (localOnly_boostImageCycle == 0) {
+                AfterImage hax = new AfterImage(drawable, 32);
+                if (baseStats.invulnerabilityFrames == 0) {
+                    hax.getColor().mul(0.66f, 0.66f, 0.66f, 0.45f);
+                }
+                hax.getColor().mul(1f, 1f, 1f, 0.5f + 0.5f * boostSpeed.len() / BoostStrength);
+                HgGame.Manager().addGFXEffectToManage(hax);
+            }
+
+            move(boostSpeed);
+            boostSpeed.scl(0.9f);
+            if (boostSpeed.isZero(3f)) boostSpeed.set(0, 0);
+        }
+
+        if (boostCooldown > 0) boostCooldown--;
 
         // Resolve aim direction
 
@@ -158,8 +196,8 @@ public class PlayerEntity extends Entity {
 
             IWeapon heldWeapon = weapons.get(currentWeapon);
 
-            if (heldWeapon != null) {
-                if (actions != null) {
+            if (actions != null) {
+                if (heldWeapon != null) {
                     if (actions.contains(MappedAction.QuickSwitchWeapon)) tryWeaponSwitch(lastWeapon);
                     else if (actions.contains(MappedAction.WeaponOne)) tryWeaponSwitch(WeaponType.Revolver);
                     else if (actions.contains(MappedAction.WeaponTwo)) tryWeaponSwitch(WeaponType.AssaultRifle);
@@ -167,8 +205,12 @@ public class PlayerEntity extends Entity {
                     else if (actions.contains(MappedAction.Reload)) heldWeapon.onReload();
                     else if (actions.contains(MappedAction.PrimaryFire)) heldWeapon.onPrimaryFire();
                     else if (actions.contains(MappedAction.SecondaryFire)) heldWeapon.onSecondaryFire();
+
+                    heldWeapon.onUpdate();
                 }
-                heldWeapon.onUpdate();
+
+                if (actions.contains(MappedAction.Boost)) tryBoost(moveDirection);
+
             }
         }
 
@@ -263,7 +305,7 @@ public class PlayerEntity extends Entity {
             if (heldWeapon != null) heldWeapon.onOwnerDeath();
 
             if (network.isLocalOrServer()) {
-                NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 1).setInts(killer.ID);
+                NetInstruction msg = new NetInstruction(TargetType.Actors, ID, 1).setInts(killer != null ? killer.ID : -1);
                 HgGame.Network().sendToAllClients(msg, true);
             }
         }
@@ -322,6 +364,8 @@ public class PlayerEntity extends Entity {
         GameManager manager = HgGame.Manager();
         if (this == manager.localView.playerEntity) HgGame.SetNotice("Healed " + (int) amount + " HP!", 35);
         baseStats.health = Math.min(baseStats.health + amount, baseStats.maxHealth);
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
     }
 
     public void obtainArmorPlates(int count) {
@@ -329,6 +373,8 @@ public class PlayerEntity extends Entity {
         if (this == manager.localView.playerEntity)
             HgGame.SetNotice("Obtained " + (count == 1 ? "an" : count) + " Armor Plate" + (count == 1 ? "" : "s") + "!", 35);
         baseStats.armorPlates = Math.min(baseStats.armorPlates + count, baseStats.maxArmorPlates);
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
     }
 
     public void obtainVest() {
@@ -336,6 +382,8 @@ public class PlayerEntity extends Entity {
         if (this == manager.localView.playerEntity)
             HgGame.SetNotice("Obtained Kevlar Vest!", 35);
         baseStats.hasKevlarVest = true;
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
     }
 
     public void obtainHeavyArmor(float amount) {
@@ -343,6 +391,8 @@ public class PlayerEntity extends Entity {
         if (this == manager.localView.playerEntity)
             HgGame.SetNotice("Obtained Heavy Armor!", 35);
         baseStats.heavyArmor = Math.min(baseStats.heavyArmor + amount, baseStats.maxHeavyArmor);
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
     }
 
     public void removeWeapon(int weapon) {
@@ -360,8 +410,13 @@ public class PlayerEntity extends Entity {
     }
 
     @Override
-    public Drawable getDrawableIfAny() {
+    public Drawable getDrawable() {
         return drawable;
+    }
+
+    @Override
+    public Drawable[] getDrawableArray() {
+        return new Drawable[] { drawable };
     }
 
     public void onWeaponPickup(int type) {
@@ -369,6 +424,8 @@ public class PlayerEntity extends Entity {
 
         IWeapon existing = weapons.get(type);
         boolean doNotice = this == manager.localView.playerEntity;
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
 
         if (existing != null) {
             existing.onWeaponPickup();
@@ -397,15 +454,30 @@ public class PlayerEntity extends Entity {
             existing.onAmmoPackPickup();
         }
         if (doNotice) HgGame.SetNotice("Picked up some ammo!", 35);
+
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/magin.ogg"), 1f, position);
+    }
+
+    public void tryBoost(Vector2 moveDirection) {
+        if (moveDirection.isZero() || boostCooldown > 0 || baseStats.stamina < BoostStaminaCost) return;
+        HgGame.Audio().playSound(HgGame.Assets().loadSound("Assets/Audio/boost.ogg"), 1f, position);
+        baseStats.stamina -= BoostStaminaCost;
+        boostSpeed.set(new Vector2(moveDirection).nor().scl(BoostStrength));
+        boostCooldown = BoostCooldownToSet;
+        baseStats.invulnerabilityFrames = BoostInvulnerability;
+        baseStats.staminaRegenCooldown = baseStats.staminaRegenCooldownToSet;
     }
 
     @Override
-    public State tryGenerateState() {
-        PlayerState stuff = new PlayerState();
+    public ObjectState tryGenerateState() {
+        State stuff = new State();
         stuff.copyPosition(this);
         stuff.smoothSpeedX = smoothSpeed.x;
         stuff.smoothSpeedY = smoothSpeed.y;
+        stuff.boostSpeedX = boostSpeed.x;
+        stuff.boostSpeedY = boostSpeed.y;
         stuff.baseStats = baseStats;
+        stuff.boostCooldown = boostCooldown;
 
         stuff.currentWeapon = currentWeapon;
 
@@ -417,11 +489,13 @@ public class PlayerEntity extends Entity {
     }
 
     @Override
-    public void tryApplyState(State state) {
-        if (state instanceof PlayerState) {
-            PlayerState stuff = (PlayerState) state;
+    public void tryApplyState(ObjectState state) {
+        if (state instanceof State) {
+            State stuff = (State) state;
             stuff.applyPosition(this);
             smoothSpeed.set(stuff.smoothSpeedX, stuff.smoothSpeedY);
+            boostSpeed.set(stuff.boostSpeedX, stuff.boostSpeedY);
+            boostCooldown = stuff.boostCooldown;
             baseStats.copyFrom(stuff.baseStats);
             currentWeapon = stuff.currentWeapon;
 

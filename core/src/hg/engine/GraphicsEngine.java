@@ -2,24 +2,16 @@ package hg.engine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
 import hg.drawables.Drawable;
 import hg.game.HgGame;
-import hg.enums.HPos;
 import hg.utils.GFXTools;
+import hg.utils.GraphicsContext;
 import hg.utils.MathTools;
-import hg.enums.VPos;
 
 import java.util.*;
 
@@ -30,8 +22,8 @@ public class GraphicsEngine {
     private final SpriteBatch batch;
 
     private Vector2 currentResolution = new Vector2(0, 0);
-    private static final OrthographicCamera camera = new OrthographicCamera(HgGame.WorldWidth, HgGame.WorldHeight);
-    private static final Vector2 cameraOffset = new Vector2();
+    private final OrthographicCamera camera = new OrthographicCamera(HgGame.WorldWidth, HgGame.WorldHeight);
+    private final Vector2 cameraOffset = new Vector2();
 
     private final HashSet<Drawable> drawableLibrary = new HashSet<>();
 
@@ -117,7 +109,6 @@ public class GraphicsEngine {
         Graphics.DisplayMode[] allModes = Gdx.graphics.getDisplayModes();
         ArrayList<Rectangle> compatibleResolutions = new ArrayList<>();
 
-        Graphics.DisplayMode bestMatch = null;
         for (var resolution : resolutionSelection) {
             for (var mode : allModes) {
                 if (mode.width == resolution.width && mode.height == resolution.height) {
@@ -157,8 +148,9 @@ public class GraphicsEngine {
 
         // Draw everything that is enabled
         batch.begin();
+        GraphicsContext context = new GraphicsContext(batch, camera, cameraOffset);
         for (var drawable : heightSortedDrawables) {
-            if (drawable.isActive()) drawable.draw(batch);
+            if (drawable.isActive()) drawable.draw(context);
         }
         batch.end();
     }
@@ -166,72 +158,4 @@ public class GraphicsEngine {
     public void cleanup() {
         batch.dispose();
     }
-
-    // Following static helper functions are used by Drawables for reducing implementation junk
-
-    /** Renders the given texture region with the given parameters to the sprite batch */
-    public static void RenderTextureRegion(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, TextureRegion textureRegion, boolean mirror, boolean flip) {
-        batch.setColor(color);
-        Affine2 targetTransform = new Affine2(transform);
-        if (!useCamera) {
-            // Move the texture into camera's view so that it's invariant to its positioning
-            targetTransform.preScale(camera.zoom, camera.zoom).preTranslate(
-                    camera.position.x,
-                    camera.position.y
-            );
-        }
-        else {
-            // Apply FOV translation
-            targetTransform.preTranslate(new Vector2(cameraOffset).scl(-1f));
-        }
-
-        if (flip || mirror) {
-            targetTransform.translate(mirror ? textureRegion.getRegionWidth() : 0, flip ? textureRegion.getRegionHeight() : 0);
-            targetTransform.scale(mirror ? -1f : 1f, flip ? -1f : 1f);
-        }
-
-        batch.draw(textureRegion, textureRegion.getRegionWidth(), textureRegion.getRegionHeight(), targetTransform);
-    }
-
-    // Functionality resembles RenderCopyEx from SDL
-    // Transforms the output if the drawable doesn't use the camera
-    public static void RenderText(SpriteBatch batch, Affine2 transform, Color color, boolean useCamera, BitmapFont font, String text, HPos hpos, VPos vpos, float wrap) {
-        //font.setColor(color);
-        Affine2 targetTransform = new Affine2(transform);
-
-        float halign = 0f;
-        switch (hpos) {
-            case Center -> halign = -0.5f;
-            case Right -> halign = -1f;
-        }
-
-        float valign = 0f;
-        switch (vpos) {
-            case Center -> valign = 0.5f;
-            case Bottom -> valign = 1f;
-        }
-
-        GlyphLayout layout = new GlyphLayout(font, text, color, wrap, Align.left, wrap > 0f);
-        targetTransform.translate(new Vector2(layout.width * halign, layout.height * valign));
-
-        if (!useCamera) {
-            // Move the texture into camera's view so that it's invariant to its positioning
-            targetTransform.preScale(camera.zoom, camera.zoom).preTranslate(
-                    camera.position.x,
-                    camera.position.y
-            );
-        }
-        else {
-            // Apply FOV translation
-            targetTransform.preTranslate(new Vector2(cameraOffset).scl(-1f));
-        }
-
-        Matrix4 old = new Matrix4(batch.getTransformMatrix());
-        batch.setTransformMatrix(new Matrix4().set(targetTransform));
-
-        font.draw(batch, layout, 0, 0);
-
-        batch.setTransformMatrix(old);
-    }
-
 }

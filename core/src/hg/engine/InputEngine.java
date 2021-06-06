@@ -63,6 +63,7 @@ public class InputEngine {
         keyActionMap.put(MappedAction.WeaponFour, Input.Keys.NUM_4);
 
         keyActionMap.put(MappedAction.ChatSubmit, Input.Keys.ENTER);
+        keyActionMap.put(MappedAction.Boost, Input.Keys.SHIFT_LEFT);
     }
 
     public void update() {

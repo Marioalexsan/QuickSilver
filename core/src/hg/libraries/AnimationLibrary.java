@@ -1,11 +1,7 @@
 package hg.libraries;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.animation.ActCriteria;
-import hg.animation.ActEffect;
-import hg.animation.ActInstruction;
-import hg.animation.AnimationInfo;
-import hg.drawables.AnimatedSprite;
+import hg.drawables.Animation;
 
 import java.util.HashMap;
 
@@ -13,92 +9,92 @@ import java.util.HashMap;
 
 /** Holds animations used in the game. */
 public class AnimationLibrary {
-    private static final HashMap<String, AnimationInfo> prototypes = new HashMap<>();
+    private static final HashMap<String, Animation.Data> prototypes = new HashMap<>();
 
-    public static AnimationInfo GetAnimationInfo(String info) {
-        AnimationInfo obj = prototypes.get(info);
-        return obj != null ? new AnimationInfo(obj) : null;
+    public static Animation.Data GetAnimationInfo(String info) {
+        Animation.Data obj = prototypes.get(info);
+        return obj != null ? new Animation.Data(obj) : null;
     }
 
     static {
-        AnimationInfo anim1 = new AnimationInfo("Assets/Sprites/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        Animation.Data anim1 = new Animation.Data("Assets/Sprites/Player/Rifle_Idle.png", 96, 105, 1, 1, 0, Animation.PlayMode.Static, null);
         anim1.cenOffset.set(new Vector2(48, 31));
         anim1.textureAngle.set(-90f);
         prototypes.put("Player_Rifle_Idle", anim1);
 
-        AnimationInfo anim2 = new AnimationInfo("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magin.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "17"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/receiverpull.ogg")),
+        Animation.Data anim2 = new Animation.Data("Assets/Sprites/Player/Rifle_Reload.png", 98, 105, 20, 20, 6, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "3"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "14"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/magin.ogg")),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "17"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/receiverpull.ogg")),
         });
         anim2.cenOffset.set(new Vector2(48, 31));
         anim2.textureAngle.set(-90f);
         prototypes.put("Player_Rifle_Reload", anim2);
 
-        AnimationInfo anim3 = new AnimationInfo("Assets/Sprites/Player/Dead.png", 150, 250, 8, 8, 3, AnimatedSprite.PlayMode.PlayAndFreeze, null);
+        Animation.Data anim3 = new Animation.Data("Assets/Sprites/Player/Dead.png", 150, 250, 8, 8, 3, Animation.PlayMode.PlayAndFreeze, null);
         anim3.cenOffset.set(new Vector2(75, 119));
         anim3.textureAngle.set(-90f);
         prototypes.put("Player_Death", anim3);
 
-        AnimationInfo anim4 = new AnimationInfo("Assets/Sprites/Player/Rifle_Shoot.png", 96, 106, 4, 4, 2, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg"))
+        Animation.Data anim4 = new Animation.Data("Assets/Sprites/Player/Rifle_Shoot.png", 96, 106, 4, 4, 2, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.Start), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/shot.ogg"))
         });
         anim4.cenOffset.set(new Vector2(48, 31));
         anim4.textureAngle.set(-90f);
         prototypes.put("Player_Rifle_Shoot", anim4);
 
-        AnimationInfo anim5 = new AnimationInfo("Assets/Sprites/Player/Revolver_Idle.png", 95, 100, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        Animation.Data anim5 = new Animation.Data("Assets/Sprites/Player/Revolver_Idle.png", 95, 100, 1, 1, 0, Animation.PlayMode.Static, null);
         anim5.cenOffset.set(new Vector2(48, 31));
         anim5.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Idle", anim5);
 
-        AnimationInfo anim6 = new AnimationInfo("Assets/Sprites/Player/Revolver_Shoot.png", 95, 100, 7, 7, 4, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg"))
+        Animation.Data anim6 = new Animation.Data("Assets/Sprites/Player/Revolver_Shoot.png", 95, 100, 7, 7, 4, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.Start), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/shot.ogg"))
         });
         anim6.cenOffset.set(new Vector2(48, 31));
         anim6.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Shoot", anim6);
 
-        AnimationInfo anim7 = new AnimationInfo("Assets/Sprites/Player/Revolver_Reload.png", 95, 100, 20, 20, 6, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "7"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magin.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "14"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+        Animation.Data anim7 = new Animation.Data("Assets/Sprites/Player/Revolver_Reload.png", 95, 100, 20, 20, 6, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "7"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/magin.ogg")),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "14"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/magout.ogg")),
         });
         anim7.cenOffset.set(new Vector2(48, 31));
         anim7.textureAngle.set(-90f);
         prototypes.put("Player_Revolver_Reload", anim7);
 
-        AnimationInfo anim8 = new AnimationInfo("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "2"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.Delay, 16f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "4"), new ActEffect(ActEffect.Type.Delay, 3f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "5"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "6"), new ActEffect(ActEffect.Type.Delay, 1f)),
+        Animation.Data anim8 = new Animation.Data("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.Start), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/shot.ogg")),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "2"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "3"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 16f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "4"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 3f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "5"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "6"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 1f)),
         });
         anim8.cenOffset.set(new Vector2(75, 68));
         anim8.textureAngle.set(-90f);
         prototypes.put("Player_Shotgun_PowerShoot", anim8);
 
-        AnimationInfo anim9 = new AnimationInfo("Assets/Sprites/Player/Shotgun_Reload.png", 150, 200, 16, 16, 5, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "13"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "12"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "12"), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/magout.ogg")),
+        Animation.Data anim9 = new Animation.Data("Assets/Sprites/Player/Shotgun_Reload.png", 150, 200, 16, 16, 5, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "13"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "12"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "12"), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/magout.ogg")),
         });
         anim9.cenOffset.set(new Vector2(75, 68));
         anim9.textureAngle.set(-90f);
         prototypes.put("Player_Shotgun_Reload", anim9);
 
-        AnimationInfo anim10 = new AnimationInfo("Assets/Sprites/Player/Shotgun_Idle.png", 150, 200, 1, 1, 0, AnimatedSprite.PlayMode.Static, null);
+        Animation.Data anim10 = new Animation.Data("Assets/Sprites/Player/Shotgun_Idle.png", 150, 200, 1, 1, 0, Animation.PlayMode.Static, null);
         anim10.cenOffset.set(new Vector2(75, 68));
         anim10.textureAngle.set(-90f);
         prototypes.put("Player_Shotgun_Idle", anim10);
 
-        AnimationInfo anim11 = new AnimationInfo("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, AnimatedSprite.PlayMode.PlayOnce, new ActInstruction[] {
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtStart), new ActEffect(ActEffect.Type.PlaySound, "Assets/Audio/shot.ogg")),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "2"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "3"), new ActEffect(ActEffect.Type.Delay, 6f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "4"), new ActEffect(ActEffect.Type.Delay, 2f)),
-                new ActInstruction(new ActCriteria(ActCriteria.Type.TriggerAtFrameX, "5"), new ActEffect(ActEffect.Type.Delay, 1f)),
+        Animation.Data anim11 = new Animation.Data("Assets/Sprites/Player/Shotgun_PowerShoot.png", 150, 200, 8, 8, 3, Animation.PlayMode.PlayOnce, new Animation.ActInstruction[] {
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.Start), new Animation.Effect(Animation.Effect.Type.PlaySound, "Assets/Audio/shot.ogg")),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "2"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "3"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 6f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "4"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 2f)),
+                new Animation.ActInstruction(new Animation.Trigger(Animation.Trigger.Type.FrameX, "5"), new Animation.Effect(Animation.Effect.Type.FrameDelay, 1f)),
         });
         anim11.cenOffset.set(new Vector2(75, 68));
         anim11.textureAngle.set(-90f);

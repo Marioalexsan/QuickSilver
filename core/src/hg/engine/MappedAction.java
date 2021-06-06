@@ -17,4 +17,5 @@ public class MappedAction {
     public static final int WeaponThree = 11;
     public static final int WeaponFour = 12;
     public static final int ChatSubmit = 14;
+    public static final int Boost = 15;
 }

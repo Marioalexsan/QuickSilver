@@ -1,11 +1,11 @@
 package hg.libraries;
 
 import com.badlogic.gdx.math.Vector2;
-import hg.enums.types.ActorType;
-import hg.enums.types.EnvType;
+import hg.enums.ActorType;
+import hg.enums.EnvType;
 import hg.maps.Description;
 import hg.maps.MapPrototype;
-import hg.enums.types.MapType;
+import hg.enums.MapType;
 
 // TODO Make a Tiler object to deal with the axis-aligned environments
 // TODO Rename rooms

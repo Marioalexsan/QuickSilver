@@ -1,12 +1,16 @@
 package hg.networking;
 
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 import hg.directors.GameSession;
+import hg.entities.*;
 import hg.gamelogic.BaseStats;
-import hg.gamelogic.states.*;
+import hg.gamelogic.gamemodes.Deathmatch;
 import hg.networking.packets.*;
+import hg.weapons.AssaultRifle;
 import hg.weapons.DBShotgun;
+import hg.weapons.Revolver;
 
 import java.util.HashMap;
 
@@ -14,6 +18,7 @@ import java.util.HashMap;
 public class NetworkHelper {
     public static void KryonetRegisterClasses(EndPoint point) {
         Kryo kryo = point.getKryo();
+
         // The order of registering could be changed to improve serialization!
 
         // Packets
@@ -43,17 +48,20 @@ public class NetworkHelper {
 
         // States
 
-        kryo.register(AssaultRifleState.class);
-        kryo.register(BulletState.class);
-        kryo.register(DBShotgunState.class);
-        kryo.register(DeathmatchState.class);
-        kryo.register(PickupState.class);
-        kryo.register(PlayerState.class);
-        kryo.register(RevolverState.class);
-        kryo.register(SpawnerState.class);
+        kryo.register(AssaultRifle.State.class);
+        kryo.register(Bullet.State.class);
+        kryo.register(DBShotgun.State.class);
+        kryo.register(Deathmatch.State.class);
+        kryo.register(Pickup.State.class);
+        kryo.register(PlayerEntity.State.class);
+        kryo.register(Revolver.State.class);
+        kryo.register(Spawner.State.class);
+        kryo.register(GenericSpawner.State.class);
+        kryo.register(GenericPickup.State.class);
 
         // Other
 
+        kryo.register(Vector2.class);
         kryo.register(EntityAdded[].class);
         kryo.register(GameSession.SessionOptions.class);
         kryo.register(int[].class);

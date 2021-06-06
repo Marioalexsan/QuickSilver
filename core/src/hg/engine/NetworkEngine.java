@@ -95,8 +95,8 @@ public class NetworkEngine {
     private final ArrayList<Integer> recentlyDisconnected = new ArrayList<>(); // Clients disconnected since last dump
 
     public NetworkEngine() {
-        kryonetClient = new Client();
-        kryonetServer = new Server() {
+        kryonetClient = new Client(32768, 8192);
+        kryonetServer = new Server(65536, 8192) {
             @Override
             public Connection newConnection() {
                 return new ConnectedClient();

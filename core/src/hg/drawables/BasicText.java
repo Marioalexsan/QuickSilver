@@ -1,12 +1,11 @@
 package hg.drawables;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Affine2;
-import hg.engine.GraphicsEngine;
 import hg.enums.HPos;
 import hg.utils.GFXTools;
 import hg.enums.VPos;
+import hg.utils.GraphicsContext;
 
 /** TO DO: Take a look at GlyphLayout / GlyphRun
  * Drawable that renders text using a BitmapFont.
@@ -43,12 +42,12 @@ public class BasicText extends Drawable {
     }
 
     @Override
-    public void draw(SpriteBatch batch) {
+    public void draw(GraphicsContext env) {
         if (font == null || text == null) {
             return;
         }
 
-        Affine2 transform = GFXTools.GetAffineForPCAO(position, center, angle, posOffset, cenOffset, angOffset);
-        GraphicsEngine.RenderText(batch, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
+        Affine2 transform = GFXTools.AffineFromPCAO(position, center, angle, posOffset, cenOffset, angOffset);
+        GFXTools.RenderText(env, transform, color, relativeToCamera, font, text, hpos, vpos, wrap);
     }
 }

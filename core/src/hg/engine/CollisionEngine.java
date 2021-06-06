@@ -8,6 +8,7 @@ import hg.game.HgGame;
 import hg.interfaces.IPolygon;
 import hg.physics.*;
 import hg.utils.Angle;
+import hg.utils.BadCoderException;
 
 import java.util.*;
 
@@ -65,18 +66,36 @@ public class CollisionEngine {
         }
     }
 
+    private static class ColliderEngineData {
+        Collider collider;
+        Vector2 lastCenterPos;
+
+        public ColliderEngineData(Collider collider) {
+            this.collider = collider;
+        }
+
+        @Override
+        public int hashCode() { return collider.hashCode(); }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (other == null || getClass() != other.getClass()) return false;
+            return collider == ((ColliderEngineData)other).collider;
+        }
+    }
+
     public static final float CELL_SIZE = 200f;
 
     private boolean debugDrawEnabled = false;
 
-    private final HashSet<Collider> colliderLibrary = new HashSet<>();
-    private final HashMap<IntPair, HashSet<Collider>> spatialHashMap = new HashMap<>();
+    private final HashSet<ColliderEngineData> colliderLibrary = new HashSet<>();
+    private final HashMap<IntPair, HashSet<ColliderEngineData>> spatialHashMap = new HashMap<>();
 
     private final ColliderDrawable colliderVision = new ColliderDrawable();
     private final BasicText colliderCount = new BasicText();
 
     public CollisionEngine() {
-        colliderCount.setFont(HgGame.Assets().loadFont("Assets/Fonts/CourierNew48.fnt"));
         colliderCount.setPosition(new Vector2(-880, 480));
         colliderCount.setLayer(DrawLayer.GUIDefault);
         colliderCount.setCameraUse(false);
@@ -97,12 +116,16 @@ public class CollisionEngine {
 
         HashSet<ColliderPair> checkedPairs = new HashSet<>();
 
-        for (Collider A : colliderLibrary) {
+        for (ColliderEngineData AData : colliderLibrary) {
+            Collider A = AData.collider;
+
             if (!A.isActive()) continue;
             if (A.isHeavy() && A.attackStats == null && A.baseStats == null) continue;
 
-            ArrayList<Collider> sortedCandidates = getCollisionCandidates(A);
-            for (Collider B : sortedCandidates) {
+            ArrayList<ColliderEngineData> sortedCandidates = getCollisionCandidates(AData);
+            for (ColliderEngineData BData : sortedCandidates) {
+                Collider B = BData.collider;
+
                 if (!B.isActive()) continue;
                 if (A == B) continue;
 
@@ -121,19 +144,29 @@ public class CollisionEngine {
 
                 // Mass logic can be improved
 
-                SATResults results = CollisionAlgorithms.CheckCollisionSAT(A, B);
+                int stepsToUse = 1;
+
+                if (AData.lastCenterPos != null && BData.lastCenterPos != null) {
+                    Vector2 AVelocity = new Vector2(A.trueCenter()).sub(AData.lastCenterPos); // How much they moved since last frame
+                    Vector2 BVelocity = new Vector2(B.trueCenter()).sub(BData.lastCenterPos);
+                    float relativeVel = new Vector2(AVelocity).sub(BVelocity).len();
+
+                    if (relativeVel > 20) stepsToUse = 2;
+                    if (relativeVel > 30) stepsToUse = 3;
+                    if (relativeVel > 40) stepsToUse = 4;
+                    if (relativeVel > 50) stepsToUse = 5;
+                }
+
+                SATResults results = SATStepCheckCollision(AData, BData, stepsToUse, doMovement);
+
                 if (results.collision) {
 
                     if (doMovement) {
-                        float AMass = Math.max(A.getMass(), 1);
-                        float BMass = Math.max(B.getMass(), 1);
-                        float total = AMass + BMass;
+                        float APushback = getAPushFactor(A, B);
+                        float BPushback = 1f - APushback;
 
-                        float APushback = A.isHeavy() ? 0f : (B.isHeavy() ? 1f : BMass / total); // The heavier the other object, the more you push this one
-                        float BPushback = B.isHeavy() ? 0f : (A.isHeavy() ? 1f : AMass / total);
-
-                        if (APushback != 0f) A.getPosition().add(new Vector2(results.mtv).scl(-APushback));
-                        if (BPushback != 0f) B.getPosition().add(new Vector2(results.mtv).scl(BPushback));
+                        if (APushback != 0f) A.getPosition().add(new Vector2(results.mtv).add(results.APositionDelta).scl(-APushback));
+                        if (BPushback != 0f) B.getPosition().add(new Vector2(results.mtv).add(results.BPositionDelta).scl(BPushback));
 
                     }
 
@@ -156,6 +189,64 @@ public class CollisionEngine {
                 }
             }
         }
+    }
+
+    private float getAPushFactor(Collider A, Collider B) {
+        float AMass = Math.max(A.getMass(), 1);
+        float BMass = Math.max(B.getMass(), 1);
+        float total = AMass + BMass;
+
+        float APushback = A.isHeavy() ? 0f : (B.isHeavy() ? 1f : BMass / total); // The heavier the other object, the more you push this one
+        return APushback;
+    }
+
+    private SATResults SATStepCheckCollision(ColliderEngineData AData, ColliderEngineData BData, int steps, boolean simulateAll) {
+        if (steps < 1) throw new BadCoderException("Can't do collisions with less than 1 step!");
+        if (steps == 1 || AData.lastCenterPos == null || BData.lastCenterPos == null)
+            return CollisionAlgorithms.CheckCollisionSAT(AData.collider, BData.collider);
+
+        SATResults results = new SATResults();
+
+        Vector2 ASavedTrueCenter = new Vector2(AData.collider.trueCenter()); // These are restored upon exiting
+        Vector2 BSavedTrueCenter = new Vector2(BData.collider.trueCenter());
+
+        Vector2 AStep = new Vector2(ASavedTrueCenter).sub(AData.lastCenterPos).scl(1f / steps); // How much they move each step
+        Vector2 BStep = new Vector2(BSavedTrueCenter).sub(BData.lastCenterPos).scl(1f / steps);
+
+        Vector2 ASimulatedPos = new Vector2(AData.lastCenterPos);
+        Vector2 BSimulatedPos = new Vector2(BData.lastCenterPos);
+
+        for (int step = 0; step < steps; step++) {
+            ASimulatedPos.add(AStep);
+            BSimulatedPos.add(BStep);
+
+            AData.collider.getPosition().set(ASimulatedPos); // Sets the temporary collider positions
+            BData.collider.getPosition().set(BSimulatedPos);
+
+            // Do collision check as if regular SAT
+
+            SATResults stepResults = CollisionAlgorithms.CheckCollisionSAT(AData.collider, BData.collider);
+            if (stepResults.collision) {
+                // Write the step deltas
+                results.collision = true;
+
+                results.APositionDelta.add(stepResults.mtv);
+                results.BPositionDelta.add(stepResults.mtv);
+
+                float APushback = getAPushFactor(AData.collider, BData.collider);
+                float BPushback = 1f - APushback;
+
+                ASimulatedPos.add(new Vector2(stepResults.mtv).scl(-APushback));
+                BSimulatedPos.add(new Vector2(stepResults.mtv).scl(BPushback));
+
+                if (!simulateAll) break;
+            }
+        }
+
+        AData.collider.getPosition().set(ASavedTrueCenter); // Restore positions
+        BData.collider.getPosition().set(BSavedTrueCenter);
+
+        return results;
     }
 
     /** This function is used for notifying the interested parties of a collision.
@@ -199,17 +290,20 @@ public class CollisionEngine {
         return isTargeted;
     }
 
-    public void registerCollider(Collider collider) { colliderLibrary.add(collider); }
+    public void registerCollider(Collider collider) { colliderLibrary.add(new ColliderEngineData(collider)); }
 
-    public void unregisterCollider(Collider collider) { colliderLibrary.remove(collider); }
+    public void unregisterCollider(Collider collider) { colliderLibrary.removeIf(data -> data.collider == collider); }
 
     public void update() {
         if (debugDrawEnabled) {
             colliderVision.registerToEngine();
             colliderVision.setLayer(DrawLayer.Overlay);
             colliderVision.collidersToDraw.clear();
-            colliderVision.collidersToDraw.addAll(colliderLibrary);
+            for (var colData: colliderLibrary) {
+                colliderVision.collidersToDraw.add(colData.collider);
+            }
 
+            colliderCount.setFont(HgGame.Assets().getFont("Text48"));
             colliderCount.setText("Colliders: " + colliderLibrary.size());
             colliderCount.registerToEngine();
         }
@@ -219,13 +313,22 @@ public class CollisionEngine {
         }
 
         resolveCollisions(true, true);
+        updateLastPositions();
+    }
+
+    private void updateLastPositions() {
+        for (var colData: colliderLibrary) {
+            colData.lastCenterPos = colData.collider.trueCenter();
+        }
     }
 
     /** Gets the collision candidates for the given collider.
-     * @param collider Collider to request candidates for
+     * @param colData Collider data to request candidates for
      * @return An array of all the colliders that may be interacting with argument
      */
-    private ArrayList<Collider> getCollisionCandidates(Collider collider) {
+    private ArrayList<ColliderEngineData> getCollisionCandidates(ColliderEngineData colData) {
+        Collider collider = colData.collider;
+
         float[] boundingBox;
         if (collider instanceof IPolygon)
             boundingBox = CollisionAlgorithms.PolyAABB(((IPolygon) collider).trueVertices());
@@ -238,7 +341,7 @@ public class CollisionEngine {
         int endX = (int) (boundingBox[2] / CELL_SIZE);
         int endY = (int) (boundingBox[3] / CELL_SIZE);
 
-        ArrayList<Collider> candidates = new ArrayList<>();
+        ArrayList<ColliderEngineData> candidates = new ArrayList<>();
         for (int x = startX; x <= endX; x++) {
             for (int y = startY; y <= endY; y++) {
                 var partial = spatialHashMap.get(new IntPair(x, y));
@@ -254,7 +357,9 @@ public class CollisionEngine {
         // Even without proper updating, it's a massive performance improvement
 
         spatialHashMap.clear();
-        for (var collider: colliderLibrary) {
+        for (var colData: colliderLibrary) {
+            Collider collider = colData.collider;
+
             if (!collider.isActive()) continue;
 
             float[] boundingBox;
@@ -271,7 +376,7 @@ public class CollisionEngine {
 
             for (int x = startX; x <= endX; x++)
                 for (int y = startY; y <= endY; y++)
-                    spatialHashMap.computeIfAbsent(new IntPair(x, y), k -> new HashSet<>()).add(collider);
+                    spatialHashMap.computeIfAbsent(new IntPair(x, y), k -> new HashSet<>()).add(colData);
         }
     }
 
@@ -286,13 +391,15 @@ public class CollisionEngine {
         ArrayList<RaycastHit> hitList = new ArrayList<>();
 
         // I should add hashmap candidates instead of searching through whole collider Library
-        for (Collider A : colliderLibrary) {
-            if (!A.isActive()) continue;
-            if (!hitThese.contains(A.group)) continue;
+        for (ColliderEngineData colData : colliderLibrary) {
+            Collider collider = colData.collider;
 
-            RaycastResults results = CollisionAlgorithms.Raycast(start, end, A);
+            if (!collider.isActive()) continue;
+            if (!hitThese.contains(collider.group)) continue;
 
-            if (results.hit) hitList.add(new RaycastHit(results.hitStart, A));
+            RaycastResults results = CollisionAlgorithms.Raycast(start, end, collider);
+
+            if (results.hit) hitList.add(new RaycastHit(results.hitStart, collider));
         }
 
         hitList.sort(RaycastHitComparator);
